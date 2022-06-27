@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/database">
+        <file>ver1.0_monitor.db</file>
+    </qresource>
+</RCC>
