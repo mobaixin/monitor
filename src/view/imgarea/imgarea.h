@@ -18,12 +18,16 @@
 #include <QList>
 #include <QTimer>
 #include <windows.h>
+#include <opencv2\opencv.hpp>
 
 #include "src/view/imgarea/mygraphicsitem.h"
 #include "src/view/imgarea/mygraphicsscene.h"
 #include "src/camera/capturethread.h"
 #include "src/camera/Include/CameraApi.h"
 #include "src/database/mydatabase.h"
+
+using namespace cv;
+using namespace std;
 
 typedef struct _WIDTH_HEIGHT{
     int     display_width;
@@ -75,12 +79,12 @@ public:
     void setSampleLab(bool isDetectMold, int curIdx = 1);
 
     // 获得图像图形模板
-    QGraphicsPixmapItem *  getImageItem();
+    QImage getImageItem();
     QList<ShapeItemData> getShapeItems();
 
     // 加载图像图形模板
     void loadImageItem(QGraphicsPixmapItem *  imageItem);
-    void loadShapeItem(QList<QGraphicsItem *> shapeItemList);
+    void loadShapeItem(ShapeItemData itemData);
 
     // 保存为图片
     QImage saveAsImage();
@@ -109,6 +113,15 @@ public:
     // 停止运行
     void pauseCamera();
 
+    // 图片检测
+    void detectImage(QImage imgBg, QImage imgFg);
+
+    // 获取item数
+    int getShapeItemNum();
+
+    // 获取opencv mask
+    Mat getShapeMask(ShapeItemData itemData);
+
 public:
     int status;
 
@@ -117,6 +130,13 @@ private:
     int initSDK();
     void cameraStatues();
     int initParameter(int hCamera,tSdkCameraCapbility * pCameraInfo);
+
+    QString pointListToStr(QList<QPointF> pointList);
+
+
+
+    static QImage matToQim(Mat & mat);
+    static Mat qimToMat(QImage & qim);
 
 private slots:
     void imageProcess(QImage img);
@@ -149,6 +169,13 @@ private:
     int m_pusAnalogGain;
     int m_analogGainMin;
     int m_analogGainMax;
+
+    // opencv
+    int m_minArea;
+    Mat m_frame;
+    Mat m_fgMaskMOG2;
+    Mat m_maskCountour;
+    Ptr<BackgroundSubtractorMOG2> m_pMOG2;
 
 };
 

@@ -16,7 +16,7 @@
 #pragma comment(lib,"../../camera/MVCAMSDK.lib")
 #endif
 
-//SDK
+// SDK
 int                     g_hCamera = -1;     //设备句柄
 unsigned char           * g_pRawBuffer=NULL;     //raw数据
 unsigned char           * g_pRgbBuffer=NULL;     //处理后数据缓存区
@@ -30,7 +30,6 @@ Width_Height            g_W_H_INFO;         //显示画板到大小和图像大�
 BYTE                    *g_readBuf=NULL;    //画板显示数据区
 int                     g_read_fps=0;       //统计读取帧率
 int                     g_disply_fps=0;     //统计显示帧率
-
 
 ImgArea *ImgArea::getInstance(QWidget *parent)
 {
@@ -248,9 +247,10 @@ void ImgArea::setSampleLab(bool isDetectMold, int curIdx)
     }
 }
 
-QGraphicsPixmapItem *ImgArea::getImageItem()
+QImage ImgArea::getImageItem()
 {
-    return m_pImageItem;
+    QImage resImg = m_pImageItem->pixmap().toImage();
+    return resImg;
 }
 
 QList<ShapeItemData> ImgArea::getShapeItems()
@@ -260,6 +260,17 @@ QList<ShapeItemData> ImgArea::getShapeItems()
         if (temp != m_pImageItem) {
 
             MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
+            QPoint center = item->getRealCenter().toPoint();
+
+            ShapeItemData itemData;
+            itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+            itemData.sceneId  = SideBar::getInstance()->getIsDetectMold() ? 1 : 2;
+            itemData.moldId   = SideBar::getInstance()->getCurrentIdx();
+            itemData.type     = item->getType();
+            itemData.center   = QString("%1,%2").arg(center.x()).arg(center.y());
+            itemData.accuracy = BottomBar::getInstance()->getAccuracy();
+            itemData.pixel    = BottomBar::getInstance()->getPixel();
+
             switch (item->getType()) {
             case MyGraphicsItem::ItemType::Rectangle:{
                 qDebug() << "item type: " << item->getType();
@@ -267,26 +278,29 @@ QList<ShapeItemData> ImgArea::getShapeItems()
                 qDebug() << "center" << item->getCenter().x() << " " << item->getCenter().y();
                 qDebug() << "edge" << item->getEdge().x() << " " << item->getEdge().y();
 
-                QPointF center = item->getRealCenter();
-                QPointF edge = QPointF(item->getRealCenter().x() + item->getEdge().x() - item->getCenter().x(),
-                                       item->getRealCenter().y() + item->getEdge().y() - item->getCenter().y());
+                int width  = abs(item->getEdge().x() - item->getCenter().x()) * 2;
+                int height = abs(item->getEdge().y() - item->getCenter().y()) * 2;
 
-                ShapeItemData itemData;
-                itemData.isDetect = 2;
-                if (SideBar::getInstance()->getIsDetectMold()) {
-                    itemData.isDetect = 1;
-                }
+                // 记录矩形的长和宽
+                QPointF edge = QPointF(width, height);
 
-                itemData.moldId = SideBar::getInstance()->getCurrentIdx();
-                itemData.type   = item->getType();
-                itemData.center = QString("%1,%2").arg(center.x()).arg(center.y());
-                itemData.edge   = QString("%1,%2").arg(edge.x()).arg(edge.y());
-                itemData.pointList = "";
-                itemData.accuracy  = BottomBar::getInstance()->getAccuracy();
-                itemData.pixel     = BottomBar::getInstance()->getPixel();
+                QList<QPointF> myList;
+                myList.append(QPointF(center.x() - width/2, center.y() - height/2));
+                myList.append(QPointF(center.x() + width/2, center.y() + height/2));
 
-                qDebug() << MyDataBase::getInstance()->addShapeItemData(itemData);
+                itemData.edge      = QString("%1,%2").arg(edge.x()).arg(edge.y());
+                itemData.pointList = pointListToStr(myList);
 
+                MyDataBase::getInstance()->addShapeItemData(itemData);
+            }
+                break;
+            case MyGraphicsItem::ItemType::Polygon: {
+                QList<QPointF> myList = item->getMyPointList();
+
+                itemData.edge      = QString("");
+                itemData.pointList = pointListToStr(myList);
+
+                MyDataBase::getInstance()->addShapeItemData(itemData);
             }
                 break;
             default:
@@ -294,13 +308,13 @@ QList<ShapeItemData> ImgArea::getShapeItems()
 
             }
 
-            if (item->getType() == MyGraphicsItem::ItemType::Polygon) {
-                QList<QPointF> myList = item->getMyPointList();
-                qDebug() << "point list size" << myList.size();
-            } else if (item->getType() == MyGraphicsItem::ItemType::Curve) {
-                QList<QPointF> myList = item->getMyPointList();
-                qDebug() << "point list size" << myList.size();
-            }
+//            if (item->getType() == MyGraphicsItem::ItemType::Polygon) {
+//                QList<QPointF> myList = item->getMyPointList();
+//                qDebug() << "point list size" << myList.size();
+//            } else if (item->getType() == MyGraphicsItem::ItemType::Curve) {
+//                QList<QPointF> myList = item->getMyPointList();
+//                qDebug() << "point list size" << myList.size();
+//            }
         }
     }
     return shapeList;
@@ -314,11 +328,54 @@ void ImgArea::loadImageItem(QGraphicsPixmapItem *imageItem)
     }
 }
 
-void ImgArea::loadShapeItem(QList<QGraphicsItem *> shapeItemList)
+void ImgArea::loadShapeItem(ShapeItemData itemData)
 {
-    if (shapeItemList.size() != 0) {
-        for (QGraphicsItem *item : shapeItemList) {
-            m_pScene->addItem(item);
+    m_pScene->clear();
+
+    QList<ShapeItemData> itemDataList = MyDataBase::getInstance()->queShapeItemData(itemData);
+
+    for (int i = 0; i < itemDataList.size(); i++) {
+        QStringList centerList = itemDataList[i].center.split(',');
+        QPointF center;
+        if (centerList.size() >= 2) {
+            center = QPointF(centerList[0].toInt(), centerList[1].toInt());
+        }
+
+        switch (itemDataList[i].type) {
+        case MyGraphicsItem::ItemType::Rectangle: {
+            QStringList edgeList = itemDataList[i].edge.split(',');
+            QPointF edge;
+            if (edgeList.size() >= 2) {
+                edge = QPointF(edgeList[0].toInt(), edgeList[1].toInt());
+            }
+
+            MyRectangle *myRect = new MyRectangle(center.x(), center.y(), edge.x(), edge.y(), MyGraphicsItem::ItemType::Rectangle);
+            m_pScene->addItem(myRect);
+        }
+            break;
+        case MyGraphicsItem::ItemType::Polygon: {
+            QStringList myStrList = itemDataList[i].pointList.split(',');
+            QPointF myEdgePoint;
+            QList<QPointF> myEdgePointList;
+
+            if (myStrList.size() > 2) {
+                MyPolygon *myPolygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
+
+                for (int i = 0; i < myStrList.size() - 1; i+=2) {
+                    if (i + 1 < myStrList.size()) {
+                        myEdgePoint = QPointF(myStrList[i].toInt(), myStrList[i+1].toInt());
+                        myEdgePointList.append(myEdgePoint);
+                        myPolygon->pushPoint(myEdgePoint, myEdgePointList, false);
+                    }
+                }
+                myPolygon->pushPoint(myEdgePoint, myEdgePointList, true);
+                m_pScene->addItem(myPolygon);
+                connect(m_pScene, &MyGraphicsScene::updatePolyPoint, myPolygon, &MyPolygon::pushPoint);
+            }
+        }
+            break;
+        default:
+            break;
         }
     }
 }
@@ -331,7 +388,7 @@ QImage ImgArea::saveAsImage()
     painter.setRenderHint(QPainter::Antialiasing);
     m_pScene->render(&painter);
 
-    image.save("D:/image/save02.png");
+    image.save("D:/image/save03.png");
 
     return image;
 }
@@ -539,6 +596,188 @@ int ImgArea::initParameter(int hCamera, tSdkCameraCapbility *pCameraInfo)
     return 1;
 }
 
+QString ImgArea::pointListToStr(QList<QPointF> pointList)
+{
+    QString resStr = "";
+
+    for (int i = 0; i < pointList.size(); i++) {
+        resStr += QString::number(pointList[i].x()) + "," + QString::number(pointList[i].y()) + ",";
+    }
+
+    return resStr;
+}
+
+void ImgArea::detectImage(QImage imgBg, QImage imgFg)
+{
+    ShapeItemData itemData;
+    itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+    itemData.sceneId  = SideBar::getInstance()->getIsDetectMold() ? 1 : 2;
+    itemData.moldId   = SideBar::getInstance()->getCurrentIdx();
+
+    Mat mask, dstBg, dstFg;
+    mask = getShapeMask(itemData);
+
+    qimToMat(imgBg).copyTo(dstBg, mask);
+    qimToMat(imgFg).copyTo(dstFg, mask);
+
+    double acc  = BottomBar::getInstance()->getAccuracy();
+    int minArea = BottomBar::getInstance()->getPixel();
+
+    m_pMOG2 = createBackgroundSubtractorMOG2(50, acc, true);
+
+    Mat frameBg = qimToMat(imgBg);
+    Mat frameFg = qimToMat(imgFg);
+
+    frameBg = dstBg.clone();
+    frameFg = dstFg.clone();
+
+    for (int i = 0; i < m_pMOG2->getHistory(); i++) {
+        m_frame = frameBg.clone();
+        m_pMOG2->apply(m_frame, m_fgMaskMOG2);
+    }
+
+    m_frame = frameFg.clone();
+    m_pMOG2->apply(m_frame, m_fgMaskMOG2, 0);
+
+    rectangle(m_frame, cv::Point(10, 2), cv::Point(100, 20),
+              cv::Scalar(255, 255, 255), -1);
+
+    // get result
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    findContours(m_fgMaskMOG2, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point());
+    Mat imageContours = Mat::zeros(m_fgMaskMOG2.size(), CV_8UC1);
+    Mat contoursMat = Mat::zeros(m_fgMaskMOG2.size(), CV_8UC1);
+    vector<vector<Point>> approxPoint(contours.size());
+
+    for (int i = 0; i < int(contours.size()); i++) {
+        if (contourArea(contours[i]) > minArea) {
+            Point2f fourPoint2f[4];
+            RotatedRect rectPoint = minAreaRect(contours[i]);
+            rectPoint.points(fourPoint2f);
+
+            int minX = 0;
+            for (int j = 0; j < 4; ++j) {
+                if (fourPoint2f[j].x > minX) {
+                    minX = fourPoint2f[j].x;
+                }
+            }
+            if (minX > 0.7 * m_frame.cols) {
+                continue;
+            }
+
+            int maxX = 0;
+            for (int j = 0; j < 4; ++j) {
+                if (fourPoint2f[j].x > maxX) {
+                    maxX = fourPoint2f[j].x;
+                }
+            }
+            if (maxX < 0.3 * m_frame.cols) {
+                continue;
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                line(m_frame, fourPoint2f[i], fourPoint2f[i + 1], Scalar(0, 0, 255), 1);
+            }
+            line(m_frame, fourPoint2f[0], fourPoint2f[3], Scalar(0, 0, 255), 1);
+
+            qDebug() << "fourPoint2f:";
+            for (int i = 0; i < 4; i++) {
+                qDebug() << fourPoint2f[i].x << " " << fourPoint2f[i].y;
+            }
+            qDebug() << " ";
+        }
+    }
+    imshow("m_fgMaskMOG2", m_fgMaskMOG2);
+    imshow("detect result", m_frame);
+
+    m_pMOG2->clear();
+
+}
+
+int ImgArea::getShapeItemNum()
+{
+    int count = 0;
+    for (auto &temp : m_pScene->items()) {
+        if (temp != m_pImageItem) {
+            count++;
+        }
+    }
+    return count;
+}
+
+Mat ImgArea::getShapeMask(ShapeItemData itemData)
+{
+    cv::Mat mask, dst;
+    QList<ShapeItemData> itemList = MyDataBase::getInstance()->queShapeItemData(itemData);
+    QImage img = m_pImageItem->pixmap().toImage();
+
+    img = QImage("D:/image/page021.png");
+    qimToMat(img).copyTo(mask);
+    mask.setTo(cv::Scalar::all(0));
+
+    for (ShapeItemData item : itemList) {
+        QStringList centerList = item.center.split(',');
+        QPointF center;
+        if (centerList.size() >= 2) {
+            center = QPointF(centerList[0].toInt(), centerList[1].toInt());
+        }
+
+        switch (item.type) {
+        case MyGraphicsItem::ItemType::Rectangle: {
+            QStringList edgeList = item.edge.split(',');
+            QPointF edge;
+            if (edgeList.size() >= 2) {
+                edge = QPointF(edgeList[0].toInt(), edgeList[1].toInt());
+            }
+
+            cv::rectangle(mask, Point(center.x() - edge.x()/2, center.y() - edge.y()/2),
+                          Point(center.x() + edge.x()/2, center.y() + edge.y()/2),
+                          Scalar(255, 255, 255), -1, 8, 0);
+        }
+            break;
+        case MyGraphicsItem::ItemType::Polygon: {
+            QStringList myStrList = item.pointList.split(',');
+            vector<vector<Point>> myEdgePointList;
+            vector<Point> myEdgePoint;
+
+            if (myStrList.size() > 2) {
+                for (int i = 0; i < myStrList.size() - 1; i+=2) {
+                    if (i + 1 < myStrList.size()) {
+                        myEdgePoint.push_back(Point(myStrList[i].toInt(), myStrList[i+1].toInt()));
+                    }
+                }
+                myEdgePointList.push_back(myEdgePoint);
+            }
+            cv::fillPoly(mask, myEdgePointList, Scalar(255, 255, 255));
+
+        }
+            break;
+        default:
+            break;
+        }
+    }
+
+    imshow("single mask", mask);
+    return mask;
+}
+
+QImage ImgArea::matToQim(Mat &mat)
+{
+    cvtColor(mat, mat, COLOR_BGR2RGB);
+    QImage qim((const unsigned char*)mat.data, mat.cols, mat.rows, mat.step,
+               QImage::Format_RGB888);
+    return qim;
+}
+
+Mat ImgArea::qimToMat(QImage &qim)
+{
+    Mat mat = Mat(qim.height(), qim.width(),
+                  CV_8UC4,(void*)qim.constBits(),qim.bytesPerLine());
+    return mat;
+}
+
 void ImgArea::imageProcess(QImage img)
 {
     if (m_thread->quit) {
@@ -560,8 +799,6 @@ void ImgArea::imageProcess(QImage img)
 //    CameraGetAnalogGain(g_hCamera,&m_pusAnalogGain);
 
 //    m_pScene->setSceneRect(0, 0, img.width(), img.height());
-
-
 
     QPixmap imgPix = (QPixmap::fromImage(img));
     imgPix = imgPix.scaled(this->size());

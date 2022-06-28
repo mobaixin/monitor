@@ -24,7 +24,7 @@ MyDataBase *MyDataBase::getInstance()
 MyDataBase::MyDataBase(QObject *parent)
     : QObject(parent)
 {
-    qDebug() << QSqlDatabase::drivers();    // 当前环境支持哪些数据库
+//    qDebug() << QSqlDatabase::drivers();    // 当前环境支持哪些数据库
     QMutexLocker lockData(&m_mutex);        // 加锁，函数执行完后自动解锁
 
     m_database=QSqlDatabase::addDatabase("QSQLITE");
@@ -65,7 +65,8 @@ int MyDataBase::initDataBase()
     // 新建表
     queryRes &= queryInit.exec(QString("create table if not exists shape_item ("
                                        "id INTEGER primary key AUTOINCREMENT,"
-                                       "is_detect INTEGER,"
+                                       "camera_id INTEGER,"
+                                       "scene_id INTEGER,"
                                        "mold_id INTEGER,"
                                        "type INTEGER,"
                                        "center VARCHAR(20),"
@@ -102,10 +103,11 @@ int MyDataBase::addShapeItemData(ShapeItemData itemData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("INSERT INTO shape_item (is_detect, mold_id, type, center, edge, point_list, accuracy, pixel) VALUES "
-                          "(:is_detect, :mold_id, :type, :center, :edge, :point_list, :accuracy, :pixel)");
+            query.prepare("INSERT INTO shape_item (camera_id, scene_id, mold_id, type, center, edge, point_list, accuracy, pixel) VALUES "
+                          "(:camera_id, :scene_id, :mold_id, :type, :center, :edge, :point_list, :accuracy, :pixel)");
 
-            query.bindValue(":is_detect",  QString::number(itemData.isDetect));
+            query.bindValue(":camera_id",  QString::number(itemData.cameraId));
+            query.bindValue(":scene_id",   QString::number(itemData.sceneId));
             query.bindValue(":mold_id",    QString::number(itemData.moldId));
             query.bindValue(":type",       QString::number(itemData.type));
             query.bindValue(":center",     itemData.center);
@@ -135,9 +137,10 @@ int MyDataBase::delShapeItemData(ShapeItemData itemData)
     if (checkShapeItemData(itemData)) {
         QSqlQuery query;
 
-        query.prepare("DELETE FROM shape_item WHERE is_detect=:is_detect and mold_id=:mold_id");
+        query.prepare("DELETE FROM shape_item WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id=:mold_id");
 
-        query.bindValue(":is_detect", QString::number(itemData.isDetect));
+        query.bindValue(":camera_id", QString::number(itemData.cameraId));
+        query.bindValue(":scene_id",  QString::number(itemData.sceneId));
         query.bindValue(":mold_id",   QString::number(itemData.moldId));
 
         queryRes = query.exec();
@@ -146,32 +149,56 @@ int MyDataBase::delShapeItemData(ShapeItemData itemData)
     return DB_OP_SUCC;
 }
 
-ShapeItemData MyDataBase::queShapeItemData(ShapeItemData itemData)
+int MyDataBase::delSceneShapeItemData(ShapeItemData itemData)
 {
-    ShapeItemData resData;
+    bool queryRes = true;
+
+    if (checkShapeItemData(itemData)) {
+        QSqlQuery query;
+
+        query.prepare("DELETE FROM shape_item WHERE camera_id=:camera_id and scene_id=:scene_id");
+
+        query.bindValue(":camera_id", QString::number(itemData.cameraId));
+        query.bindValue(":scene_id",  QString::number(itemData.sceneId));
+
+        queryRes = query.exec();
+    }
+
+    return DB_OP_SUCC;
+}
+
+QList<ShapeItemData> MyDataBase::queShapeItemData(ShapeItemData itemData)
+{
+    QList<ShapeItemData> resDataList;
 
     QSqlQuery query;
     bool queryRes = true;
 
-    query.prepare("SELECT * FROM shape_item WHERE is_detect=:is_detect and mold_id=:mold_id");
+    query.prepare("SELECT * FROM shape_item WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id=:mold_id");
 
-    query.bindValue(":is_detect", QString::number(itemData.isDetect));
+    query.bindValue(":camera_id", QString::number(itemData.cameraId));
+    query.bindValue(":scene_id",  QString::number(itemData.sceneId));
     query.bindValue(":mold_id",   QString::number(itemData.moldId));
 
     queryRes = query.exec();
 
-    if (query.next()) {
-        resData.isDetect = query.value("is_detect").toInt();
-        resData.moldId   = query.value("mold_id").toInt();
-        resData.type     = query.value("type").toInt();
-        resData.center   = query.value("center").toString();
-        resData.edge     = query.value("edge").toString();
+    while (query.next()) {
+        ShapeItemData resData;
+
+        resData.cameraId  = query.value("camera_id").toInt();
+        resData.sceneId   = query.value("scene_id").toInt();
+        resData.moldId    = query.value("mold_id").toInt();
+        resData.type      = query.value("type").toInt();
+        resData.center    = query.value("center").toString();
+        resData.edge      = query.value("edge").toString();
         resData.pointList = query.value("point_list").toString();
         resData.accuracy  = query.value("accuracy").toInt();
         resData.pixel     = query.value("pixel").toInt();
+
+        resDataList.append(resData);
     }
 
-    return resData;
+    return resDataList;
 }
 
 int MyDataBase::altShapeItemData(ShapeItemData itemData)
@@ -184,10 +211,11 @@ int MyDataBase::altShapeItemData(ShapeItemData itemData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("UPDATE shape_item SET type=:type, center=:center, edge=:edge, point_list=:point_list, accuracy=:accuracy, pixel=:pixel"
-                          "WHERE is_detect=:is_detect and mold_id=:mold_id");
+            query.prepare("UPDATE shape_item SET type=:type, center=:center, edge=:edge, point_list=:point_list, accuracy=:accuracy, pixel=:pixel "
+                          "WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id=:mold_id");
 
-            query.bindValue(":is_detect",  QString::number(itemData.isDetect));
+            query.bindValue(":camera_id",  QString::number(itemData.cameraId));
+            query.bindValue(":scene_id",  QString::number(itemData.sceneId));
             query.bindValue(":mold_id",    QString::number(itemData.moldId));
             query.bindValue(":type",       QString::number(itemData.type));
             query.bindValue(":center",     itemData.center);
@@ -195,6 +223,56 @@ int MyDataBase::altShapeItemData(ShapeItemData itemData)
             query.bindValue(":point_list", itemData.pointList);
             query.bindValue(":accuracy",   QString::number(itemData.accuracy));
             query.bindValue(":pixel",      QString::number(itemData.pixel));
+
+            queryRes = query.exec();
+
+            if (queryRes) {
+                return DB_OP_SUCC;
+            } else {
+                return DB_OP_ADD_FAILED;
+            }
+        } else {
+            return DB_UNCONNECT;
+        }
+    }
+    return DB_OP_SUCC;
+}
+
+int MyDataBase::getMoldNum(ShapeItemData itemData)
+{
+    int count = 0;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT COUNT(DISTINCT mold_id) FROM shape_item WHERE camera_id=:camera_id and scene_id=:scene_id");
+
+    query.bindValue(":camera_id", QString::number(itemData.cameraId));
+    query.bindValue(":scene_id",  QString::number(itemData.sceneId));
+
+    queryRes = query.exec();
+    query.next();
+
+    count = query.value(0).toInt();
+    return count;
+}
+
+int MyDataBase::updateItemMoldId(ShapeItemData itemData)
+{
+    bool queryRes = true;
+
+    if (!checkShapeItemData(itemData)) {
+        return INVALID_INPUT;
+    } else {
+        if (m_database.isValid()) {
+            QSqlQuery query;
+
+            query.prepare("UPDATE shape_item SET mold_id=mold_id-1 "
+                          "WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id>:mold_id");
+
+            query.bindValue(":camera_id",  QString::number(itemData.cameraId));
+            query.bindValue(":scene_id",  QString::number(itemData.sceneId));
+            query.bindValue(":mold_id",    QString::number(itemData.moldId));
 
             queryRes = query.exec();
 
@@ -320,7 +398,7 @@ bool MyDataBase::checkShapeItemData(ShapeItemData itemData)
 {
     bool checkRes = true;
 
-    if (itemData.isDetect != 0 && itemData.isDetect != 1) {
+    if (itemData.sceneId != 1 && itemData.sceneId != 2) {
         return false;
     }
 

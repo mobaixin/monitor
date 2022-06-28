@@ -1,0 +1,70 @@
+===============================================================================
+EXTENSION NAME : linecount
+EXTENSION VERSION : 0.1.7
+-------------------------------------------------------------------------------
+count time : 2022-06-28 16:47:31
+count workspace : d:\Documents\QTProjects\monitor
+total files : 58
+total code lines : 9429
+total comment lines : 9371
+total blank lines : 2520
+
+data\database\database.qrc, code is 5, comment is 0, blank is 0.
+data\database\ver1.0_monitor.db, code is 0, comment is 0, blank is 0.
+data\img\img.qrc, code is 6, comment is 0, blank is 0.
+data\img\page01.png, it is a binary file.
+demo1.pro, code is 80, comment is 0, blank is 16.
+demo1.pro.user, code is 319, comment is 0, blank is 0.
+demo1_zh_CN.ts, code is 3, comment is 0, blank is 0.
+main.cpp, code is 9, comment is 0, blank is 2.
+README.en.md, code is 3, comment is 0, blank is 1.
+README.md, code is 27, comment is 6, blank is 12.
+src\camera\camera.cpp, code is 4, comment is 0, blank is 2.
+src\camera\camera.h, code is 9, comment is 1, blank is 3.
+src\camera\capturethread.cpp, code is 69, comment is 12, blank is 17.
+src\camera\capturethread.h, code is 24, comment is 1, blank is 12.
+src\camera\detect.cpp, code is 134, comment is 288, blank is 43.
+src\camera\Include\CameraApi.h, code is 1412, comment is 3833, blank is 300.
+src\camera\Include\CameraApiLoad.h, code is 2376, comment is 3604, blank is 706.
+src\camera\Include\CameraDefine.H, code is 580, comment is 540, blank is 117.
+src\camera\Include\CameraGrabber.h, code is 81, comment is 228, blank is 25.
+src\camera\Include\CameraImage.h, code is 104, comment is 253, blank is 24.
+src\camera\Include\CameraStatus.h, code is 88, comment is 84, blank is 16.
+src\camera\lib\MVCAMSDK.lib, it is a binary file.
+src\camera\lib\MVCAMSDK_X64.lib, it is a binary file.
+src\camera\resource.h, code is 8, comment is 5, blank is 1.
+src\controller\controller.h, code is 0, comment is 0, blank is 0.
+src\database\mydatabase.cpp, code is 310, comment is 11, blank is 109.
+src\database\mydatabase.h, code is 71, comment is 21, blank is 13.
+src\model\model.h, code is 0, comment is 0, blank is 0.
+src\view\bottombar\bottombar.cpp, code is 211, comment is 119, blank is 88.
+src\view\bottombar\bottombar.h, code is 56, comment is 23, blank is 32.
+src\view\common\myselectframe.cpp, code is 74, comment is 4, blank is 19.
+src\view\common\myselectframe.h, code is 31, comment is 7, blank is 13.
+src\view\common\myslider.cpp, code is 127, comment is 7, blank is 38.
+src\view\common\myslider.h, code is 46, comment is 14, blank is 23.
+src\view\imgarea\imgarea.cpp, code is 534, comment is 75, blank is 143.
+src\view\imgarea\imgarea.h, code is 106, comment is 27, blank is 50.
+src\view\imgarea\mygraphicsitem.cpp, code is 399, comment is 39, blank is 106.
+src\view\imgarea\mygraphicsitem.h, code is 167, comment is 23, blank is 43.
+src\view\imgarea\mygraphicsscene.cpp, code is 80, comment is 0, blank is 15.
+src\view\imgarea\mygraphicsscene.h, code is 34, comment is 1, blank is 10.
+src\view\imgarea\mypointitem.cpp, code is 162, comment is 0, blank is 20.
+src\view\imgarea\mypointitem.h, code is 43, comment is 8, blank is 12.
+src\view\mainwindow.cpp, code is 113, comment is 16, blank is 38.
+src\view\mainwindow.h, code is 53, comment is 15, blank is 20.
+src\view\sidebar\sidebar.cpp, code is 390, comment is 13, blank is 74.
+src\view\sidebar\sidebar.h, code is 67, comment is 9, blank is 29.
+src\view\titlebar\cameraipset.cpp, code is 106, comment is 3, blank is 32.
+src\view\titlebar\cameraipset.h, code is 37, comment is 5, blank is 11.
+src\view\titlebar\camerapara.cpp, code is 103, comment is 17, blank is 44.
+src\view\titlebar\camerapara.h, code is 35, comment is 6, blank is 13.
+src\view\titlebar\iosetting.cpp, code is 209, comment is 4, blank is 52.
+src\view\titlebar\iosetting.h, code is 46, comment is 4, blank is 14.
+src\view\titlebar\ngrecord.cpp, code is 101, comment is 3, blank is 42.
+src\view\titlebar\ngrecord.h, code is 37, comment is 5, blank is 14.
+src\view\titlebar\syssetting.cpp, code is 106, comment is 6, blank is 32.
+src\view\titlebar\syssetting.h, code is 44, comment is 4, blank is 14.
+src\view\titlebar\titlebar.cpp, code is 143, comment is 15, blank is 39.
+src\view\titlebar\titlebar.h, code is 47, comment is 12, blank is 21.
+===============================================================================

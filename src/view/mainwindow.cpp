@@ -129,7 +129,7 @@ void MainWindow::setDetectObject()
 
 void MainWindow::saveMold()
 {
-    QGraphicsPixmapItem *imageItem;
+    QImage imageItem;
     QList<ShapeItemData> shapeItemList;
 
     imageItem = m_pImgArea->getImageItem();
@@ -150,7 +150,7 @@ void MainWindow::loadMold()
     shapeItemList = m_pSideBar->getShapeMold();
 
     m_pImgArea->loadImageItem(imageItem);
-    m_pImgArea->loadShapeItem(shapeItemList);
+//    m_pImgArea->loadShapeItem(shapeItemList);
 }
 
 void MainWindow::adjustBottomBarPos()

@@ -26,11 +26,11 @@ void CameraPara::setWidgetUi()
     // 初始化组件
     m_exposeTimeLab = new QLabel(this);
     m_cameraGainLab = new QLabel(this);
-    m_widDynamicLab = new QLabel(this);
+//    m_widDynamicLab = new QLabel(this);
 
     m_exposeTimeSlider = new MySlider(this);
     m_cameraGainSlider = new MySlider(this);
-    m_widDynamicSlider = new MySlider(this);
+//    m_widDynamicSlider = new MySlider(this);
 
     m_defaultBtn = new QPushButton(this);
     m_cancelBtn  = new QPushButton(this);
@@ -42,11 +42,11 @@ void CameraPara::setWidgetUi()
     // 组件布局
     m_mainLayout->addWidget(m_exposeTimeLab, 0, 0, 1, 1);
     m_mainLayout->addWidget(m_cameraGainLab, 1, 0, 1, 1);
-    m_mainLayout->addWidget(m_widDynamicLab, 2, 0, 1, 1);
+//    m_mainLayout->addWidget(m_widDynamicLab, 2, 0, 1, 1);
 
     m_mainLayout->addWidget(m_exposeTimeSlider, 0, 1, 1, 2);
     m_mainLayout->addWidget(m_cameraGainSlider, 1, 1, 1, 2);
-    m_mainLayout->addWidget(m_widDynamicSlider, 2, 1, 1, 2);
+//    m_mainLayout->addWidget(m_widDynamicSlider, 2, 1, 1, 2);
     m_mainLayout->addLayout(m_btnLayout, 3, 0, 1, 3);
 
     m_btnLayout->addWidget(m_defaultBtn);
@@ -71,37 +71,37 @@ void CameraPara::setWidgetStyle()
 {
     this->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
     this->setModal(true);
-    this->setFixedSize(330, 150);
+    this->setFixedSize(330, 120);
     this->setWindowTitle("相机参数");
 
     m_exposeTimeLab->setFixedSize(85, 30);
     m_cameraGainLab->setFixedSize(85, 30);
-    m_widDynamicLab->setFixedSize(85, 30);
+//    m_widDynamicLab->setFixedSize(85, 30);
 
     m_exposeTimeSlider->setEditSize(50, 20);
     m_cameraGainSlider->setEditSize(50, 20);
-    m_widDynamicSlider->setEditSize(50, 20);
+//    m_widDynamicSlider->setEditSize(50, 20);
 
     QList<double> exposeTimeList = ImgArea::getInstance()->getExposureTime();
     QList<int>    cameraGainList = ImgArea::getInstance()->getCameraGain();
 
     m_exposeTimeSlider->setEditReadOnly(true);
     m_cameraGainSlider->setEditReadOnly(true);
-    m_widDynamicSlider->setEditReadOnly(true);
+//    m_widDynamicSlider->setEditReadOnly(true);
 
     m_exposeTimeSlider->setStep(10);
     m_cameraGainSlider->setStep(1);
-    m_widDynamicSlider->setStep(1);
+//    m_widDynamicSlider->setStep(1);
 
     m_exposeTimeSlider->setSliderSize(100, 20);
     m_cameraGainSlider->setSliderSize(100, 20);
-    m_widDynamicSlider->setSliderSize(100, 20);
+//    m_widDynamicSlider->setSliderSize(100, 20);
 
     m_exposeTimeSlider->setAutoSetEditValue(false);
 
     m_exposeTimeSlider->setValueRange(exposeTimeList.at(1), exposeTimeList.at(2));
     m_cameraGainSlider->setValueRange(cameraGainList.at(1), cameraGainList.at(2));
-    m_widDynamicSlider->setValueRange(0, 20);
+//    m_widDynamicSlider->setValueRange(0, 20);
 
     m_exposeTimeSlider->setValue(exposeTimeList.at(0) / exposeTimeList.at(3), false);
     m_cameraGainSlider->setValue(cameraGainList.at(0));
@@ -115,7 +115,7 @@ void CameraPara::setWidgetStyle()
 
     m_exposeTimeLab->setText("相机1曝光时间:");
     m_cameraGainLab->setText("相机1增益:");
-    m_widDynamicLab->setText("相机1宽动态值:");
+//    m_widDynamicLab->setText("相机1宽动态值:");
 
     m_defaultBtn->setText("默认");
     m_cancelBtn->setText("取消");

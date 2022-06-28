@@ -36,11 +36,11 @@ private:
 private:
     QLabel *m_exposeTimeLab;
     QLabel *m_cameraGainLab;
-    QLabel *m_widDynamicLab;
+//    QLabel *m_widDynamicLab;
 
     MySlider *m_exposeTimeSlider;
     MySlider *m_cameraGainSlider;
-    MySlider *m_widDynamicSlider;
+//    MySlider *m_widDynamicSlider;
 
     QPushButton *m_defaultBtn;
     QPushButton *m_cancelBtn;

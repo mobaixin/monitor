@@ -28,7 +28,8 @@ enum DB_RETURN_STATUS{              //数据库操作结果返回表
 };
 
 typedef struct ShapeItemData{
-    int isDetect;
+    int cameraId;
+    int sceneId;
     int moldId;
     int type;
     QString center;
@@ -60,8 +61,12 @@ public:
     // ShapeItem表操作
     int addShapeItemData(ShapeItemData itemData);
     int delShapeItemData(ShapeItemData itemData);
-    ShapeItemData queShapeItemData(ShapeItemData itemData);
+    int delSceneShapeItemData(ShapeItemData itemData);
+    QList<ShapeItemData> queShapeItemData(ShapeItemData itemData);
     int altShapeItemData(ShapeItemData itemData);
+
+    int getMoldNum(ShapeItemData itemData);
+    int updateItemMoldId(ShapeItemData itemData);
 
     // NGRecord表操作
     int addNGRecordData(NGRecordData recordData);

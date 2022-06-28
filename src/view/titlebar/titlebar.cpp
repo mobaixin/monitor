@@ -22,6 +22,9 @@ TitleBar::TitleBar(QWidget *parent)
 
     // 设置组件样式
     setWidgetStyle();
+
+    // 设置初始数据
+    setData();
 }
 
 TitleBar::~TitleBar()
@@ -115,12 +118,18 @@ void TitleBar::setWidgetStyle()
 void TitleBar::setData()
 {
     m_pIsSetMonitor = false;
+    m_cameraId = 1;
 }
 
 // 设置左上方标识
 void TitleBar::setTitleLab(QString label)
 {
     m_ptitleLab->setText(label);
+}
+
+int TitleBar::getCurCameraId()
+{
+    return m_cameraId;
 }
 
 void TitleBar::startBtnClick()
@@ -163,6 +172,12 @@ void TitleBar::sysSettingBtnClick()
 void TitleBar::testBtnClick()
 {
     ImgArea::getInstance()->setDetectRes(true);
+
+    QImage trainImg  = QImage("D:/image/page021.png");
+    QImage targetImg = QImage("D:/image/page032.png");
+//    QImage targetImg = ImgArea::getInstance()->getImageItem();
+
+    ImgArea::getInstance()->detectImage(trainImg, targetImg);
 }
 
 void TitleBar::NGRecordBtnClick()

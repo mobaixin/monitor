@@ -31,6 +31,9 @@ public:
     // 设置左上方标识
     void setTitleLab(QString label);
 
+    // 获得当前相机ID
+    int getCurCameraId();
+
 private:
     void startBtnClick();
     void stopBtnClick();
@@ -66,6 +69,9 @@ private:
 
     // NG记录
     NGRecord *m_pNGRecord;
+
+    // 相机ID
+    int m_cameraId;
 };
 
 

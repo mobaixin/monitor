@@ -164,11 +164,19 @@ void SideBar::setData()
 {
     m_isDetectMold = true;
 
-    m_deteMoldNum = 0;
-    m_prodMoldNum = 0;
+    ShapeItemData itemData;
+    itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
 
-    m_curDeteMoldIdx = 1;
-    m_curProdMoldIdx = 1;
+    itemData.sceneId  = 1;
+    m_deteMoldNum     = MyDataBase::getInstance()->getMoldNum(itemData);
+
+    itemData.sceneId  = 2;
+    m_prodMoldNum     = MyDataBase::getInstance()->getMoldNum(itemData);
+
+    m_curDeteMoldIdx = m_deteMoldNum > 0 ? 1 : 0;
+    m_curProdMoldIdx = m_prodMoldNum > 0 ? 1 : 0;
+
+    updateOrderLab();
 }
 
 void SideBar::setDisplayState(bool isDisplay)
@@ -286,8 +294,25 @@ void SideBar::productBtnClick()
 
 void SideBar::saveMoldBtnClick()
 {
-    MainWindow::getInstance()->saveMold();
-    updateOrderLab();
+    if (ImgArea::getInstance()->getShapeItemNum() > 0) {
+//        MainWindow::getInstance()->saveMold();
+
+        if (m_isDetectMold) {
+            if (m_deteMoldNum == 0) {
+                m_curDeteMoldIdx = 1;
+            }
+            m_deteMoldNum += 1;
+        } else {
+            if (m_prodMoldNum == 0) {
+                m_curProdMoldIdx = 1;
+            }
+            m_prodMoldNum += 1;
+        }
+
+        updateOrderLab();
+
+        ImgArea::getInstance()->getShapeItems();
+    }
 }
 
 void SideBar::homePageBtnClick()
@@ -303,6 +328,13 @@ void SideBar::homePageBtnClick()
     }
     MainWindow::getInstance()->setDetectObject();
     updateOrderLab();
+
+    ShapeItemData itemData;
+    itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+    itemData.sceneId  = m_isDetectMold ? 1 : 2;
+    itemData.moldId   = getCurrentIdx();
+
+    ImgArea::getInstance()->loadShapeItem(itemData);
 }
 
 void SideBar::prevPageBtnClick()
@@ -323,6 +355,12 @@ void SideBar::prevPageBtnClick()
         updateOrderLab();
         MainWindow::getInstance()->setDetectObject();
 //        MainWindow::getInstance()->loadMold();
+        ShapeItemData itemData;
+        itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+        itemData.sceneId  = m_isDetectMold ? 1 : 2;
+        itemData.moldId   = getCurrentIdx();
+
+        ImgArea::getInstance()->loadShapeItem(itemData);
     }
 
 }
@@ -345,11 +383,22 @@ void SideBar::nextPageBtnClick()
         updateOrderLab();
         MainWindow::getInstance()->setDetectObject();
 //        MainWindow::getInstance()->loadMold();
+        ShapeItemData itemData;
+        itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+        itemData.sceneId  = m_isDetectMold ? 1 : 2;
+        itemData.moldId   = getCurrentIdx();
+
+        ImgArea::getInstance()->loadShapeItem(itemData);
     }
 }
 
 void SideBar::delMoldBtnClick()
 {
+    bool isChange = false;
+    ShapeItemData itemData;
+    itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+    itemData.sceneId  = m_isDetectMold ? 1 : 2;
+
     if (m_isDetectMold) {
         if (m_deteMoldNum > 0) {
             m_deteImgItemList.removeAt(m_curDeteMoldIdx - 1);
@@ -357,7 +406,10 @@ void SideBar::delMoldBtnClick()
 
             if (m_curDeteMoldIdx == m_deteMoldNum) {
                 m_curDeteMoldIdx -= 1;
+                isChange = true;
             }
+            itemData.moldId = m_deteMoldNum;
+            MyDataBase::getInstance()->delShapeItemData(itemData);
             m_deteMoldNum -= 1;
         }
     } else {
@@ -367,12 +419,21 @@ void SideBar::delMoldBtnClick()
 
             if (m_curProdMoldIdx == m_prodMoldNum) {
                 m_curProdMoldIdx -= 1;
+                isChange = true;
             }
+            itemData.moldId = m_prodMoldNum;
+            MyDataBase::getInstance()->delShapeItemData(itemData);
+            MyDataBase::getInstance()->updateItemMoldId(itemData);
             m_prodMoldNum -= 1;
         }
     }
     updateOrderLab();
     MainWindow::getInstance()->setDetectObject();
+
+    if (isChange) {
+        itemData.moldId   = getCurrentIdx();
+        ImgArea::getInstance()->loadShapeItem(itemData);
+    }
 }
 
 void SideBar::clearMoldBtnClick()
@@ -381,17 +442,26 @@ void SideBar::clearMoldBtnClick()
         m_deteImgItemList.clear();
         m_deteShapeItemList.clear();
 
-        m_curDeteMoldIdx = 1;
+        m_curDeteMoldIdx = 0;
         m_deteMoldNum = 0;
     } else {
         m_prodImgItemList.clear();
         m_prodShapeItemList.clear();
 
-        m_curProdMoldIdx = 1;
+        m_curProdMoldIdx = 0;
         m_prodMoldNum = 0;
     }
     updateOrderLab();
     MainWindow::getInstance()->setDetectObject();
+
+    ShapeItemData itemData;
+    itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+    itemData.sceneId  = m_isDetectMold ? 1 : 2;
+    itemData.moldId   = getCurrentIdx();
+
+    MyDataBase::getInstance()->delSceneShapeItemData(itemData);
+
+    ImgArea::getInstance()->loadShapeItem(itemData);
 }
 
 void SideBar::updateOrderLab()

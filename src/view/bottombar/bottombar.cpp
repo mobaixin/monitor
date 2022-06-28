@@ -214,8 +214,8 @@ void BottomBar::setWidgetStyle()
     m_pClearBtn->setFixedSize(60, 30);
     m_pPositionBtn->setFixedSize(60, 30);
 
-    m_pAccLab->setText("检测精度:");
-    m_pPixLab->setText("像素:");
+    m_pAccLab->setText(" 检测精度:");
+    m_pPixLab->setText(" 像素:");
 
 //    m_pAccLab->setAutoFillBackground(true);
 //    m_pAccLab->setBackgroundRole(QPalette::Window);

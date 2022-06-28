@@ -26,8 +26,8 @@ QList<QPointF> MyGraphicsItem::getMyPointList()
 {
     QList<QPointF> pointList;
 
-    for (MyPointItem *item : m_pointList) {
-        pointList.append(item->getPoint());
+    for (int i = 0; i < m_pointList.size() - 1; i++) {
+        pointList.append(m_pointList[i]->getPoint());
     }
     return pointList;
 }
@@ -64,13 +64,13 @@ void MyGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 //        qDebug() << "scene center pos: " << scenecenter_pos.x() << " " << scenecenter_pos.y();
 //    }
 
-    qDebug() << "real center:" << getRealCenter().x() << " " << getRealCenter().y();
-    qDebug() << "center:" << getCenter().x() << " " << getCenter().y();
-    qDebug() << "edge:" << getEdge().x() << " " << getEdge().y();
+//    qDebug() << "real center:" << getRealCenter().x() << " " << getRealCenter().y();
+//    qDebug() << "center:" << getCenter().x() << " " << getCenter().y();
+//    qDebug() << "edge:" << getEdge().x() << " " << getEdge().y();
 
-    for (MyPointItem *item : m_pointList) {
-        qDebug() << "item:" << item->getPoint().x() << " " << item->getPoint().y();
-    }
+//    for (MyPointItem *item : m_pointList) {
+//        qDebug() << "item:" << item->getPoint().x() << " " << item->getPoint().y();
+//    }
 
     return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
 }
@@ -430,8 +430,6 @@ void MyPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
             painter->drawLine(m_pointList.at(i - 1)->getPoint(), m_pointList.at(i)->getPoint());
         }
     }
-
-    qDebug() << m_myPointList.size();
 }
 
 void MyPolygon::mousePressEvent(QGraphicsSceneMouseEvent *event)
