@@ -11,6 +11,7 @@
 #include <QList>
 
 #include "src/view/imgarea/mygraphicsitem.h"
+#include "src/serialport/myserialport.h"
 
 class SideBar : public QWidget
 {
@@ -36,8 +37,14 @@ public:
     // 获取检测对象
     bool getIsDetectMold();
 
+    // 获取场景ID
+    int getCurSceneID();
+
     // 获取当前索引
     int getCurrentIdx();
+
+    // 获取当前模板数
+    int getCurMoldNum();
 
     // 保存模板
     void saveImageMold(QGraphicsPixmapItem *imgItem);
@@ -52,6 +59,7 @@ private:
     void checkMoldBtnClick();
     void productBtnClick();
     void saveMoldBtnClick();
+    void addMoldBtnClick();
     void homePageBtnClick();
     void prevPageBtnClick();
     void nextPageBtnClick();
@@ -60,9 +68,13 @@ private:
 
     void updateOrderLab();
 
-
+    void loadCurMold();
+    void loadCurImage();
 private:
     bool m_isDetectMold;
+    bool m_isShowMold;
+
+    int m_sceneId;
 
     int m_deteMoldNum;
     int m_prodMoldNum;
@@ -82,6 +94,7 @@ private:
     QLabel *m_orderLab;
 
     QPushButton *m_saveMoldBtn;
+    QPushButton *m_addMoldBtn;
     QPushButton *m_homePageBtn;
     QPushButton *m_prevPageBtn;
     QPushButton *m_nextPageBtn;

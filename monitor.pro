@@ -1,4 +1,4 @@
-QT       += core gui sql
+QT       += core gui sql serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -34,8 +34,10 @@ SOURCES += \
     src/camera/capturethread.cpp \
     src/camera/detect.cpp \
     src/database/mydatabase.cpp \
+    src/serialport/myserialport.cpp \
     src/view/bottombar/bottombar.cpp    \
     src/view/common/myselectframe.cpp \
+    src/view/common/mysettings.cpp \
     src/view/common/myslider.cpp \
     src/view/imgarea/imgarea.cpp        \
     src/view/imgarea/mygraphicsitem.cpp \
@@ -55,7 +57,9 @@ HEADERS += \
     src/camera/capturethread.h \
     src/camera/resource.h \
     src/database/mydatabase.h \
+    src/serialport/myserialport.h \
     src/view/common/myselectframe.h \
+    src/view/common/mysettings.h \
     src/view/common/myslider.h \
     src/view/imgarea/mygraphicsitem.h   \
     src/view/imgarea/mygraphicsscene.h  \
@@ -74,7 +78,7 @@ HEADERS += \
     src/controller/controller.h
 
 TRANSLATIONS += \
-    demo1_zh_CN.ts
+    monitor_zh_CN.ts
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

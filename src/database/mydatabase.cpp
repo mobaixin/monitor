@@ -1,12 +1,14 @@
 #include <QSqlQuery>
 #include <QMessageBox>
-#include <QApplication>
 #include <QSqlError>
 #include <QFileInfo>
 #include <QSqlRecord>
 #include <QDebug>
 
 #include "mydatabase.h"
+
+QString MyDataBase::dbFilePath = "";
+QString MyDataBase::imgFilePath = "";
 
 MyDataBase *MyDataBase::getInstance()
 {
@@ -38,8 +40,22 @@ MyDataBase::MyDataBase(QObject *parent)
 //    }
 
     // todo 数据库路径问题
+    // create folder
+    dbFilePath  = QCoreApplication::applicationDirPath() + "/data";
+    imgFilePath = dbFilePath + "/imgmold";
+
+    QDir dir(dbFilePath);
+    if (!dir.exists()) {
+        bool ismkdir = dir.mkdir(dbFilePath);
+        ismkdir = dir.mkdir(imgFilePath);
+        if(!ismkdir)
+            qDebug() << "Create path fail" << endl;
+        else
+            qDebug() << "Create fullpath success" << endl;
+    }
 //    m_database.setDatabaseName(dirPath + "monitor.db");
-    m_database.setDatabaseName(QCoreApplication::applicationDirPath()+"//monitor.db");
+    m_database.setDatabaseName(dbFilePath + "/monitor.db");
+    qDebug() << QDir::homePath();
 
     initDataBase();
 }
@@ -68,12 +84,25 @@ int MyDataBase::initDataBase()
                                        "camera_id INTEGER,"
                                        "scene_id INTEGER,"
                                        "mold_id INTEGER,"
+                                       "item_id INTEGER,"
                                        "type INTEGER,"
                                        "center VARCHAR(20),"
                                        "edge VARCHAR(20),"
-                                       "point_list VARCHAR(500),"
+                                       "point_list VARCHAR,"
                                        "accuracy INTEGER,"
                                        "pixel INTEGER,"
+                                       "other1 VARCHAR,"
+                                       "other2 VARCHAR)"
+                                       ));
+
+    queryRes &= queryInit.exec(QString("create table if not exists image_mold ("
+                                       "id INTEGER primary key AUTOINCREMENT,"
+                                       "camera_id INTEGER,"
+                                       "scene_id INTEGER,"
+                                       "mold_id INTEGER,"
+                                       "img_path VARCHAR,"
+                                       "img_content VARCHAR,"
+                                       "time VARCHAR,"
                                        "other1 VARCHAR,"
                                        "other2 VARCHAR)"
                                        ));
@@ -83,7 +112,10 @@ int MyDataBase::initDataBase()
                                        "time VARCHAR,"
                                        "camera_id INTEGER,"
                                        "scene_id INTEGER,"
-                                       "result BOOLEAN)"
+                                       "result INTEGER,"
+                                       "img_path VARCHAR,"
+                                       "other1 VARCHAR,"
+                                       "other2 VARCHAR)"
                                        ));
 
     if (true == queryRes) {
@@ -174,11 +206,10 @@ QList<ShapeItemData> MyDataBase::queShapeItemData(ShapeItemData itemData)
     QSqlQuery query;
     bool queryRes = true;
 
-    query.prepare("SELECT * FROM shape_item WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id=:mold_id");
+    query.prepare("SELECT * FROM shape_item WHERE camera_id=:camera_id and scene_id=:scene_id");
 
     query.bindValue(":camera_id", QString::number(itemData.cameraId));
     query.bindValue(":scene_id",  QString::number(itemData.sceneId));
-    query.bindValue(":mold_id",   QString::number(itemData.moldId));
 
     queryRes = query.exec();
 
@@ -270,9 +301,9 @@ int MyDataBase::updateItemMoldId(ShapeItemData itemData)
             query.prepare("UPDATE shape_item SET mold_id=mold_id-1 "
                           "WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id>:mold_id");
 
-            query.bindValue(":camera_id",  QString::number(itemData.cameraId));
+            query.bindValue(":camera_id", QString::number(itemData.cameraId));
             query.bindValue(":scene_id",  QString::number(itemData.sceneId));
-            query.bindValue(":mold_id",    QString::number(itemData.moldId));
+            query.bindValue(":mold_id",   QString::number(itemData.moldId));
 
             queryRes = query.exec();
 
@@ -286,6 +317,218 @@ int MyDataBase::updateItemMoldId(ShapeItemData itemData)
         }
     }
     return DB_OP_SUCC;
+}
+
+int MyDataBase::addImgMoldData(ImageMoldData imgData)
+{
+    bool queryRes = true;
+
+    if (!checkImgMoldData(imgData)) {
+        return INVALID_INPUT;
+    } else {
+        if (m_database.isValid()) {
+            QSqlQuery query;
+
+            query.prepare("INSERT INTO image_mold (camera_id, scene_id, mold_id, img_path, img_content, time) VALUES "
+                          "(:camera_id, :scene_id, :mold_id, :img_path, :img_content, :time)");
+
+            query.bindValue(":camera_id",   QString::number(imgData.cameraId));
+            query.bindValue(":scene_id",    QString::number(imgData.sceneId));
+            query.bindValue(":mold_id",     QString::number(imgData.moldId));
+            query.bindValue(":img_path",    imgData.imgPath);
+            query.bindValue(":img_content", imgData.imgContent);
+            query.bindValue(":time",        imgData.time);
+
+            queryRes = query.exec();
+
+            if (queryRes) {
+                return DB_OP_SUCC;
+            } else {
+                return DB_OP_ADD_FAILED;
+            }
+        } else {
+            return DB_UNCONNECT;
+        }
+    }
+    return DB_OP_SUCC;
+}
+
+int MyDataBase::delImgMoldData(ImageMoldData imgData)
+{
+    bool queryRes = true;
+
+    if (checkImgMoldData(imgData)) {
+        QSqlQuery query;
+
+        query.prepare("DELETE FROM image_mold WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id=:mold_id");
+
+        query.bindValue(":camera_id", QString::number(imgData.cameraId));
+        query.bindValue(":scene_id",  QString::number(imgData.sceneId));
+        query.bindValue(":mold_id",   QString::number(imgData.moldId));
+
+        queryRes = query.exec();
+    }
+
+    return DB_OP_SUCC;
+}
+
+ImageMoldData MyDataBase::queImgMoldData(ImageMoldData imgData)
+{
+    ImageMoldData resData;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM image_mold WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id=:mold_id");
+
+    query.bindValue(":camera_id", QString::number(imgData.cameraId));
+    query.bindValue(":scene_id",  QString::number(imgData.sceneId));
+    query.bindValue(":mold_id",   QString::number(imgData.moldId));
+
+    queryRes = query.exec();
+
+    if (query.next()) {
+        resData.cameraId   = query.value("camera_id").toInt();
+        resData.sceneId    = query.value("scene_id").toInt();
+        resData.moldId     = query.value("mold_id").toInt();
+        resData.imgPath    = query.value("img_path").toString();
+        resData.imgContent = query.value("img_content").toString();
+        resData.time       = query.value("time").toString();
+    }
+
+    return resData;
+}
+
+int MyDataBase::altImgMoldData(ImageMoldData imgData)
+{
+    bool queryRes = true;
+
+    if (!checkImgMoldData(imgData)) {
+        return INVALID_INPUT;
+    } else {
+        if (m_database.isValid()) {
+            QSqlQuery query;
+
+            query.prepare("UPDATE image_mold SET img_path=:img_path, img_content=:img_content, time=:time "
+                          "WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id=:mold_id");
+
+            query.bindValue(":camera_id",   QString::number(imgData.cameraId));
+            query.bindValue(":scene_id",    QString::number(imgData.sceneId));
+            query.bindValue(":mold_id",     QString::number(imgData.moldId));
+            query.bindValue(":img_path",    imgData.imgPath);
+            query.bindValue(":img_content", imgData.imgContent);
+            query.bindValue(":time",        imgData.time);
+
+            queryRes = query.exec();
+
+            if (queryRes) {
+                return DB_OP_SUCC;
+            } else {
+                return DB_OP_ADD_FAILED;
+            }
+        } else {
+            return DB_UNCONNECT;
+        }
+    }
+    return DB_OP_SUCC;
+}
+
+QList<ImageMoldData> MyDataBase::queAllImgMoldData(ImageMoldData imgData)
+{
+    QList<ImageMoldData> resDataList;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM image_mold WHERE camera_id=:camera_id and scene_id=:scene_id");
+
+    query.bindValue(":camera_id", QString::number(imgData.cameraId));
+    query.bindValue(":scene_id",  QString::number(imgData.sceneId));
+
+    queryRes = query.exec();
+
+    while (query.next()) {
+        ImageMoldData resData;
+
+        resData.cameraId  = query.value("camera_id").toInt();
+        resData.sceneId   = query.value("scene_id").toInt();
+        resData.moldId    = query.value("mold_id").toInt();
+        resData.imgPath   = query.value("img_path").toString();
+        resData.imgContent= query.value("img_content").toString();
+        resData.time      = query.value("time").toString();
+
+        resDataList.append(resData);
+    }
+
+    return resDataList;
+}
+
+int MyDataBase::updateImgMoldId(ImageMoldData imgData)
+{
+    bool queryRes = true;
+
+    if (!checkImgMoldData(imgData)) {
+        return INVALID_INPUT;
+    } else {
+        if (m_database.isValid()) {
+            QSqlQuery query;
+
+            query.prepare("UPDATE image_mold SET mold_id=mold_id-1 "
+                          "WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id>:mold_id");
+
+            query.bindValue(":camera_id", QString::number(imgData.cameraId));
+            query.bindValue(":scene_id",  QString::number(imgData.sceneId));
+            query.bindValue(":mold_id",   QString::number(imgData.moldId));
+
+            queryRes = query.exec();
+
+            if (queryRes) {
+                return DB_OP_SUCC;
+            } else {
+                return DB_OP_ADD_FAILED;
+            }
+        } else {
+            return DB_UNCONNECT;
+        }
+    }
+    return DB_OP_SUCC;
+}
+
+int MyDataBase::delSceneImgMoldData(ImageMoldData imgData)
+{
+    bool queryRes = true;
+
+    if (checkImgMoldData(imgData)) {
+        QSqlQuery query;
+
+        query.prepare("DELETE FROM image_mold WHERE camera_id=:camera_id and scene_id=:scene_id");
+
+        query.bindValue(":camera_id", QString::number(imgData.cameraId));
+        query.bindValue(":scene_id",  QString::number(imgData.sceneId));
+
+        queryRes = query.exec();
+    }
+
+    return DB_OP_SUCC;
+}
+
+int MyDataBase::getImageMoldNum(ImageMoldData imgData)
+{
+    int count = 0;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT COUNT(DISTINCT mold_id) FROM image_mold WHERE camera_id=:camera_id and scene_id=:scene_id");
+
+    query.bindValue(":camera_id", QString::number(imgData.cameraId));
+    query.bindValue(":scene_id",  QString::number(imgData.sceneId));
+
+    queryRes = query.exec();
+    query.next();
+
+    count = query.value(0).toInt();
+    return count;
 }
 
 int MyDataBase::addNGRecordData(NGRecordData recordData)
@@ -403,6 +646,21 @@ bool MyDataBase::checkShapeItemData(ShapeItemData itemData)
     }
 
     if (itemData.moldId < 0) {
+        return false;
+    }
+
+    return checkRes;
+}
+
+bool MyDataBase::checkImgMoldData(ImageMoldData imgData)
+{
+    bool checkRes = true;
+
+    if (imgData.sceneId != 1 && imgData.sceneId != 2) {
+        return false;
+    }
+
+    if (imgData.moldId < 0) {
         return false;
     }
 

@@ -8,9 +8,12 @@
 #include <QString>
 #include <QThread>
 #include <QMutexLocker>
+#include <QApplication>
+#include <QDir>
 
-const QString SHAPEITEM = "shape_item"; //图形标注表
-const QString NGRECORD  = "ng_record";  //NG记录表
+const QString SHAPEITEM = "shape_item"; // 图形标注表
+const QString IMGMOLD   = "image_mold"; // 图像模板表
+const QString NGRECORD  = "ng_record";  // NG记录表
 
 enum DB_RETURN_STATUS{              //数据库操作结果返回表
     DB_OP_SUCC          = (0),      //数据库操作成功
@@ -31,6 +34,7 @@ typedef struct ShapeItemData{
     int cameraId;
     int sceneId;
     int moldId;
+    int itemId;
     int type;
     QString center;
     QString edge;
@@ -39,11 +43,21 @@ typedef struct ShapeItemData{
     int pixel;
 }ShapeItemData;
 
+typedef struct ImageMoldData{
+    int cameraId;
+    int sceneId;
+    int moldId;
+    QString imgPath;
+    QString imgContent;
+    QString time;
+}ImageMoldData;
+
 typedef struct NGRecordData{
     QString time;
     int cameraId;
     int sceneId;
     QString result;
+    QString imgPath;
 }NGRecordData;
 
 class MyDataBase : public QObject
@@ -58,15 +72,33 @@ public:
     // open数据库
     int initDataBase();
 
-    // ShapeItem表操作
+    // -----ShapeItem表操作-----
     int addShapeItemData(ShapeItemData itemData);
     int delShapeItemData(ShapeItemData itemData);
-    int delSceneShapeItemData(ShapeItemData itemData);
     QList<ShapeItemData> queShapeItemData(ShapeItemData itemData);
     int altShapeItemData(ShapeItemData itemData);
 
+    // 清除当前场景的所有图形
+    int delSceneShapeItemData(ShapeItemData itemData);
+    // 获取当前场景中图形的数量
     int getMoldNum(ShapeItemData itemData);
+    // 更新图形的模板ID
     int updateItemMoldId(ShapeItemData itemData);
+
+    // -----ImgMold表操作-----
+    int addImgMoldData(ImageMoldData imgData);
+    int delImgMoldData(ImageMoldData imgData);
+    ImageMoldData queImgMoldData(ImageMoldData imgData);
+    int altImgMoldData(ImageMoldData imgData);
+
+    // 获取当前场景的所有图片模板
+    QList<ImageMoldData> queAllImgMoldData(ImageMoldData imgData);
+    // 更新图片的模板ID
+    int updateImgMoldId(ImageMoldData imgData);
+    // 清除当前场景的所有图片模板
+    int delSceneImgMoldData(ImageMoldData imgData);
+    // 获取当前场景中图片模板的数量
+    int getImageMoldNum(ImageMoldData imgData);
 
     // NGRecord表操作
     int addNGRecordData(NGRecordData recordData);
@@ -74,8 +106,13 @@ public:
     NGRecordData queNGRecordData(NGRecordData recordData);
     int altNGRecordData(NGRecordData recordData);
 
+public:
+    static QString dbFilePath;
+    static QString imgFilePath;
+
 private:
     bool checkShapeItemData(ShapeItemData itemData);
+    bool checkImgMoldData(ImageMoldData imgData);
     bool checkNGRecordData(NGRecordData recordData);
 
 private:

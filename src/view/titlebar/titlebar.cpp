@@ -173,8 +173,21 @@ void TitleBar::testBtnClick()
 {
     ImgArea::getInstance()->setDetectRes(true);
 
-    QImage trainImg  = QImage("D:/image/page021.png");
-    QImage targetImg = QImage("D:/image/page032.png");
+    ImageMoldData imgData;
+    imgData.cameraId = m_cameraId;
+    imgData.sceneId  = SideBar::getInstance()->getCurSceneID();
+
+    QList<ImageMoldData> imgDataList = MyDataBase::getInstance()->queAllImgMoldData(imgData);
+
+    QImage curImg = ImgArea::getInstance()->getCurImage();
+    curImg.save(MyDataBase::imgFilePath + "/tmp.png");
+
+    if (imgDataList.size() == 0) {
+        return ;
+    }
+
+    QImage trainImg  = QImage(imgDataList[0].imgPath);
+    QImage targetImg = QImage(MyDataBase::imgFilePath + "/tmp.png");
 //    QImage targetImg = ImgArea::getInstance()->getImageItem();
 
     ImgArea::getInstance()->detectImage(trainImg, targetImg);

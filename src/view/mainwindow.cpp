@@ -36,6 +36,7 @@ MainWindow::~MainWindow()
 void MainWindow::setWidgetUi()
 {
     MyDataBase::getInstance();
+    MySerialPort::getInstance();
 
     m_pMainWid   = new QWidget(this);
     m_pTitleBar  = TitleBar::getInstance(this);
@@ -97,6 +98,26 @@ void MainWindow::setData()
     // 设置图片
 //    m_pImgArea->loadImage("D:/image/page01.png");
 //    m_pImgArea->loadImage(":/img/page01.png");
+
+
+    // create folder
+    QString dbFilePath  = QCoreApplication::applicationDirPath() + "/data";
+    QString imgFilePath = dbFilePath + "/imgmold";
+
+    QDir dir(dbFilePath);
+    if (!dir.exists()) {
+        bool ismkdir = dir.mkdir(dbFilePath);
+        ismkdir = dir.mkdir(imgFilePath);
+        if(!ismkdir)
+            qDebug() << "Create path fail" << endl;
+        else
+            qDebug() << "Create fullpath success" << endl;
+    }
+    dir.setPath(imgFilePath);
+    if (!dir.exists()) {
+        dir.mkdir(imgFilePath);
+    }
+
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -113,8 +134,11 @@ void MainWindow::showMonitorSet(bool isDisplay)
 {
     if (isDisplay) {
         m_pBottomBar->show();
+        m_pImgArea->setShowState(false);
     } else {
         m_pBottomBar->hide();
+        ImgArea::getInstance()->clearShapes();
+        m_pImgArea->setShowState(true);
     }
     m_pSideBar->setDisplayState(isDisplay);
 }
@@ -149,7 +173,7 @@ void MainWindow::loadMold()
     imageItem = m_pSideBar->getImageMold();
     shapeItemList = m_pSideBar->getShapeMold();
 
-    m_pImgArea->loadImageItem(imageItem);
+//    m_pImgArea->loadImageItem(imageItem);
 //    m_pImgArea->loadShapeItem(shapeItemList);
 }
 

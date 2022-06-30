@@ -39,6 +39,17 @@ typedef struct _WIDTH_HEIGHT{
     int     buffer_size;
 }Width_Height;
 
+typedef struct myMOG2Data {
+    Ptr<BackgroundSubtractorMOG2> myMOG2;
+    int accuracy;
+    int pixel;
+} myMOG2Data;
+
+enum DetectRes {
+    NG = 0,
+    OK = 1
+};
+
 class ImgArea : public QWidget
 {
     Q_OBJECT
@@ -63,7 +74,10 @@ public:
     // 设置背景图片
     void loadImage(QString filePath);
 
+    // 擦除单个图形item
     void eraseShape();
+
+    // 清除所有图形item
     void clearShapes();
 
     // 设置运行状态
@@ -83,7 +97,7 @@ public:
     QList<ShapeItemData> getShapeItems();
 
     // 加载图像图形模板
-    void loadImageItem(QGraphicsPixmapItem *  imageItem);
+    void loadImageItem(ImageMoldData imgData);
     void loadShapeItem(ShapeItemData itemData);
 
     // 保存为图片
@@ -114,13 +128,22 @@ public:
     void pauseCamera();
 
     // 图片检测
-    void detectImage(QImage imgBg, QImage imgFg);
+    int detectImage(QImage imgBg, QImage imgFg);
 
     // 获取item数
     int getShapeItemNum();
 
     // 获取opencv mask
-    Mat getShapeMask(ShapeItemData itemData);
+    Mat getShapeMask(ShapeItemData itemData, QImage img);
+
+    // 设置显示状态
+    void setShowState(bool isShow);
+
+    // 获取当前图片
+    QImage getCurImage();
+
+    // 获取相机状态
+    int getCameraStatus();
 
 public:
     int status;
@@ -133,7 +156,8 @@ private:
 
     QString pointListToStr(QList<QPointF> pointList);
 
-
+    // 获取MOG2
+    Ptr<BackgroundSubtractorMOG2> getMOG2Data(ShapeItemData itemData);
 
     static QImage matToQim(Mat & mat);
     static Mat qimToMat(QImage & qim);
@@ -153,11 +177,14 @@ private:
     QGraphicsView *m_pView;
     MyGraphicsScene *m_pScene;
     QGraphicsPixmapItem *m_pImageItem;
+    QImage m_pCurImage;
 
     QSize m_sceneSize;
 
     QTimer *m_timer;
     CaptureThread *m_thread;
+
+    bool m_isShowImage;
 
     // 曝光时间
     double m_pfExposureTime;
@@ -177,6 +204,7 @@ private:
     Mat m_maskCountour;
     Ptr<BackgroundSubtractorMOG2> m_pMOG2;
 
+    QList<myMOG2Data> myMOG2DataList;
 };
 
 

@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QApplication>
 #include <QList>
+#include <QDateTime>
 
 #include "src/view/imgarea/imgarea.h"
 #include "src/view/mainwindow.h"
@@ -103,7 +104,7 @@ void ImgArea::setWidgetUi()
 //    m_pView->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
     m_pScene->addItem(m_pImageItem);
-//    m_pScene->setBackgroundBrush(Qt::black);
+    m_pScene->setBackgroundBrush(Qt::black);
 
     m_pImgAreaLayout->addWidget(m_pView);
     m_pImgAreaLayout->setContentsMargins(0, 0, 0, 0);
@@ -152,6 +153,8 @@ void ImgArea::setWidgetStyle()
 
 void ImgArea::setData()
 {
+    m_isShowImage = true;
+
     if(initSDK()==-1){
         status =0;
     } else {
@@ -160,7 +163,7 @@ void ImgArea::setData()
 
         m_thread->start();
         m_thread->stream();
-        status =1;
+        status = 1;
     }
     qDebug() << "status: " << status;
 }
@@ -185,7 +188,9 @@ void ImgArea::loadImage(QString filePath)
 void ImgArea::eraseShape()
 {
     if (!m_pScene->selectedItems().isEmpty()) {
-        m_pScene->removeItem(m_pScene->selectedItems().first());
+        QGraphicsItem *temp = m_pScene->selectedItems().first();
+        m_pScene->removeItem(temp);
+        delete temp;
     }
 }
 
@@ -194,6 +199,7 @@ void ImgArea::clearShapes()
     for (auto &temp : m_pScene->items()) {
         if (temp != m_pImageItem) {
             m_pScene->removeItem(temp);
+            delete temp;
         }
     }
 }
@@ -249,8 +255,21 @@ void ImgArea::setSampleLab(bool isDetectMold, int curIdx)
 
 QImage ImgArea::getImageItem()
 {
-    QImage resImg = m_pImageItem->pixmap().toImage();
-    return resImg;
+    QDateTime time   = QDateTime::currentDateTime();
+    QString fileName = time.toString("yyyy-MM-dd-HH-mm-ss");
+    QString timeStr  = time.toString("yyyy-MM-dd HH:mm:ss");
+
+    ImageMoldData imgData;
+    imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
+    imgData.sceneId  = SideBar::getInstance()->getIsDetectMold() ? 1 : 2;
+    imgData.moldId   = SideBar::getInstance()->getCurMoldNum();
+    imgData.imgPath  = QString("%1/%2.png").arg(MyDataBase::imgFilePath).arg(fileName);
+    imgData.time     = timeStr;
+
+    MyDataBase::getInstance()->addImgMoldData(imgData);
+    m_pCurImage.save(imgData.imgPath);
+
+    return m_pCurImage;
 }
 
 QList<ShapeItemData> ImgArea::getShapeItems()
@@ -320,17 +339,30 @@ QList<ShapeItemData> ImgArea::getShapeItems()
     return shapeList;
 }
 
-void ImgArea::loadImageItem(QGraphicsPixmapItem *imageItem)
+void ImgArea::loadImageItem(ImageMoldData imgData)
 {
-    if (imageItem != nullptr) {
-        m_pScene->clear();
-        m_pScene->addItem(imageItem);
+    if (imgData.moldId <= 0) {
+        m_pImageItem->hide();
+        return ;
+    }
+
+    ImageMoldData resImgData =MyDataBase::getInstance()->queImgMoldData(imgData);
+    QImage img;
+
+    qDebug() << "image path: " << resImgData.imgPath;
+    if (img.load(resImgData.imgPath)) {
+        QPixmap imgPix = (QPixmap::fromImage(img));
+        imgPix = imgPix.scaled(this->size());
+        m_pImageItem->setPixmap(imgPix);
+
+        qDebug() << "show image";
+        m_pImageItem->show();
     }
 }
 
 void ImgArea::loadShapeItem(ShapeItemData itemData)
 {
-    m_pScene->clear();
+    clearShapes();
 
     QList<ShapeItemData> itemDataList = MyDataBase::getInstance()->queShapeItemData(itemData);
 
@@ -607,93 +639,113 @@ QString ImgArea::pointListToStr(QList<QPointF> pointList)
     return resStr;
 }
 
-void ImgArea::detectImage(QImage imgBg, QImage imgFg)
+Ptr<BackgroundSubtractorMOG2> ImgArea::getMOG2Data(ShapeItemData itemData)
 {
+    Ptr<BackgroundSubtractorMOG2> myMOG2Data;
+
+    Mat mask,srcFg, dstBg, dstFg;
+    mask = getShapeMask(itemData, QImage());
+
+
+
+    return myMOG2Data;
+}
+
+int ImgArea::detectImage(QImage imgBg, QImage imgFg)
+{
+    int detectRes = DetectRes::NG;
+
+    imgBg = imgBg.scaled(this->size());
+    imgFg = imgFg.scaled(this->size());
+
     ShapeItemData itemData;
     itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
-    itemData.sceneId  = SideBar::getInstance()->getIsDetectMold() ? 1 : 2;
-    itemData.moldId   = SideBar::getInstance()->getCurrentIdx();
+    itemData.sceneId  = SideBar::getInstance()->getCurSceneID();
+    itemData.moldId   = 1;
 
-    Mat mask, dstBg, dstFg;
-    mask = getShapeMask(itemData);
+    QList<ShapeItemData> itemDataList = MyDataBase::getInstance()->queShapeItemData(itemData);
 
-    qimToMat(imgBg).copyTo(dstBg, mask);
-    qimToMat(imgFg).copyTo(dstFg, mask);
+    ImageMoldData imgData;
+    imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
+    imgData.sceneId  = SideBar::getInstance()->getCurSceneID();
 
-    double acc  = BottomBar::getInstance()->getAccuracy();
-    int minArea = BottomBar::getInstance()->getPixel();
+    QList<ImageMoldData> imgDataList = MyDataBase::getInstance()->queAllImgMoldData(imgData);
 
-    m_pMOG2 = createBackgroundSubtractorMOG2(50, acc, true);
+    QList<Mat> shapeMaskList;
 
-    Mat frameBg = qimToMat(imgBg);
-    Mat frameFg = qimToMat(imgFg);
-
-    frameBg = dstBg.clone();
-    frameFg = dstFg.clone();
-
-    for (int i = 0; i < m_pMOG2->getHistory(); i++) {
-        m_frame = frameBg.clone();
-        m_pMOG2->apply(m_frame, m_fgMaskMOG2);
+    for (int i = 0; i < itemDataList.size(); i++) {
+        Mat shapeMask = getShapeMask(itemDataList[i], imgFg);
+        shapeMaskList.append(shapeMask);
     }
 
-    m_frame = frameFg.clone();
-    m_pMOG2->apply(m_frame, m_fgMaskMOG2, 0);
+    for (int i = 0; i < imgDataList.size(); i++) {
 
-    rectangle(m_frame, cv::Point(10, 2), cv::Point(100, 20),
-              cv::Scalar(255, 255, 255), -1);
+        imgBg = QImage(imgDataList[i].imgPath).scaled(this->size());
 
-    // get result
-    vector<vector<Point>> contours;
-    vector<Vec4i> hierarchy;
-    findContours(m_fgMaskMOG2, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point());
-    Mat imageContours = Mat::zeros(m_fgMaskMOG2.size(), CV_8UC1);
-    Mat contoursMat = Mat::zeros(m_fgMaskMOG2.size(), CV_8UC1);
-    vector<vector<Point>> approxPoint(contours.size());
+        int imgMoldDeteRes = DetectRes::OK;
 
-    for (int i = 0; i < int(contours.size()); i++) {
-        if (contourArea(contours[i]) > minArea) {
-            Point2f fourPoint2f[4];
-            RotatedRect rectPoint = minAreaRect(contours[i]);
-            rectPoint.points(fourPoint2f);
+        for (int j = 0; j < itemDataList.size(); j++) {
+            Mat mask, srcFg, dstBg, dstFg;
+            mask = shapeMaskList[j];
 
-            int minX = 0;
-            for (int j = 0; j < 4; ++j) {
-                if (fourPoint2f[j].x > minX) {
-                    minX = fourPoint2f[j].x;
+            qimToMat(imgBg).copyTo(dstBg, mask);
+            qimToMat(imgFg).copyTo(dstFg, mask);
+
+            double acc  = itemDataList[j].accuracy;
+            int minArea = itemDataList[j].pixel;
+
+            m_pMOG2 = createBackgroundSubtractorMOG2(50, acc, true);
+
+            Mat frameBg = dstBg.clone();
+            Mat frameFg = dstFg.clone();
+
+            for (int i = 0; i < m_pMOG2->getHistory(); i++) {
+                m_frame = frameBg.clone();
+                m_pMOG2->apply(m_frame, m_fgMaskMOG2);
+            }
+
+            m_frame = frameFg.clone();
+            m_pMOG2->apply(m_frame, m_fgMaskMOG2, 0);
+
+    //        rectangle(m_frame, cv::Point(10, 2), cv::Point(100, 20),
+    //                  cv::Scalar(255, 255, 255), -1);
+
+            // get result
+            vector<vector<Point>> contours;
+            vector<Vec4i> hierarchy;
+            findContours(m_fgMaskMOG2, contours, hierarchy, CV_RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point());
+            Mat imageContours = Mat::zeros(m_fgMaskMOG2.size(), CV_8UC1);
+            Mat contoursMat = Mat::zeros(m_fgMaskMOG2.size(), CV_8UC1);
+            vector<vector<Point>> approxPoint(contours.size());
+
+
+            for (int i = 0; i < int(contours.size()); i++) {
+                qDebug() << "contourArea(contours[i]:" << contourArea(contours[i]);
+                if (contourArea(contours[i]) > minArea) {
+
+                    // 绘制轮廓
+                    drawContours(m_frame, contours, i, Scalar(0, 0, 255), 2, 8, hierarchy);
+
+                    // 出现NG
+                    imgMoldDeteRes = DetectRes::NG;
                 }
             }
-            if (minX > 0.7 * m_frame.cols) {
-                continue;
-            }
 
-            int maxX = 0;
-            for (int j = 0; j < 4; ++j) {
-                if (fourPoint2f[j].x > maxX) {
-                    maxX = fourPoint2f[j].x;
-                }
-            }
-            if (maxX < 0.3 * m_frame.cols) {
-                continue;
-            }
+            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
+            imshow(QString("fgMaskMOG2_%1_%2").arg(i).arg(j).toStdString(), m_fgMaskMOG2);
+            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), m_frame);
 
-            for (int i = 0; i < 3; i++)
-            {
-                line(m_frame, fourPoint2f[i], fourPoint2f[i + 1], Scalar(0, 0, 255), 1);
-            }
-            line(m_frame, fourPoint2f[0], fourPoint2f[3], Scalar(0, 0, 255), 1);
+            m_pMOG2->clear();
+        }
 
-            qDebug() << "fourPoint2f:";
-            for (int i = 0; i < 4; i++) {
-                qDebug() << fourPoint2f[i].x << " " << fourPoint2f[i].y;
-            }
-            qDebug() << " ";
+        if (imgMoldDeteRes == DetectRes::OK) {
+            detectRes = DetectRes::OK;
+            break;
         }
     }
-    imshow("m_fgMaskMOG2", m_fgMaskMOG2);
-    imshow("detect result", m_frame);
 
-    m_pMOG2->clear();
-
+    qDebug() << "detect res: " << detectRes;
+    return detectRes;
 }
 
 int ImgArea::getShapeItemNum()
@@ -707,60 +759,79 @@ int ImgArea::getShapeItemNum()
     return count;
 }
 
-Mat ImgArea::getShapeMask(ShapeItemData itemData)
+Mat ImgArea::getShapeMask(ShapeItemData itemData, QImage img)
 {
     cv::Mat mask, dst;
-    QList<ShapeItemData> itemList = MyDataBase::getInstance()->queShapeItemData(itemData);
-    QImage img = m_pImageItem->pixmap().toImage();
+//    QImage img = m_pImageItem->pixmap().toImage();
 
-    img = QImage("D:/image/page021.png");
+    img = img.scaled(this->size());
+
     qimToMat(img).copyTo(mask);
     mask.setTo(cv::Scalar::all(0));
 
-    for (ShapeItemData item : itemList) {
-        QStringList centerList = item.center.split(',');
-        QPointF center;
-        if (centerList.size() >= 2) {
-            center = QPointF(centerList[0].toInt(), centerList[1].toInt());
-        }
-
-        switch (item.type) {
-        case MyGraphicsItem::ItemType::Rectangle: {
-            QStringList edgeList = item.edge.split(',');
-            QPointF edge;
-            if (edgeList.size() >= 2) {
-                edge = QPointF(edgeList[0].toInt(), edgeList[1].toInt());
-            }
-
-            cv::rectangle(mask, Point(center.x() - edge.x()/2, center.y() - edge.y()/2),
-                          Point(center.x() + edge.x()/2, center.y() + edge.y()/2),
-                          Scalar(255, 255, 255), -1, 8, 0);
-        }
-            break;
-        case MyGraphicsItem::ItemType::Polygon: {
-            QStringList myStrList = item.pointList.split(',');
-            vector<vector<Point>> myEdgePointList;
-            vector<Point> myEdgePoint;
-
-            if (myStrList.size() > 2) {
-                for (int i = 0; i < myStrList.size() - 1; i+=2) {
-                    if (i + 1 < myStrList.size()) {
-                        myEdgePoint.push_back(Point(myStrList[i].toInt(), myStrList[i+1].toInt()));
-                    }
-                }
-                myEdgePointList.push_back(myEdgePoint);
-            }
-            cv::fillPoly(mask, myEdgePointList, Scalar(255, 255, 255));
-
-        }
-            break;
-        default:
-            break;
-        }
+    QStringList centerList = itemData.center.split(',');
+    QPointF center;
+    if (centerList.size() >= 2) {
+        center = QPointF(centerList[0].toInt(), centerList[1].toInt());
     }
 
-    imshow("single mask", mask);
+    switch (itemData.type) {
+    case MyGraphicsItem::ItemType::Rectangle: {
+        QStringList edgeList = itemData.edge.split(',');
+        QPointF edge;
+        if (edgeList.size() >= 2) {
+            edge = QPointF(edgeList[0].toInt(), edgeList[1].toInt());
+        }
+
+        cv::rectangle(mask, Point(center.x() - edge.x()/2, center.y() - edge.y()/2),
+                      Point(center.x() + edge.x()/2, center.y() + edge.y()/2),
+                      Scalar(255, 255, 255), -1, 8, 0);
+    }
+        break;
+    case MyGraphicsItem::ItemType::Polygon: {
+        QStringList myStrList = itemData.pointList.split(',');
+        vector<vector<Point>> myEdgePointList;
+        vector<Point> myEdgePoint;
+
+        if (myStrList.size() > 2) {
+            for (int i = 0; i < myStrList.size() - 1; i+=2) {
+                if (i + 1 < myStrList.size()) {
+                    myEdgePoint.push_back(Point(myStrList[i].toInt(), myStrList[i+1].toInt()));
+                }
+            }
+            myEdgePointList.push_back(myEdgePoint);
+        }
+        cv::fillPoly(mask, myEdgePointList, Scalar(255, 255, 255));
+
+    }
+        break;
+    default:
+        break;
+    }
+
+//    imshow("single mask", mask);
     return mask;
+}
+
+void ImgArea::setShowState(bool isShow)
+{
+    m_isShowImage = isShow;
+
+    if (m_isShowImage == false) {
+        m_pImageItem->hide();
+    } else {
+        m_pImageItem->show();
+    }
+}
+
+QImage ImgArea::getCurImage()
+{
+    return m_pCurImage;
+}
+
+int ImgArea::getCameraStatus()
+{
+    return status;
 }
 
 QImage ImgArea::matToQim(Mat &mat)
@@ -800,9 +871,13 @@ void ImgArea::imageProcess(QImage img)
 
 //    m_pScene->setSceneRect(0, 0, img.width(), img.height());
 
-    QPixmap imgPix = (QPixmap::fromImage(img));
-    imgPix = imgPix.scaled(this->size());
-    m_pImageItem->setPixmap(imgPix);
+    m_pCurImage = img;
+
+    if (m_isShowImage) {
+        QPixmap imgPix = (QPixmap::fromImage(img));
+        imgPix = imgPix.scaled(this->size());
+        m_pImageItem->setPixmap(imgPix);
+    }
 
     g_disply_fps++;
 }
