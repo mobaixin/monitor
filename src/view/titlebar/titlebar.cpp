@@ -236,6 +236,7 @@ void TitleBar::sysSettingBtnClick()
 void TitleBar::testBtnClick()
 {
     setAlarmBtnState(false);
+    ImgArea::getInstance()->clearDetectResult();
 
     detectCurImage();
 }
@@ -250,6 +251,15 @@ void TitleBar::addMoldBtnClick()
 
     setAlarmBtnState(false);
     ImgArea::getInstance()->clearDetectResult();
+
+    NGRecordData ngData;
+    ngData.time = timeStr;
+    ngData.cameraId = m_cameraId;
+    ngData.sceneId  = SideBar::getInstance()->getCurSceneID();
+    ngData.result   = "异常";
+    ngData.imgPath  = filePath;
+
+    MyDataBase::getInstance()->addNGRecordData(ngData);
 }
 
 void TitleBar::reDetectBtnClick()

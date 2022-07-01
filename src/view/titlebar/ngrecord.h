@@ -12,6 +12,8 @@
 #include <QStandardItemModel>
 #include <QTextEdit>
 
+#include "src/database/mydatabase.h"
+
 class NGRecord : public QDialog
 {
     Q_OBJECT
@@ -26,6 +28,9 @@ public:
 
     // 设置初始数据
     void setData();
+
+    // 添加NG记录
+    void addNgRecord(NGRecordData ngData);
 
 private:
     void resetBtnClick();

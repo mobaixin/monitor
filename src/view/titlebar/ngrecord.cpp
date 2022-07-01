@@ -58,8 +58,8 @@ void NGRecord::setWidgetStyle()
     this->setFixedSize(700, 300);
     this->setWindowTitle("NG记录");
 
-    m_ngTableView->setFixedSize(350, this->height());
-    m_recordText->setFixedSize(200, this->height());
+    m_ngTableView->setFixedSize(320, this->height());
+    m_recordText->setFixedSize(230, this->height());
     m_resultLab->setFixedSize(140, 30);
     m_resetBtn->setFixedSize(135, 30);
     m_optRecordBtn->setFixedSize(135, 30);
@@ -70,9 +70,9 @@ void NGRecord::setWidgetStyle()
     m_ngTableView->setFont(viewFont);
     m_ngTableView->setAlternatingRowColors(true);
 
-    m_ngModel->setHorizontalHeaderLabels({"时间", "相机", "场景", "结果"});
+    m_ngModel->setHorizontalHeaderLabels({"时间", " 相机 ", " 场景 ", " 结果 "});
     m_ngTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    m_ngTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_ngTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     m_ngTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_ngTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_ngTableView->setModel(m_ngModel);
@@ -92,7 +92,7 @@ void NGRecord::setWidgetStyle()
     m_optRecordBtn->setFocusPolicy(Qt::NoFocus);
     m_closeBtn->setFocusPolicy(Qt::NoFocus);
 
-    m_resultLab->setText("正常0次，异常10次");
+    m_resultLab->setText("正常0次，异常5次");
     m_resetBtn->setText("清零");
     m_optRecordBtn->setText("操作记录");
     m_closeBtn->setText("关闭");
@@ -120,6 +120,16 @@ void NGRecord::setData()
                           );
 }
 
+void NGRecord::addNgRecord(NGRecordData ngData)
+{
+    QList<QStandardItem *> itemList;
+    itemList.append(new QStandardItem(" " + ngData.time + "     "));
+    itemList.append(new QStandardItem(QString::number(ngData.cameraId)));
+    itemList.append(new QStandardItem(QString::number(ngData.sceneId)));
+    itemList.append(new QStandardItem(ngData.result));
+    m_ngModel->appendRow(itemList);
+}
+
 void NGRecord::resetBtnClick()
 {
     m_resultLab->setText("正常0次，异常0次");
@@ -137,10 +147,10 @@ void NGRecord::closeBtnClick()
 
 void NGRecord::getModelData()
 {
-    for (int i = 0; i < 10; i++) {
-        m_ngModel->setItem(i, 0, new QStandardItem(QString(" 2022-6-17 11:0%1:06     ").arg(i)));
-        m_ngModel->setItem(i, 1, new QStandardItem(QString(" 1    ")));
-        m_ngModel->setItem(i, 2, new QStandardItem(QString(" 1    ")));
-        m_ngModel->setItem(i, 3, new QStandardItem(QString(" 异常    ")));
+    for (int i = 0; i < 5; i++) {
+        m_ngModel->setItem(i, 0, new QStandardItem(QString(" 2022-6-17 11:0%1:06 ").arg(i)));
+        m_ngModel->setItem(i, 1, new QStandardItem(QString(" 1 ")));
+        m_ngModel->setItem(i, 2, new QStandardItem(QString(" 1 ")));
+        m_ngModel->setItem(i, 3, new QStandardItem(QString(" 异常 ")));
     }
 }

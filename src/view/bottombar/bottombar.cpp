@@ -335,26 +335,36 @@ void BottomBar::circleBtnClick()
 {
     MyCircle *circle = new MyCircle(500, 300, 50, MyGraphicsItem::Circle);
     m_pAreaScene->addItem(circle);
+
+    circle->setAccuracy(getAccuracy());
+    circle->setPixel(getPixel());
 }
 
 void BottomBar::ellipseBtnClick()
 {
     MyEllipse *ellipse = new MyEllipse(0, 0, 120, 80, MyGraphicsItem::ItemType::Ellipse);
     m_pAreaScene->addItem(ellipse);
+
+    ellipse->setAccuracy(getAccuracy());
+    ellipse->setPixel(getPixel());
 }
 
 void BottomBar::conCircleBtnClick()
 {
     MyConcentricCircle *conCircle = new MyConcentricCircle(500, 300, 50, 80, MyGraphicsItem::ItemType::Concentric_Circle);
     m_pAreaScene->addItem(conCircle);
+
+    conCircle->setAccuracy(getAccuracy());
+    conCircle->setPixel(getPixel());
 }
 
 void BottomBar::rectBtnClick()
 {
     MyRectangle *rectangle = new MyRectangle(500, 300, 100, 50, MyGraphicsItem::ItemType::Rectangle);
-//    rectangle->setPos(500, 300);
-//    rectangle->setCenter(QPointF(500, 300));
     m_pAreaScene->addItem(rectangle);
+
+    rectangle->setAccuracy(getAccuracy());
+    rectangle->setPixel(getPixel());
 }
 
 void BottomBar::polygonBtnClick()
@@ -367,6 +377,9 @@ void BottomBar::polygonBtnClick()
 
         MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
         m_pAreaScene->addItem(polygon);
+
+        polygon->setAccuracy(getAccuracy());
+        polygon->setPixel(getPixel());
 
         connect(m_pAreaScene, &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
@@ -388,6 +401,9 @@ void BottomBar::curveBtnClick()
 
         MyCurve *curve = new MyCurve(MyGraphicsItem::ItemType::Curve);
         m_pAreaScene->addItem(curve);
+
+        curve->setAccuracy(getAccuracy());
+        curve->setPixel(getPixel());
 
         connect(m_pAreaScene, &MyGraphicsScene::updateCurvePoint, curve, &MyCurve::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
@@ -411,6 +427,9 @@ void BottomBar::maskBtnClick()
         MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
         polygon->setMask(true);
         m_pAreaScene->addItem(polygon);
+
+        polygon->setAccuracy(getAccuracy());
+        polygon->setPixel(getPixel());
 
         connect(m_pAreaScene, &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )

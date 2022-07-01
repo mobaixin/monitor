@@ -39,6 +39,12 @@ public:
     QPointF getRealCenter() { return scenePos() + boundingRect().center(); }
     QList<QPointF> getMyPointList();
 
+    int getAccuracy() { return m_accuracy; }
+    void setAccuracy(int acc) { m_accuracy = acc; }
+
+    int getPixel() { return m_pixel; }
+    void setPixel(int pix) { m_pixel = pix; }
+
 protected:
     virtual void focusInEvent(QFocusEvent *event) override;
     virtual void focusOutEvent(QFocusEvent *event) override;
@@ -51,6 +57,9 @@ protected:
 
     ItemType m_type;
     MyPointItemList m_pointList;
+
+    int m_accuracy;
+    int m_pixel;
 
     QPen m_penIsSelected;
     QPen m_penNoSelected;

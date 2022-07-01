@@ -312,8 +312,8 @@ QList<ShapeItemData> ImgArea::getShapeItems()
             itemData.moldId   = SideBar::getInstance()->getCurrentIdx();
             itemData.type     = item->getType();
             itemData.center   = QString("%1,%2").arg(center.x()).arg(center.y());
-            itemData.accuracy = BottomBar::getInstance()->getAccuracy();
-            itemData.pixel    = BottomBar::getInstance()->getPixel();
+            itemData.accuracy = item->getAccuracy();
+            itemData.pixel    = item->getPixel();
 
             switch (item->getType()) {
             case MyGraphicsItem::ItemType::Rectangle:{
