@@ -23,7 +23,6 @@ LIBS += -L$$PWD/src/camera/lib/ -lMVCAMSDK_X64
 
 
 INCLUDEPATH +=D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\include \
-              D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\include \
               D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\include\opencv2
 
 LIBS +=D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\x86\mingw\bin\libopencv_*.dll

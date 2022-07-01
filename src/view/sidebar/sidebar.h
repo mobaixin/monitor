@@ -13,6 +13,12 @@
 #include "src/view/imgarea/mygraphicsitem.h"
 #include "src/serialport/myserialport.h"
 
+enum RadioBtnState {
+    NoState = 0,
+    Correct = 1,
+    Wrong = 2
+};
+
 class SideBar : public QWidget
 {
     Q_OBJECT
@@ -54,6 +60,15 @@ public:
     QGraphicsPixmapItem *  getImageMold();
     QList<QGraphicsItem *> getShapeMold();
 
+    // 添加报警模板
+    void addAlarmImageMold(QString imgPath, QString timeStr);
+
+    // 设置顶针状态
+    void setThimbleState(int state);
+    void setOpenMoldState(int state);
+    void setCanThimbleState(int state);
+    void setCanClampMoldState(int state);
+
 private:
     void positionBtnClick();
     void checkMoldBtnClick();
@@ -70,6 +85,8 @@ private:
 
     void loadCurMold();
     void loadCurImage();
+
+    void setRadioBtnState(QRadioButton *btn, int state);
 private:
     bool m_isDetectMold;
     bool m_isShowMold;

@@ -76,7 +76,7 @@ void SideBar::setWidgetUi()
     m_sideBarLayout->addWidget(m_clearMoldBtn);
     m_sideBarLayout->addStretch();
     m_sideBarLayout->setContentsMargins(0, 30, 0, 0);
-    m_sideBarLayout->setSpacing(10);
+    m_sideBarLayout->setSpacing(5);
 
     this->setLayout(m_sideBarLayout);
 
@@ -113,10 +113,10 @@ void SideBar::setWidgetStyle()
     this->setFixedSize(120, 600);
     this->setAttribute(Qt::WA_TranslucentBackground, true);
 
-    m_thimbleBox->setFixedSize(100, 20);
-    m_openMoldBox->setFixedSize(100, 20);
-    m_canThimbleBox->setFixedSize(100, 20);
-    m_canClampMoldBox->setFixedSize(100, 20);
+    m_thimbleBox->setFixedSize(100, 30);
+    m_openMoldBox->setFixedSize(100, 30);
+    m_canThimbleBox->setFixedSize(100, 30);
+    m_canClampMoldBox->setFixedSize(100, 30);
 
     m_positionBtn->setFixedSize(100, 30);
     m_checkMoldBtn->setFixedSize(100, 30);
@@ -160,9 +160,33 @@ void SideBar::setWidgetStyle()
     m_delMoldBtn->setText("删除模板");
     m_clearMoldBtn->setText("清空模板");
 
-    m_canThimbleBox->setStyleSheet("QRadioButton::indicator{background-color:green;width:12px;height:12px;border-radius:6px;}");
-    m_canClampMoldBox->setStyleSheet("QRadioButton::indicator{background-color:red;width:12px;height:12px;border-radius:6px;}");
+    setRadioBtnState(m_thimbleBox, RadioBtnState::NoState);
+    setRadioBtnState(m_openMoldBox, RadioBtnState::NoState);
+    setRadioBtnState(m_canThimbleBox, RadioBtnState::Correct);
+    setRadioBtnState(m_canClampMoldBox, RadioBtnState::Correct);
 
+    m_orderLab->setStyleSheet("font-size:14px;");
+
+    QString sceneBtnStyleStr = "QPushButton{background:#00BFFF;color:#000000;border-radius:5px;font-size:14px;border: 1px groove #F3F781;}"
+                               "QPushButton:hover{background:#58D3F7;color:#000000;}"
+                               "QPushButton:pressed{background:#086A87;color:#FAFAFA;}"
+                               "QPushButton:checked{background:#086A87;color:#FAFAFA;}";
+
+    QString btnStyleStr = "QPushButton{background:#00BFFF;color:#000000;border-radius:5px;font-size:14px;border: 1px groove #F3F781;}"
+                          "QPushButton:hover{background:#58D3F7;color:#000000;}"
+                          "QPushButton:pressed{background:#00BFFF;color:#000000;}";
+
+    m_positionBtn->setStyleSheet(btnStyleStr);
+    m_checkMoldBtn->setStyleSheet(sceneBtnStyleStr);
+    m_productBtn->setStyleSheet(sceneBtnStyleStr);
+
+    m_saveMoldBtn->setStyleSheet(btnStyleStr);
+    m_addMoldBtn->setStyleSheet(btnStyleStr);
+    m_homePageBtn->setStyleSheet(btnStyleStr);
+    m_prevPageBtn->setStyleSheet(btnStyleStr);
+    m_nextPageBtn->setStyleSheet(btnStyleStr);
+    m_delMoldBtn->setStyleSheet(btnStyleStr);
+    m_clearMoldBtn->setStyleSheet(btnStyleStr);
 }
 
 // 设置初始数据
@@ -299,6 +323,46 @@ QList<QGraphicsItem *> SideBar::getShapeMold()
     return shapeItem;
 }
 
+void SideBar::addAlarmImageMold(QString imgPath, QString timeStr)
+{
+    if (m_sceneId == 1) {
+        m_deteMoldNum += 1;
+    } else {
+        m_prodMoldNum += 1;
+    }
+
+    updateOrderLab();
+
+    ImageMoldData imgData;
+    imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
+    imgData.sceneId  = m_sceneId;
+    imgData.moldId   = getCurMoldNum();
+    imgData.imgPath  = imgPath;
+    imgData.time     = timeStr;
+
+    MyDataBase::getInstance()->addImgMoldData(imgData);
+}
+
+void SideBar::setThimbleState(int state)
+{
+    setRadioBtnState(m_thimbleBox, state);
+}
+
+void SideBar::setOpenMoldState(int state)
+{
+    setRadioBtnState(m_openMoldBox, state);
+}
+
+void SideBar::setCanThimbleState(int state)
+{
+    setRadioBtnState(m_canThimbleBox, state);
+}
+
+void SideBar::setCanClampMoldState(int state)
+{
+    setRadioBtnState(m_canClampMoldBox, state);
+}
+
 void SideBar::positionBtnClick()
 {
     if (this->x() > 500) {
@@ -377,6 +441,7 @@ void SideBar::addMoldBtnClick()
         m_prodMoldNum += 1;
     }
 
+    MainWindow::getInstance()->setDetectObject();
     updateOrderLab();
 
     QImage curImage = ImgArea::getInstance()->getImageItem();
@@ -562,4 +627,22 @@ void SideBar::loadCurImage()
 
     qDebug() << "load img";
     ImgArea::getInstance()->loadImageItem(imgData);
+}
+
+void SideBar::setRadioBtnState(QRadioButton *btn, int state)
+{
+    QString noStateStyleStr = "QRadioButton{font-size:14px;}"
+                              "QRadioButton::indicator{background:#D8D8D8;width:16px;height:16px;border-radius:8px;}";
+    QString correctStyleStr = "QRadioButton{font-size:14px;}"
+                              "QRadioButton::indicator{background-color:#04B404;width:16px;height:16px;border-radius:8px;}";
+    QString wrongStyleStr   = "QRadioButton{font-size:14px;"
+                              "}QRadioButton::indicator{background-color:#DF0101;width:16px;height:16px;border-radius:8px;}";
+
+    if (state == RadioBtnState::NoState) {
+        btn->setStyleSheet(noStateStyleStr);
+    } else if (state == RadioBtnState::Correct) {
+        btn->setStyleSheet(correctStyleStr);
+    } else if (state == RadioBtnState::Wrong) {
+        btn->setStyleSheet(wrongStyleStr);
+    }
 }

@@ -239,7 +239,28 @@ void BottomBar::setWidgetStyle()
     m_pClearBtn->setText("清除");
     m_pPositionBtn->setText("↑↓");
 
+    m_pCurvBtn->setCheckable(true);
+    m_pPolyBtn->setCheckable(true);
 
+    QString spBtnStyleStr = "QPushButton{background:#00BFFF;color:#000000;border-radius:5px;font-size:14px;border: 1px groove #F3F781;}"
+                            "QPushButton:hover{background:#58D3F7;color:#000000;}"
+                            "QPushButton:pressed{background:#086A87;color:#FAFAFA;}"
+                            "QPushButton:checked{background:#086A87;color:#FAFAFA;}";
+
+    QString btnStyleStr = "QPushButton{background:#00BFFF;color:#000000;border-radius:5px;font-size:14px;border: 1px groove #F3F781;}"
+                          "QPushButton:hover{background:#58D3F7;color:#000000;}"
+                          "QPushButton:pressed{background:#00BFFF;color:#000000;}";
+
+    m_pCurvBtn->setStyleSheet(spBtnStyleStr);
+    m_pPolyBtn->setStyleSheet(spBtnStyleStr);
+    m_pRectBtn->setStyleSheet(btnStyleStr);
+    m_pCircleBtn->setStyleSheet(btnStyleStr);
+    m_pConCirBtn->setStyleSheet(btnStyleStr);
+    m_pMaskBtn->setStyleSheet(btnStyleStr);
+    m_pCopyBtn->setStyleSheet(btnStyleStr);
+    m_pEraseBtn->setStyleSheet(btnStyleStr);
+    m_pClearBtn->setStyleSheet(btnStyleStr);
+    m_pPositionBtn->setStyleSheet(btnStyleStr);
 }
 
 void BottomBar::setData()

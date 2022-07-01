@@ -96,6 +96,11 @@ void SysSetting::setWidgetStyle()
     m_prodDelaySlider->setValueRange(0, 20);
     m_prodTimesSlider->setValueRange(0, 40);
 
+    m_moldDelaySlider->setValue(6);
+    m_moldTimesSlider->setValue(4);
+    m_prodDelaySlider->setValue(4);
+    m_prodTimesSlider->setValue(2);
+
     m_changeTimeBtn->setFixedSize(100, 30);
     m_ioSettingsBtn->setFixedSize(100, 30);
     m_cameraParaBtn->setFixedSize(100, 30);

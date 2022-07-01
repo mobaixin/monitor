@@ -135,10 +135,12 @@ void MainWindow::showMonitorSet(bool isDisplay)
     if (isDisplay) {
         m_pBottomBar->show();
         m_pImgArea->setShowState(false);
+        setDetectObject();
     } else {
         m_pBottomBar->hide();
         ImgArea::getInstance()->clearShapes();
         m_pImgArea->setShowState(true);
+        m_pImgArea->setMonitorState(false);
     }
     m_pSideBar->setDisplayState(isDisplay);
 }

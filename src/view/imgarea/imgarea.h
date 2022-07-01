@@ -47,7 +47,7 @@ typedef struct myMOG2Data {
 
 enum DetectRes {
     NG = 0,
-    OK = 1
+    OK = 1,
 };
 
 class ImgArea : public QWidget
@@ -82,6 +82,12 @@ public:
 
     // 设置运行状态
     void setRunState(bool isStart);
+
+    // 设置监视状态
+    void setMonitorState(bool isMonitor);
+
+    // 设置检测状态
+    void setDetectState(bool isDetect);
 
     // 设置场景尺寸
     void setSceneSize();
@@ -128,7 +134,7 @@ public:
     void pauseCamera();
 
     // 图片检测
-    int detectImage(QImage imgBg, QImage imgFg);
+    int detectImage(QImage imgFg);
 
     // 获取item数
     int getShapeItemNum();
@@ -144,6 +150,12 @@ public:
 
     // 获取相机状态
     int getCameraStatus();
+
+    // 描绘检测结果
+    void drawDetectResult(QVector<QVector<QPointF>> resPointList);
+
+    // 清除检测结果
+    void clearDetectResult();
 
 public:
     int status;
@@ -205,6 +217,8 @@ private:
     Ptr<BackgroundSubtractorMOG2> m_pMOG2;
 
     QList<myMOG2Data> myMOG2DataList;
+
+    QList<QGraphicsPolygonItem *> m_detectResItemList;
 };
 
 

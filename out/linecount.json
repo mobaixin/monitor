@@ -363,6 +363,397 @@
                     "filename": "src\\view\\titlebar\\titlebar.h"
                 }
             ]
+        },
+        {
+            "version": "0.1.7",
+            "counttime": "2022-07-01 17:14:10",
+            "filesum": 63,
+            "codesum": 10210,
+            "commentsum": 9433,
+            "blanksum": 2778,
+            "filelist": [
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".gitignore"
+                },
+                {
+                    "blank": 0,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "data\\database\\database.qrc"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": "data\\database\\ver1.0_monitor.db"
+                },
+                {
+                    "blank": 0,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "data\\img\\img.qrc"
+                },
+                {
+                    "filename": "data\\img\\page01.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 2,
+                    "code": 9,
+                    "comment": 0,
+                    "filename": "main.cpp"
+                },
+                {
+                    "blank": 16,
+                    "code": 83,
+                    "comment": 0,
+                    "filename": "monitor.pro"
+                },
+                {
+                    "blank": 0,
+                    "code": 319,
+                    "comment": 0,
+                    "filename": "monitor.pro.user"
+                },
+                {
+                    "blank": 0,
+                    "code": 3,
+                    "comment": 0,
+                    "filename": "monitor_zh_CN.ts"
+                },
+                {
+                    "blank": 1,
+                    "code": 3,
+                    "comment": 0,
+                    "filename": "README.en.md"
+                },
+                {
+                    "blank": 12,
+                    "code": 27,
+                    "comment": 6,
+                    "filename": "README.md"
+                },
+                {
+                    "blank": 2,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "src\\camera\\camera.cpp"
+                },
+                {
+                    "blank": 3,
+                    "code": 9,
+                    "comment": 1,
+                    "filename": "src\\camera\\camera.h"
+                },
+                {
+                    "blank": 17,
+                    "code": 69,
+                    "comment": 12,
+                    "filename": "src\\camera\\capturethread.cpp"
+                },
+                {
+                    "blank": 12,
+                    "code": 24,
+                    "comment": 1,
+                    "filename": "src\\camera\\capturethread.h"
+                },
+                {
+                    "blank": 43,
+                    "code": 134,
+                    "comment": 288,
+                    "filename": "src\\camera\\detect.cpp"
+                },
+                {
+                    "blank": 300,
+                    "code": 1412,
+                    "comment": 3833,
+                    "filename": "src\\camera\\Include\\CameraApi.h"
+                },
+                {
+                    "blank": 706,
+                    "code": 2376,
+                    "comment": 3604,
+                    "filename": "src\\camera\\Include\\CameraApiLoad.h"
+                },
+                {
+                    "blank": 117,
+                    "code": 580,
+                    "comment": 540,
+                    "filename": "src\\camera\\Include\\CameraDefine.H"
+                },
+                {
+                    "blank": 25,
+                    "code": 81,
+                    "comment": 228,
+                    "filename": "src\\camera\\Include\\CameraGrabber.h"
+                },
+                {
+                    "blank": 24,
+                    "code": 104,
+                    "comment": 253,
+                    "filename": "src\\camera\\Include\\CameraImage.h"
+                },
+                {
+                    "blank": 16,
+                    "code": 88,
+                    "comment": 84,
+                    "filename": "src\\camera\\Include\\CameraStatus.h"
+                },
+                {
+                    "filename": "src\\camera\\lib\\MVCAMSDK.lib",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "src\\camera\\lib\\MVCAMSDK_X64.lib",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 1,
+                    "code": 8,
+                    "comment": 5,
+                    "filename": "src\\camera\\resource.h"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": "src\\controller\\controller.h"
+                },
+                {
+                    "blank": 181,
+                    "code": 495,
+                    "comment": 12,
+                    "filename": "src\\database\\mydatabase.cpp"
+                },
+                {
+                    "blank": 17,
+                    "code": 95,
+                    "comment": 30,
+                    "filename": "src\\database\\mydatabase.h"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": "src\\model\\model.h"
+                },
+                {
+                    "blank": 19,
+                    "code": 61,
+                    "comment": 5,
+                    "filename": "src\\serialport\\myserialport.cpp"
+                },
+                {
+                    "blank": 10,
+                    "code": 21,
+                    "comment": 3,
+                    "filename": "src\\serialport\\myserialport.h"
+                },
+                {
+                    "blank": 93,
+                    "code": 227,
+                    "comment": 119,
+                    "filename": "src\\view\\bottombar\\bottombar.cpp"
+                },
+                {
+                    "blank": 32,
+                    "code": 56,
+                    "comment": 23,
+                    "filename": "src\\view\\bottombar\\bottombar.h"
+                },
+                {
+                    "blank": 19,
+                    "code": 74,
+                    "comment": 4,
+                    "filename": "src\\view\\common\\myselectframe.cpp"
+                },
+                {
+                    "blank": 13,
+                    "code": 31,
+                    "comment": 7,
+                    "filename": "src\\view\\common\\myselectframe.h"
+                },
+                {
+                    "blank": 3,
+                    "code": 13,
+                    "comment": 0,
+                    "filename": "src\\view\\common\\mysettings.cpp"
+                },
+                {
+                    "blank": 7,
+                    "code": 15,
+                    "comment": 1,
+                    "filename": "src\\view\\common\\mysettings.h"
+                },
+                {
+                    "blank": 39,
+                    "code": 130,
+                    "comment": 7,
+                    "filename": "src\\view\\common\\myslider.cpp"
+                },
+                {
+                    "blank": 23,
+                    "code": 46,
+                    "comment": 14,
+                    "filename": "src\\view\\common\\myslider.h"
+                },
+                {
+                    "blank": 194,
+                    "code": 686,
+                    "comment": 84,
+                    "filename": "src\\view\\imgarea\\imgarea.cpp"
+                },
+                {
+                    "blank": 62,
+                    "code": 128,
+                    "comment": 38,
+                    "filename": "src\\view\\imgarea\\imgarea.h"
+                },
+                {
+                    "blank": 106,
+                    "code": 399,
+                    "comment": 39,
+                    "filename": "src\\view\\imgarea\\mygraphicsitem.cpp"
+                },
+                {
+                    "blank": 43,
+                    "code": 167,
+                    "comment": 23,
+                    "filename": "src\\view\\imgarea\\mygraphicsitem.h"
+                },
+                {
+                    "blank": 15,
+                    "code": 80,
+                    "comment": 0,
+                    "filename": "src\\view\\imgarea\\mygraphicsscene.cpp"
+                },
+                {
+                    "blank": 10,
+                    "code": 34,
+                    "comment": 1,
+                    "filename": "src\\view\\imgarea\\mygraphicsscene.h"
+                },
+                {
+                    "blank": 20,
+                    "code": 162,
+                    "comment": 0,
+                    "filename": "src\\view\\imgarea\\mypointitem.cpp"
+                },
+                {
+                    "blank": 12,
+                    "code": 43,
+                    "comment": 8,
+                    "filename": "src\\view\\imgarea\\mypointitem.h"
+                },
+                {
+                    "blank": 42,
+                    "code": 133,
+                    "comment": 18,
+                    "filename": "src\\view\\mainwindow.cpp"
+                },
+                {
+                    "blank": 20,
+                    "code": 53,
+                    "comment": 15,
+                    "filename": "src\\view\\mainwindow.h"
+                },
+                {
+                    "blank": 108,
+                    "code": 514,
+                    "comment": 27,
+                    "filename": "src\\view\\sidebar\\sidebar.cpp"
+                },
+                {
+                    "blank": 35,
+                    "code": 87,
+                    "comment": 13,
+                    "filename": "src\\view\\sidebar\\sidebar.h"
+                },
+                {
+                    "blank": 32,
+                    "code": 106,
+                    "comment": 3,
+                    "filename": "src\\view\\titlebar\\cameraipset.cpp"
+                },
+                {
+                    "blank": 11,
+                    "code": 37,
+                    "comment": 5,
+                    "filename": "src\\view\\titlebar\\cameraipset.h"
+                },
+                {
+                    "blank": 44,
+                    "code": 103,
+                    "comment": 17,
+                    "filename": "src\\view\\titlebar\\camerapara.cpp"
+                },
+                {
+                    "blank": 13,
+                    "code": 35,
+                    "comment": 6,
+                    "filename": "src\\view\\titlebar\\camerapara.h"
+                },
+                {
+                    "blank": 52,
+                    "code": 209,
+                    "comment": 4,
+                    "filename": "src\\view\\titlebar\\iosetting.cpp"
+                },
+                {
+                    "blank": 14,
+                    "code": 46,
+                    "comment": 4,
+                    "filename": "src\\view\\titlebar\\iosetting.h"
+                },
+                {
+                    "blank": 42,
+                    "code": 101,
+                    "comment": 3,
+                    "filename": "src\\view\\titlebar\\ngrecord.cpp"
+                },
+                {
+                    "blank": 14,
+                    "code": 37,
+                    "comment": 5,
+                    "filename": "src\\view\\titlebar\\ngrecord.h"
+                },
+                {
+                    "blank": 33,
+                    "code": 110,
+                    "comment": 6,
+                    "filename": "src\\view\\titlebar\\syssetting.cpp"
+                },
+                {
+                    "blank": 14,
+                    "code": 44,
+                    "comment": 4,
+                    "filename": "src\\view\\titlebar\\syssetting.h"
+                },
+                {
+                    "blank": 64,
+                    "code": 229,
+                    "comment": 16,
+                    "filename": "src\\view\\titlebar\\titlebar.cpp"
+                },
+                {
+                    "blank": 24,
+                    "code": 57,
+                    "comment": 14,
+                    "filename": "src\\view\\titlebar\\titlebar.h"
+                }
+            ]
         }
     ]
 }

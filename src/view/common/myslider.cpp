@@ -80,6 +80,10 @@ void MySlider::setWidgetStyle()
     QFont btnFont = this->font();
     btnFont.setPixelSize(20);
     m_addBtn->setFont(btnFont);
+
+    m_lineEdit->setFocusPolicy(Qt::NoFocus);
+    m_addBtn->setFocusPolicy(Qt::NoFocus);
+    m_subBtn->setFocusPolicy(Qt::NoFocus);
 }
 
 // 设置初始数据

@@ -210,14 +210,38 @@ void ImgArea::setRunState(bool isStart)
         m_pTipLab->setText("运行监视中");
         m_pTipLab->setStyleSheet("color:#80FF00;font-size:20px;font-weight:10px;");
 
-        m_pSampleLab->hide();
-        m_pResultLab->hide();
+//        m_pSampleLab->hide();
+//        m_pResultLab->hide();
 
     } else {
         m_pTipLab->setText("保护停止");
         m_pTipLab->setStyleSheet("color:red;font-size:20px;font-weight:10px;");
 
+//        m_pSampleLab->hide();
+//        m_pResultLab->hide();
+    }
+}
+
+void ImgArea::setMonitorState(bool isMonitor)
+{
+    if (isMonitor) {
         m_pSampleLab->show();
+    } else {
+        m_pSampleLab->hide();
+
+        if (!m_thread->isRunning()) {
+            QPixmap imgPix = (QPixmap::fromImage(m_pCurImage));
+            imgPix = imgPix.scaled(this->size());
+            m_pImageItem->setPixmap(imgPix);
+        }
+    }
+}
+
+void ImgArea::setDetectState(bool isDetect)
+{
+    if (isDetect) {
+        m_pResultLab->show();
+    } else {
         m_pResultLab->hide();
     }
 }
@@ -251,6 +275,7 @@ void ImgArea::setSampleLab(bool isDetectMold, int curIdx)
         m_pSampleLab->clear();
         m_pSampleLab->setText(QString("产品取样图像:第%1张").arg(curIdx));
     }
+    m_pSampleLab->show();
 }
 
 QImage ImgArea::getImageItem()
@@ -651,11 +676,11 @@ Ptr<BackgroundSubtractorMOG2> ImgArea::getMOG2Data(ShapeItemData itemData)
     return myMOG2Data;
 }
 
-int ImgArea::detectImage(QImage imgBg, QImage imgFg)
+int ImgArea::detectImage(QImage imgFg)
 {
     int detectRes = DetectRes::NG;
 
-    imgBg = imgBg.scaled(this->size());
+    QImage imgBg;
     imgFg = imgFg.scaled(this->size());
 
     ShapeItemData itemData;
@@ -671,7 +696,12 @@ int ImgArea::detectImage(QImage imgBg, QImage imgFg)
 
     QList<ImageMoldData> imgDataList = MyDataBase::getInstance()->queAllImgMoldData(imgData);
 
+    if (imgDataList.size() == 0) {
+        return -1;
+    }
+
     QList<Mat> shapeMaskList;
+    QVector<QVector<QPointF>> resPointList;
 
     for (int i = 0; i < itemDataList.size(); i++) {
         Mat shapeMask = getShapeMask(itemDataList[i], imgFg);
@@ -688,18 +718,20 @@ int ImgArea::detectImage(QImage imgBg, QImage imgFg)
             Mat mask, srcFg, dstBg, dstFg;
             mask = shapeMaskList[j];
 
+            srcFg = qimToMat(imgFg);
+
             qimToMat(imgBg).copyTo(dstBg, mask);
             qimToMat(imgFg).copyTo(dstFg, mask);
 
             double acc  = itemDataList[j].accuracy;
             int minArea = itemDataList[j].pixel;
 
-            m_pMOG2 = createBackgroundSubtractorMOG2(50, acc, true);
+            m_pMOG2 = createBackgroundSubtractorMOG2(50, acc, false);
 
             Mat frameBg = dstBg.clone();
             Mat frameFg = dstFg.clone();
 
-            for (int i = 0; i < m_pMOG2->getHistory(); i++) {
+            for (int k = 0; k < m_pMOG2->getHistory(); k++) {
                 m_frame = frameBg.clone();
                 m_pMOG2->apply(m_frame, m_fgMaskMOG2);
             }
@@ -719,21 +751,30 @@ int ImgArea::detectImage(QImage imgBg, QImage imgFg)
             vector<vector<Point>> approxPoint(contours.size());
 
 
-            for (int i = 0; i < int(contours.size()); i++) {
-                qDebug() << "contourArea(contours[i]:" << contourArea(contours[i]);
-                if (contourArea(contours[i]) > minArea) {
+            for (int k = 0; k < int(contours.size()); k++) {
+                if (contourArea(contours[k]) > minArea) {
+
+                    qDebug() << "contourArea(contours[k]):" << contourArea(contours[k]);
 
                     // 绘制轮廓
-                    drawContours(m_frame, contours, i, Scalar(0, 0, 255), 2, 8, hierarchy);
+                    drawContours(srcFg, contours, k, Scalar(0, 0, 255), 2, 8, hierarchy);
 
                     // 出现NG
                     imgMoldDeteRes = DetectRes::NG;
+
+                    if (i == imgDataList.size() - 1) {
+                        QVector<QPointF> singlePointList;
+                        for (int m = 0; m < int(contours[k].size()); m++) {
+                            singlePointList.append(QPointF(contours[k][m].x, contours[k][m].y));
+                        }
+                        resPointList.append(singlePointList);
+                    }
                 }
             }
 
             imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
             imshow(QString("fgMaskMOG2_%1_%2").arg(i).arg(j).toStdString(), m_fgMaskMOG2);
-            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), m_frame);
+            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), srcFg);
 
             m_pMOG2->clear();
         }
@@ -742,6 +783,10 @@ int ImgArea::detectImage(QImage imgBg, QImage imgFg)
             detectRes = DetectRes::OK;
             break;
         }
+    }
+
+    if (detectRes == DetectRes::NG) {
+        drawDetectResult(resPointList);
     }
 
     qDebug() << "detect res: " << detectRes;
@@ -832,6 +877,26 @@ QImage ImgArea::getCurImage()
 int ImgArea::getCameraStatus()
 {
     return status;
+}
+
+void ImgArea::drawDetectResult(QVector<QVector<QPointF>> resPointList)
+{
+    QPen polyPen = QPen(Qt::red, 2);
+    qDebug() << "resPointList.size(): " << resPointList.size();
+    for (int i = 0; i < resPointList.size(); i++) {
+        QPolygonF resPoly = QPolygonF(resPointList[i]);
+        m_detectResItemList.append(m_pScene->addPolygon(resPoly, polyPen));
+    }
+}
+
+void ImgArea::clearDetectResult()
+{
+    for (int i = 0; i < m_detectResItemList.size(); i++) {
+        m_pScene->removeItem(m_detectResItemList[i]);
+    }
+
+    m_detectResItemList.clear();
+    m_pResultLab->hide();
 }
 
 QImage ImgArea::matToQim(Mat &mat)

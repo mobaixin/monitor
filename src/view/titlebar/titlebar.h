@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QButtonGroup>
 #include <QHBoxLayout>
+#include <QDateTime>
 
 #include "src/view/titlebar/syssetting.h"
 #include "src/view/titlebar/ngrecord.h"
@@ -34,14 +35,22 @@ public:
     // 获得当前相机ID
     int getCurCameraId();
 
+    // 设置报警相关按钮的显示状态
+    void setAlarmBtnState(bool isShow);
+
 private:
     void startBtnClick();
     void stopBtnClick();
     void monitorSetBtnClick();
     void sysSettingBtnClick();
     void testBtnClick();
+    void addMoldBtnClick();
+    void reDetectBtnClick();
     void NGRecordBtnClick();
+    void delAlarmBtnClick();
     void closeBtnClick();
+
+    void detectCurImage();
 
 private:
     // 左上方标识
@@ -53,7 +62,10 @@ private:
     QPushButton *m_pMonitorSetBtn;
     QPushButton *m_pSysSettingBtn;
     QPushButton *m_pTestBtn;
+    QPushButton *m_pAddMoldBtn;
+    QPushButton *m_pReDetectBtn;
     QPushButton *m_pNGRecordBtn;
+    QPushButton *m_pDelAlarmBtn;
     QPushButton *m_pCloseBtn;
 
     // 界面布局
@@ -72,6 +84,9 @@ private:
 
     // 相机ID
     int m_cameraId;
+
+    // 检测时间
+    QDateTime m_detectTime;
 };
 
 
