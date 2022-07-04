@@ -49,7 +49,12 @@ protected:
     virtual void focusInEvent(QFocusEvent *event) override;
     virtual void focusOutEvent(QFocusEvent *event) override;
 
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+
+    virtual void paint(QPainter *painter,
+                       const QStyleOptionGraphicsItem *option,
+                       QWidget *widget) override;
 
     QPointF m_center;
     QPointF m_edge;
@@ -98,6 +103,8 @@ public:
 
     void updateRadius();
 
+    MyPointItem *getEdgeItem();
+
 protected:
     virtual QRectF boundingRect() const override;
     virtual void paint(QPainter *painter,
@@ -143,6 +150,8 @@ public:
         return Type;
     }
 
+    MyPointItem *getEdgeItem();
+
 protected:
     virtual QRectF boundingRect() const override;
     virtual void paint(QPainter *painter,
@@ -184,13 +193,15 @@ protected:
                        const QStyleOptionGraphicsItem *option,
                        QWidget *widget) override;
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-//    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 protected:
     qreal m_radius;
     bool m_isCreateFinished;
     bool m_isMaskArea;
     bool m_isAddPoint;
+    bool m_isAddedPoint;
     int  m_addPoingIdx;
 
     MyPointItem *m_newPoint;

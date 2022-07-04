@@ -179,6 +179,7 @@ void BottomBar::setWidgetUi()
     connect(m_pEraseBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::eraseShape);
     connect(m_pClearBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::clearShapes);
 
+    connect(m_pAccMySlider, &MySlider::valueChange, this, &BottomBar::updateItemAccuracy);
 }
 
 // 设置组件样式
@@ -268,11 +269,21 @@ void BottomBar::setData()
     m_isCreatePolygon = false;
     m_isCreateCurve   = false;
     m_isCreateMask = false;
+
+    m_isUpdateAcc = false;
+    m_isUpdatePix = false;
 }
 
 void BottomBar::setBtnEnabled(bool enable)
 {
     m_pClearBtn->setEnabled(enable);
+}
+
+void BottomBar::setAccuracy(int acc)
+{
+    m_isUpdateAcc = false;
+    m_pAccMySlider->setValue(acc);
+    m_isUpdatePix = true;
 }
 
 int BottomBar::getAccuracy()
@@ -282,11 +293,46 @@ int BottomBar::getAccuracy()
     return acc;
 }
 
+void BottomBar::setPixel(int pix)
+{
+    m_isUpdatePix = false;
+    m_pPixMySlider->setValue(pix);
+    m_isUpdatePix = true;
+}
+
 int BottomBar::getPixel()
 {
     int pix = m_pPixMySlider->getEditValue().toInt();
 
     return pix;
+}
+
+void BottomBar::createRect(QPointF point)
+{
+    m_newMyRect = new MyRectangle(point.x(), point.y(), 5, 5, MyGraphicsItem::ItemType::Rectangle);
+    m_pAreaScene->addItem(m_newMyRect);
+
+    m_newMyRect->setAccuracy(getAccuracy());
+    m_newMyRect->setPixel(getPixel());
+}
+
+MyRectangle *BottomBar::getNewMyRect()
+{
+    return m_newMyRect;
+}
+
+void BottomBar::createCircle(QPointF point)
+{
+    m_newMyCircle = new MyCircle(point.x(), point.y(), 5, MyGraphicsItem::ItemType::Circle);
+    m_pAreaScene->addItem(m_newMyCircle);
+
+    m_newMyCircle->setAccuracy(getAccuracy());
+    m_newMyCircle->setPixel(getPixel());
+}
+
+MyCircle *BottomBar::getNewMyCircle()
+{
+    return m_newMyCircle;
 }
 
 //void BottomBar::accAddBtnClick()
@@ -333,11 +379,13 @@ int BottomBar::getPixel()
 
 void BottomBar::circleBtnClick()
 {
-    MyCircle *circle = new MyCircle(500, 300, 50, MyGraphicsItem::Circle);
-    m_pAreaScene->addItem(circle);
+//    MyCircle *circle = new MyCircle(500, 300, 50, MyGraphicsItem::Circle);
+//    m_pAreaScene->addItem(circle);
 
-    circle->setAccuracy(getAccuracy());
-    circle->setPixel(getPixel());
+//    circle->setAccuracy(getAccuracy());
+//    circle->setPixel(getPixel());
+
+    m_pAreaScene->startCreateCircle();
 }
 
 void BottomBar::ellipseBtnClick()
@@ -360,11 +408,13 @@ void BottomBar::conCircleBtnClick()
 
 void BottomBar::rectBtnClick()
 {
-    MyRectangle *rectangle = new MyRectangle(500, 300, 100, 50, MyGraphicsItem::ItemType::Rectangle);
-    m_pAreaScene->addItem(rectangle);
+//    MyRectangle *rectangle = new MyRectangle(500, 300, 100, 50, MyGraphicsItem::ItemType::Rectangle);
+//    m_pAreaScene->addItem(rectangle);
 
-    rectangle->setAccuracy(getAccuracy());
-    rectangle->setPixel(getPixel());
+//    rectangle->setAccuracy(getAccuracy());
+//    rectangle->setPixel(getPixel());
+
+    m_pAreaScene->startCreateRect();
 }
 
 void BottomBar::polygonBtnClick()
@@ -454,5 +504,20 @@ void BottomBar::positionBtnClick()
     } else {
         this->setGeometry(0, MainWindow::getInstance()->height() - this->height(), this->width(), this->height());
     }
+}
+
+void BottomBar::updateItemAccuracy(int acc)
+{
+    if (!m_isUpdateAcc) {
+        return ;
+    }
+
+    if (!m_pAreaScene->selectedItems().isEmpty()) {
+        qDebug() << "m_pAreaScene->selectedItems";
+        QGraphicsItem *temp = m_pAreaScene->selectedItems().first();
+        MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
+        item->setAccuracy(acc);
+    }
+
 }
 

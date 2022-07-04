@@ -106,6 +106,9 @@ public:
     NGRecordData queNGRecordData(NGRecordData recordData);
     int altNGRecordData(NGRecordData recordData);
 
+    // 获取所有的记录
+    QList<NGRecordData> queAllNGRecordData();
+
 public:
     static QString dbFilePath;
     static QString imgFilePath;

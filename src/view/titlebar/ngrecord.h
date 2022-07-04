@@ -55,6 +55,9 @@ private:
     QHBoxLayout *m_mainLayout;
     QVBoxLayout *m_rightLayout;
 
+    int m_okTotalNum;
+    int m_ngTotalNum;
+
 };
 
 #endif // NGRECORD_H

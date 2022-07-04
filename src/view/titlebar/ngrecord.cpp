@@ -76,6 +76,7 @@ void NGRecord::setWidgetStyle()
     m_ngTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_ngTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_ngTableView->setModel(m_ngModel);
+//    m_ngTableView->setFocusPolicy(Qt::NoFocus);
 
     m_recordText->setFont(viewFont);
     m_recordText->setReadOnly(true);
@@ -101,6 +102,8 @@ void NGRecord::setWidgetStyle()
 
 void NGRecord::setData()
 {
+    m_okTotalNum = 0;
+    m_ngTotalNum = 0;
     getModelData();
     m_ngTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
@@ -118,6 +121,7 @@ void NGRecord::setData()
                           "10:40:14\n相机1场景1 收到触发信号\n"
                           "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
                           );
+    m_resultLab->setText(QString("正常%1次，异常%2次").arg(m_okTotalNum).arg(m_ngTotalNum));
 }
 
 void NGRecord::addNgRecord(NGRecordData ngData)
@@ -147,10 +151,23 @@ void NGRecord::closeBtnClick()
 
 void NGRecord::getModelData()
 {
-    for (int i = 0; i < 5; i++) {
-        m_ngModel->setItem(i, 0, new QStandardItem(QString(" 2022-6-17 11:0%1:06 ").arg(i)));
-        m_ngModel->setItem(i, 1, new QStandardItem(QString(" 1 ")));
-        m_ngModel->setItem(i, 2, new QStandardItem(QString(" 1 ")));
-        m_ngModel->setItem(i, 3, new QStandardItem(QString(" 异常 ")));
+//    for (int i = 0; i < 5; i++) {
+//        m_ngModel->setItem(i, 0, new QStandardItem(QString(" 2022-6-17 11:0%1:06 ").arg(i)));
+//        m_ngModel->setItem(i, 1, new QStandardItem(QString(" 1 ")));
+//        m_ngModel->setItem(i, 2, new QStandardItem(QString(" 1 ")));
+//        m_ngModel->setItem(i, 3, new QStandardItem(QString(" 异常 ")));
+//    }
+
+    QList<NGRecordData> recordDataList = MyDataBase::getInstance()->queAllNGRecordData();
+
+    for (int i = 0; i < recordDataList.size(); i++) {
+        m_ngModel->setItem(i, 0, new QStandardItem(QString(" %1 ").arg(recordDataList[i].time)));
+        m_ngModel->setItem(i, 1, new QStandardItem(QString(" %1 ").arg(recordDataList[i].cameraId)));
+        m_ngModel->setItem(i, 2, new QStandardItem(QString(" %1 ").arg(recordDataList[i].sceneId)));
+        m_ngModel->setItem(i, 3, new QStandardItem(QString(" %1 ").arg(recordDataList[i].result)));
+
+        if (recordDataList[i].result == "异常") {
+            m_ngTotalNum++;
+        }
     }
 }

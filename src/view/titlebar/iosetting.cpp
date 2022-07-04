@@ -229,7 +229,10 @@ void IOSetting::setWidgetStyle()
 
 void IOSetting::setData()
 {
-
+    m_sliderList[0]->setValue(0);
+    m_sliderList[1]->setValue(3);
+    m_sliderList[2]->setValue(20);
+    m_sliderList[3]->setValue(10);
 }
 
 void IOSetting::restartBtnClick()

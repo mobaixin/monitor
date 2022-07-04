@@ -347,18 +347,20 @@ QList<ShapeItemData> ImgArea::getShapeItems()
                 MyDataBase::getInstance()->addShapeItemData(itemData);
             }
                 break;
+            case MyGraphicsItem::ItemType::Circle: {
+                int radius = sqrt(pow(item->getCenter().x() - item->getEdge().x(), 2) + pow(item->getCenter().y() - item->getEdge().y(), 2));
+
+                // 记录圆形的半径
+                QPointF edge = QPointF(radius, radius);
+                itemData.edge      = QString("%1,%2").arg(edge.x()).arg(edge.y());
+
+                MyDataBase::getInstance()->addShapeItemData(itemData);
+            }
+                break;
             default:
                 break;
 
             }
-
-//            if (item->getType() == MyGraphicsItem::ItemType::Polygon) {
-//                QList<QPointF> myList = item->getMyPointList();
-//                qDebug() << "point list size" << myList.size();
-//            } else if (item->getType() == MyGraphicsItem::ItemType::Curve) {
-//                QList<QPointF> myList = item->getMyPointList();
-//                qDebug() << "point list size" << myList.size();
-//            }
         }
     }
     return shapeList;
@@ -374,13 +376,13 @@ void ImgArea::loadImageItem(ImageMoldData imgData)
     ImageMoldData resImgData =MyDataBase::getInstance()->queImgMoldData(imgData);
     QImage img;
 
-    qDebug() << "image path: " << resImgData.imgPath;
+//    qDebug() << "image path: " << resImgData.imgPath;
     if (img.load(resImgData.imgPath)) {
         QPixmap imgPix = (QPixmap::fromImage(img));
         imgPix = imgPix.scaled(this->size());
         m_pImageItem->setPixmap(imgPix);
 
-        qDebug() << "show image";
+//        qDebug() << "show image";
         m_pImageItem->show();
     }
 }
@@ -407,6 +409,8 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             }
 
             MyRectangle *myRect = new MyRectangle(center.x(), center.y(), edge.x(), edge.y(), MyGraphicsItem::ItemType::Rectangle);
+            myRect->setAccuracy(itemDataList[i].accuracy);
+            myRect->setPixel(itemDataList[i].pixel);
             m_pScene->addItem(myRect);
         }
             break;
@@ -426,9 +430,24 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
                     }
                 }
                 myPolygon->pushPoint(myEdgePoint, myEdgePointList, true);
+                myPolygon->setAccuracy(itemDataList[i].accuracy);
+                myPolygon->setPixel(itemDataList[i].pixel);
                 m_pScene->addItem(myPolygon);
                 connect(m_pScene, &MyGraphicsScene::updatePolyPoint, myPolygon, &MyPolygon::pushPoint);
             }
+        }
+            break;
+        case MyGraphicsItem::ItemType::Circle: {
+            QStringList edgeList = itemDataList[i].edge.split(',');
+            QPointF edge;
+            if (edgeList.size() >= 2) {
+                edge = QPointF(edgeList[0].toInt(), edgeList[1].toInt());
+            }
+
+            MyCircle *myCircle = new MyCircle(center.x(), center.y(), edge.x(), MyGraphicsItem::ItemType::Circle);
+            myCircle->setAccuracy(itemDataList[i].accuracy);
+            myCircle->setPixel(itemDataList[i].pixel);
+            m_pScene->addItem(myCircle);
         }
             break;
         default:
@@ -848,6 +867,15 @@ Mat ImgArea::getShapeMask(ShapeItemData itemData, QImage img)
         }
         cv::fillPoly(mask, myEdgePointList, Scalar(255, 255, 255));
 
+    }
+        break;
+    case MyGraphicsItem::ItemType::Circle: {
+        QStringList edgeList = itemData.edge.split(',');
+        QPointF edge;
+        if (edgeList.size() >= 2) {
+            edge = QPointF(edgeList[0].toInt(), edgeList[1].toInt());
+        }
+        cv::circle(mask, Point(center.x(), center.y()), edge.x(), Scalar(255, 255, 255), -1, 8, 0);
     }
         break;
     default:

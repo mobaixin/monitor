@@ -588,10 +588,11 @@ NGRecordData MyDataBase::queNGRecordData(NGRecordData recordData)
     QSqlQuery query;
     bool queryRes = true;
 
-    query.prepare("SELECT * FROM ng_record WHERE camera_id=:camera_id and scene_id=:scene_id");
+    query.prepare("SELECT * FROM ng_record WHERE camera_id=:camera_id and scene_id=:scene_id and time=:time");
 
     query.bindValue(":camera_id", QString::number(recordData.cameraId));
     query.bindValue(":scene_id",  QString::number(recordData.sceneId));
+    query.bindValue(":time",      recordData.time);
 
     queryRes = query.exec();
 
@@ -635,6 +636,32 @@ int MyDataBase::altNGRecordData(NGRecordData recordData)
         }
     }
     return DB_OP_SUCC;
+}
+
+QList<NGRecordData> MyDataBase::queAllNGRecordData()
+{
+    QList<NGRecordData> resDataList;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM ng_record");
+
+    queryRes = query.exec();
+
+    while (query.next()) {
+        NGRecordData resData;
+
+        resData.cameraId  = query.value("camera_id").toInt();
+        resData.sceneId   = query.value("scene_id").toInt();
+        resData.time      = query.value("time").toString();
+        resData.result    = query.value("result").toString();
+        resData.imgPath   = query.value("img_path").toString();
+
+        resDataList.append(resData);
+    }
+
+    return resDataList;
 }
 
 bool MyDataBase::checkShapeItemData(ShapeItemData itemData)

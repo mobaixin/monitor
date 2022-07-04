@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QGridLayout>
 
+#include "src/view/imgarea/mygraphicsitem.h"
 #include "src/view/imgarea/mygraphicsscene.h"
 #include "src/view/common/myslider.h"
 
@@ -27,11 +28,29 @@ public:
 
     void setBtnEnabled(bool enable);
 
+    // 设置精确度值
+    void setAccuracy(int acc);
+
     // 获得精确度值
     int getAccuracy();
 
+    // 设置像素值
+    void setPixel(int pix);
+
     // 获得像素值
     int getPixel();
+
+    // 创建矩形
+    void createRect(QPointF point);
+
+    // 获取创建的矩形
+    MyRectangle *getNewMyRect();
+
+    // 创建矩形
+    void createCircle(QPointF point);
+
+    // 获取创建的矩形
+    MyCircle *getNewMyCircle();
 
 private:
     // 按钮响应事件
@@ -56,12 +75,20 @@ private:
     void CopyBtnClick();
     void positionBtnClick();
 
+    void updateItemAccuracy(int acc);
+
 private:
     MyGraphicsScene *m_pAreaScene;
+
+    MyRectangle *m_newMyRect;
+    MyCircle *m_newMyCircle;
 
     bool m_isCreatePolygon;
     bool m_isCreateCurve;
     bool m_isCreateMask;
+
+    bool m_isUpdateAcc;
+    bool m_isUpdatePix;
 
     MySlider *m_pAccMySlider;
     MySlider *m_pPixMySlider;

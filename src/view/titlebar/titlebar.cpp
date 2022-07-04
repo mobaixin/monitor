@@ -279,6 +279,7 @@ void TitleBar::delAlarmBtnClick()
 {
     setAlarmBtnState(false);
     ImgArea::getInstance()->clearDetectResult();
+    SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
 }
 
 void TitleBar::closeBtnClick()

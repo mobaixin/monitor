@@ -7,6 +7,7 @@
 #include <QApplication>
 
 #include "mygraphicsitem.h"
+#include "src/view/bottombar/bottombar.h"
 
 MyGraphicsItem::MyGraphicsItem(QPointF center, QPointF edge, MyGraphicsItem::ItemType type)
     : m_center(center), m_edge(edge), m_type(type)
@@ -36,12 +37,24 @@ void MyGraphicsItem::focusInEvent(QFocusEvent *event)
 {
     Q_UNUSED(event);
     this->setPen(m_penIsSelected);
+
+    BottomBar::getInstance()->setAccuracy(m_accuracy);
+    BottomBar::getInstance()->setPixel(m_pixel);
+
+
 }
 
 void MyGraphicsItem::focusOutEvent(QFocusEvent *event)
 {
     Q_UNUSED(event);
     this->setPen(m_penNoSelected);
+}
+
+void MyGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    this->setSelected(true);
+    return QAbstractGraphicsShapeItem::mousePressEvent(event);
+
 }
 
 void MyGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
@@ -73,6 +86,22 @@ void MyGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 //    }
 
     return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
+}
+
+void MyGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    //设置笔的颜色，和笔刷颜色
+    painter->setPen(this->pen());
+    painter->setBrush(this->brush());
+
+    QFont font = painter->font();
+    font.setPixelSize(18);
+    painter->setFont(font);
+
+    painter->drawText(m_center.x() - 40, m_center.y(), QString("(%1, %2)").arg(m_accuracy).arg(m_pixel));
 }
 
 
@@ -122,9 +151,15 @@ void MyCircle::updateRadius()
     m_radius = sqrt(pow(m_center.x() - m_edge.x(), 2) + pow(m_center.y() - m_edge.y(), 2));
 }
 
+MyPointItem *MyCircle::getEdgeItem()
+{
+    return m_pointList[0];
+}
+
 QRectF MyCircle::boundingRect() const
 {
-    return QRectF(m_center.x()- m_radius, m_center.y() - m_radius, m_radius * 2, m_radius * 2);
+    int fixRadius = m_radius > 100 ? m_radius : 100;
+    return QRectF(m_center.x()- fixRadius, m_center.y() - fixRadius, fixRadius * 2, fixRadius * 2);
 }
 
 void MyCircle::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -137,6 +172,8 @@ void MyCircle::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
     QRectF rect(m_center.x() - m_radius, m_center.y() - m_radius, m_radius * 2, m_radius * 2);
     painter->drawEllipse(rect);
+
+    return MyGraphicsItem::paint(painter, option, widget);
 }
 
 //void MyCircle::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
@@ -232,6 +269,11 @@ void MyRectangle::setRect(qreal x, qreal y, qreal width, qreal height)
     this->show();
 }
 
+MyPointItem *MyRectangle::getEdgeItem()
+{
+    return m_pointList[0];
+}
+
 QRectF MyRectangle::boundingRect() const
 {
     return QRectF(m_center.x() - m_width/2 - 5, m_center.y() - m_height/2 - 5,
@@ -251,11 +293,9 @@ void MyRectangle::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 
     QRectF rect(m_center.x() - m_width/2, m_center.y() - m_height/2, m_width, m_height);
     painter->drawRect(rect);
+
+    return MyGraphicsItem::paint(painter, option, widget);
 }
-
-
-
-
 
 // 多边形
 MyPolygon::MyPolygon(MyGraphicsItem::ItemType type)
@@ -263,6 +303,7 @@ MyPolygon::MyPolygon(MyGraphicsItem::ItemType type)
 {
     m_isCreateFinished = false;
     m_isAddPoint = false;
+    m_isAddedPoint = false;
 }
 
 QPointF MyPolygon::getCentroid(QList<QPointF> list)
@@ -345,6 +386,8 @@ bool MyPolygon::isPointOnLine(QPointF point)
         m_addPoingIdx = i;
         pushPoint(point, list, false);
         m_isAddPoint = false;
+
+        m_isAddedPoint = true;
     }
 
 //    qDebug() << "isPointOnLine: " << flag;
@@ -395,10 +438,10 @@ void MyPolygon::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
             if (m_isAddPoint) {
                 point->setAcceptedMouseButtons(Qt::LeftButton);
                 point->setFocus();
-                QMouseEvent mouseEvent( QEvent::MouseButtonPress, p, Qt::LeftButton , Qt::LeftButton,Qt::NoModifier );
-                QMouseEvent mouseEvent_1( QEvent::MouseButtonRelease, p, Qt::LeftButton , Qt::LeftButton,Qt::NoModifier );
-                QApplication::sendEvent( this, &mouseEvent_1 );
-                QApplication::sendEvent( point, &mouseEvent );
+//                QMouseEvent mouseEvent( QEvent::MouseButtonPress, p, Qt::LeftButton , Qt::LeftButton,Qt::NoModifier );
+//                QMouseEvent mouseEvent_1( QEvent::MouseButtonRelease, p, Qt::LeftButton , Qt::LeftButton,Qt::NoModifier );
+//                QApplication::sendEvent( this, &mouseEvent_1 );
+//                QApplication::sendEvent( point, &mouseEvent );
             }
         }
 
@@ -430,6 +473,8 @@ void MyPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
             painter->drawLine(m_pointList.at(i - 1)->getPoint(), m_pointList.at(i)->getPoint());
         }
     }
+
+    return MyGraphicsItem::paint(painter, option, widget);
 }
 
 void MyPolygon::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -441,10 +486,30 @@ void MyPolygon::mousePressEvent(QGraphicsSceneMouseEvent *event)
     return QAbstractGraphicsShapeItem::mousePressEvent(event);
 }
 
-//void MyPolygon::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-//{
-//    return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
-//}
+void MyPolygon::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (m_isAddedPoint && event->buttons() == Qt::LeftButton) {
+//        qreal disx = event->scenePos().x() - event->lastScenePos().x();
+//        qreal disy = event->scenePos().y() - event->lastScenePos().y();
+
+//        qDebug() << " MyPolygon::mouseMoveEvent";
+//        qDebug() << "m_newPoint: " << m_newPoint->x() << " " << m_newPoint->y();
+//        qDebug() << "event->pos(): " << event->pos().x() << " " << event->pos().y();
+        m_newPoint->setPoint(event->pos());
+        m_newPoint->setPos(m_newPoint->getPoint());
+        m_newPoint->scene()->update();
+    } else {
+        return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
+    }
+
+
+}
+
+void MyPolygon::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    m_isAddedPoint = false;
+    return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
+}
 
 MyCurve::MyCurve(MyGraphicsItem::ItemType type)
     : MyGraphicsItem(QPointF(0, 0), QPointF(0, 0), type)
@@ -541,4 +606,6 @@ void MyCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
             painter->drawLine(m_pointList.at(i - 1)->getPoint(), m_pointList.at(i)->getPoint());
         }
     }
+
+    return MyGraphicsItem::paint(painter, option, widget);
 }

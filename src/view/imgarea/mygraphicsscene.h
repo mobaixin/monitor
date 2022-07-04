@@ -12,10 +12,18 @@ public:
     explicit MyGraphicsScene(QObject *parent = nullptr);
 
     void startCreatePolygon();
-    void startCreateCurve();
-
     void finishCreatePloygon();
+
+    void startCreateCurve();
     void finishCreateCurve();
+
+    void startCreateRect();
+    void finishCreateRect();
+
+    void startCreateCircle();
+    void finishCreateCircle();
+
+    void addMyItem(QGraphicsItem *item);
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
@@ -37,8 +45,14 @@ protected:
     bool m_isCreateCurve;
     bool m_isPauseCurve;
     bool m_isCreateRect;
+    bool m_isCreatingRect;
     bool m_isCreateCircle;
+    bool m_isCreatingCircle;
     bool m_isCreateConCir;
+
+    bool m_isAddPolygonPoint;
+
+//    MyRectangle *rectangle;
 };
 
 #endif // MYGRAPHICSSCENE_H
