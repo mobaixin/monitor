@@ -6,6 +6,11 @@
 MyGraphicsScene::MyGraphicsScene(QObject *parent)
     : QGraphicsScene(parent)
 {
+    setData();
+}
+
+void MyGraphicsScene::setData()
+{
     m_isCreatePolygon = false;
 
     m_isCreateCurve = false;
@@ -16,10 +21,14 @@ MyGraphicsScene::MyGraphicsScene(QObject *parent)
 
     m_isCreateCircle   = false;
     m_isCreatingCircle = false;
+
+    m_isCreateConCir   = false;
+    m_isCreatingConCir = false;
 }
 
 void MyGraphicsScene::startCreatePolygon()
 {
+    setData();
     m_isCreatePolygon = true;
     m_ploygonList.clear();
 }
@@ -36,6 +45,7 @@ void MyGraphicsScene::finishCreatePloygon()
 
 void MyGraphicsScene::startCreateCurve()
 {
+    setData();
     m_isCreateCurve = true;
     m_isPauseCurve  = true;
     m_curveList.clear();
@@ -55,6 +65,7 @@ void MyGraphicsScene::finishCreateCurve()
 
 void MyGraphicsScene::startCreateRect()
 {
+    setData();
     m_isCreateRect = true;
 }
 
@@ -66,6 +77,7 @@ void MyGraphicsScene::finishCreateRect()
 
 void MyGraphicsScene::startCreateCircle()
 {
+    setData();
     m_isCreateCircle = true;
 }
 
@@ -75,10 +87,16 @@ void MyGraphicsScene::finishCreateCircle()
     m_isCreatingCircle = false;
 }
 
-void MyGraphicsScene::addMyItem(QGraphicsItem *item)
+void MyGraphicsScene::startCreateConCircle()
 {
-    this->addItem(item);
-    this->addSimpleText("123");
+    setData();
+    m_isCreateConCir = true;
+}
+
+void MyGraphicsScene::finishCreateConCircle()
+{
+    m_isCreateConCir   = false;
+    m_isCreatingConCir = false;
 }
 
 void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -114,6 +132,11 @@ void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
         BottomBar::getInstance()->createCircle(p);
         m_isCreatingCircle = true;
+    } else if (m_isCreateConCir) {
+        QPointF p(event->scenePos().x(), event->scenePos().y());
+
+        BottomBar::getInstance()->createConCircle(p);
+        m_isCreatingConCir = true;
     } else {
         QGraphicsScene::mousePressEvent(event);
     }
@@ -147,6 +170,24 @@ void MyGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         myCircle->setEdge(p);
         edgeItem->scene()->update();
         myCircle->updateRadius();
+    } else if (m_isCreateConCir && m_isCreatingConCir) {
+        QPointF p(event->scenePos().x(), event->scenePos().y());
+        MyConcentricCircle *myConCircle = BottomBar::getInstance()->getNewMyConCircle();
+        MyPointItem *edgeItem = myConCircle->getEdgeItem();
+        MyPointItem *anotherEdgeItem = myConCircle->getAnotherEdgeItem();
+
+        edgeItem->setPoint(event->scenePos());
+        edgeItem->setPos(edgeItem->getPoint());
+
+        anotherEdgeItem->setPoint(QPointF(event->scenePos().x() + 20, event->scenePos().y() + 20));
+        anotherEdgeItem->setPos(anotherEdgeItem->getPoint());
+
+        myConCircle->setEdge(p);
+        myConCircle->setAnotherEdge(QPointF(p.x() + 20, p.y() + 20));
+        edgeItem->scene()->update();
+        anotherEdgeItem->scene()->update();
+        myConCircle->updateRadius();
+        myConCircle->updateOtherRadius();
     }
     else {
         QGraphicsScene::mouseMoveEvent(event);
@@ -161,6 +202,8 @@ void MyGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         finishCreateRect();
     } else if (m_isCreatingCircle) {
         finishCreateCircle();
+    } else if (m_isCreateConCir) {
+        finishCreateConCircle();
     }
 
     QGraphicsScene::mouseReleaseEvent(event);

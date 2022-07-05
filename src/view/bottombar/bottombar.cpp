@@ -179,7 +179,8 @@ void BottomBar::setWidgetUi()
     connect(m_pEraseBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::eraseShape);
     connect(m_pClearBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::clearShapes);
 
-    connect(m_pAccMySlider, &MySlider::valueChange, this, &BottomBar::updateItemAccuracy);
+    connect(m_pAccMySlider, &MySlider::valueChange, this, &BottomBar::updateItemAcc);
+    connect(m_pPixMySlider, &MySlider::valueChange, this, &BottomBar::updateItemPix);
 }
 
 // 设置组件样式
@@ -242,6 +243,7 @@ void BottomBar::setWidgetStyle()
 
     m_pCurvBtn->setCheckable(true);
     m_pPolyBtn->setCheckable(true);
+    m_pMaskBtn->setCheckable(true);
 
     QString spBtnStyleStr = "QPushButton{background:#00BFFF;color:#000000;border-radius:5px;font-size:14px;border: 1px groove #F3F781;}"
                             "QPushButton:hover{background:#58D3F7;color:#000000;}"
@@ -257,7 +259,7 @@ void BottomBar::setWidgetStyle()
     m_pRectBtn->setStyleSheet(btnStyleStr);
     m_pCircleBtn->setStyleSheet(btnStyleStr);
     m_pConCirBtn->setStyleSheet(btnStyleStr);
-    m_pMaskBtn->setStyleSheet(btnStyleStr);
+    m_pMaskBtn->setStyleSheet(spBtnStyleStr);
     m_pCopyBtn->setStyleSheet(btnStyleStr);
     m_pEraseBtn->setStyleSheet(btnStyleStr);
     m_pClearBtn->setStyleSheet(btnStyleStr);
@@ -283,7 +285,6 @@ void BottomBar::setAccuracy(int acc)
 {
     m_isUpdateAcc = false;
     m_pAccMySlider->setValue(acc);
-    m_isUpdatePix = true;
 }
 
 int BottomBar::getAccuracy()
@@ -297,7 +298,6 @@ void BottomBar::setPixel(int pix)
 {
     m_isUpdatePix = false;
     m_pPixMySlider->setValue(pix);
-    m_isUpdatePix = true;
 }
 
 int BottomBar::getPixel()
@@ -333,6 +333,20 @@ void BottomBar::createCircle(QPointF point)
 MyCircle *BottomBar::getNewMyCircle()
 {
     return m_newMyCircle;
+}
+
+void BottomBar::createConCircle(QPointF point)
+{
+    m_newMyConCircle = new MyConcentricCircle(point.x(), point.y(), 10, 30, MyGraphicsItem::ItemType::Concentric_Circle);
+    m_pAreaScene->addItem(m_newMyConCircle);
+
+    m_newMyConCircle->setAccuracy(getAccuracy());
+    m_newMyConCircle->setPixel(getPixel());
+}
+
+MyConcentricCircle *BottomBar::getNewMyConCircle()
+{
+    return m_newMyConCircle;
 }
 
 //void BottomBar::accAddBtnClick()
@@ -399,11 +413,13 @@ void BottomBar::ellipseBtnClick()
 
 void BottomBar::conCircleBtnClick()
 {
-    MyConcentricCircle *conCircle = new MyConcentricCircle(500, 300, 50, 80, MyGraphicsItem::ItemType::Concentric_Circle);
-    m_pAreaScene->addItem(conCircle);
+//    MyConcentricCircle *conCircle = new MyConcentricCircle(500, 300, 50, 80, MyGraphicsItem::ItemType::Concentric_Circle);
+//    m_pAreaScene->addItem(conCircle);
 
-    conCircle->setAccuracy(getAccuracy());
-    conCircle->setPixel(getPixel());
+//    conCircle->setAccuracy(getAccuracy());
+//    conCircle->setPixel(getPixel());
+
+    m_pAreaScene->startCreateConCircle();
 }
 
 void BottomBar::rectBtnClick()
@@ -506,18 +522,33 @@ void BottomBar::positionBtnClick()
     }
 }
 
-void BottomBar::updateItemAccuracy(int acc)
+void BottomBar::updateItemAcc(int acc)
 {
     if (!m_isUpdateAcc) {
+        m_isUpdateAcc = true;
         return ;
     }
 
     if (!m_pAreaScene->selectedItems().isEmpty()) {
-        qDebug() << "m_pAreaScene->selectedItems";
         QGraphicsItem *temp = m_pAreaScene->selectedItems().first();
         MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
         item->setAccuracy(acc);
+        item->update();
+    }
+}
+
+void BottomBar::updateItemPix(int pix)
+{
+    if (!m_isUpdatePix) {
+        m_isUpdatePix = true;
+        return ;
     }
 
+    if (!m_pAreaScene->selectedItems().isEmpty()) {
+        QGraphicsItem *temp = m_pAreaScene->selectedItems().first();
+        MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
+        item->setPixel(pix);
+        item->update();
+    }
 }
 

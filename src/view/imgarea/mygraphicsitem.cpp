@@ -27,7 +27,7 @@ QList<QPointF> MyGraphicsItem::getMyPointList()
 {
     QList<QPointF> pointList;
 
-    for (int i = 0; i < m_pointList.size() - 1; i++) {
+    for (int i = 0; i < m_pointList.size(); i++) {
         pointList.append(m_pointList[i]->getPoint());
     }
     return pointList;
@@ -41,24 +41,19 @@ void MyGraphicsItem::focusInEvent(QFocusEvent *event)
     BottomBar::getInstance()->setAccuracy(m_accuracy);
     BottomBar::getInstance()->setPixel(m_pixel);
 
-
+//    return QGraphicsItem::focusInEvent(event);
 }
 
 void MyGraphicsItem::focusOutEvent(QFocusEvent *event)
 {
     Q_UNUSED(event);
     this->setPen(m_penNoSelected);
+
+//    return QGraphicsItem::focusOutEvent(event);
 }
 
-void MyGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    this->setSelected(true);
-    return QAbstractGraphicsShapeItem::mousePressEvent(event);
-
-}
-
-void MyGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
+//void MyGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+//{
 //    qDebug() << "MyGraphicsItem::mouseMoveEvent";
 
 //    if (event->buttons() == Qt::LeftButton) {
@@ -85,8 +80,8 @@ void MyGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 //        qDebug() << "item:" << item->getPoint().x() << " " << item->getPoint().y();
 //    }
 
-    return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
-}
+//    return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
+//}
 
 void MyGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
@@ -158,8 +153,8 @@ MyPointItem *MyCircle::getEdgeItem()
 
 QRectF MyCircle::boundingRect() const
 {
-    int fixRadius = m_radius > 100 ? m_radius : 100;
-    return QRectF(m_center.x()- fixRadius, m_center.y() - fixRadius, fixRadius * 2, fixRadius * 2);
+    int fixedRadius = m_radius > 100 ? m_radius : 100;
+    return QRectF(m_center.x()- fixedRadius, m_center.y() - fixedRadius, fixedRadius * 2, fixedRadius * 2);
 }
 
 void MyCircle::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -205,9 +200,17 @@ void MyConcentricCircle::setAnotherEdge(QPointF p)
     m_anotherEdge = p;
 }
 
+MyPointItem *MyConcentricCircle::getAnotherEdgeItem()
+{
+    // 0和2是edge
+    return m_pointList[2];
+}
+
 QRectF MyConcentricCircle::boundingRect() const
 {
     qreal maxRadius = m_radius > m_anotherRadius ? m_radius : m_anotherRadius;
+    maxRadius = maxRadius > 100 ? maxRadius : 100;
+
     return QRectF(m_center.x() - maxRadius, m_center.y() - maxRadius,
                   maxRadius * 2, maxRadius * 2);
 }
@@ -276,8 +279,11 @@ MyPointItem *MyRectangle::getEdgeItem()
 
 QRectF MyRectangle::boundingRect() const
 {
-    return QRectF(m_center.x() - m_width/2 - 5, m_center.y() - m_height/2 - 5,
-                  m_width + 10, m_height + 10);
+    int fixedWid = m_width > 200 ? m_width : 200;
+    int fixedHei = m_height > 60 ? m_height : 60;
+
+    return QRectF(m_center.x() - fixedWid/2 - 5, m_center.y() - fixedHei/2 - 5,
+                  fixedWid + 10, fixedHei + 10);
 }
 
 void MyRectangle::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -451,7 +457,8 @@ void MyPolygon::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
 
 QRectF MyPolygon::boundingRect() const
 {
-    return QRectF(m_center.x() - m_radius, m_center.y() - m_radius, m_radius * 2, m_radius * 2);
+    int fixedRadius = m_radius > 100 ? m_radius : 100;
+    return QRectF(m_center.x() - fixedRadius, m_center.y() - fixedRadius, fixedRadius * 2, fixedRadius * 2);
 }
 
 void MyPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -585,7 +592,8 @@ void MyCurve::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
 
 QRectF MyCurve::boundingRect() const
 {
-    return QRectF(m_center.x() - m_radius, m_center.y() - m_radius, m_radius * 2, m_radius * 2);
+    int fixedRadius = m_radius > 100 ? m_radius : 100;
+    return QRectF(m_center.x() - fixedRadius, m_center.y() - fixedRadius, fixedRadius * 2, fixedRadius * 2);
 }
 
 void MyCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)

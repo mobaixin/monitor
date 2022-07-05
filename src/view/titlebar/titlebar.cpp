@@ -248,6 +248,7 @@ void TitleBar::addMoldBtnClick()
     QString filePath = QString("%1/%2.png").arg(MyDataBase::imgFilePath).arg(fileName);
 
     SideBar::getInstance()->addAlarmImageMold(filePath, timeStr);
+    SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
 
     setAlarmBtnState(false);
     ImgArea::getInstance()->clearDetectResult();

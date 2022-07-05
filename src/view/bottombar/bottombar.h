@@ -46,11 +46,17 @@ public:
     // 获取创建的矩形
     MyRectangle *getNewMyRect();
 
-    // 创建矩形
+    // 创建圆形
     void createCircle(QPointF point);
 
-    // 获取创建的矩形
+    // 获取创建的圆形
     MyCircle *getNewMyCircle();
+
+    // 创建圆环
+    void createConCircle(QPointF point);
+
+    // 获取创建的圆环
+    MyConcentricCircle *getNewMyConCircle();
 
 private:
     // 按钮响应事件
@@ -75,13 +81,15 @@ private:
     void CopyBtnClick();
     void positionBtnClick();
 
-    void updateItemAccuracy(int acc);
+    void updateItemAcc(int acc);
+    void updateItemPix(int pix);
 
 private:
     MyGraphicsScene *m_pAreaScene;
 
     MyRectangle *m_newMyRect;
     MyCircle *m_newMyCircle;
+    MyConcentricCircle *m_newMyConCircle;
 
     bool m_isCreatePolygon;
     bool m_isCreateCurve;

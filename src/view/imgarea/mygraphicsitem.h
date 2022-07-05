@@ -49,8 +49,7 @@ protected:
     virtual void focusInEvent(QFocusEvent *event) override;
     virtual void focusOutEvent(QFocusEvent *event) override;
 
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+//    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 
     virtual void paint(QPainter *painter,
                        const QStyleOptionGraphicsItem *option,
@@ -127,6 +126,8 @@ public:
     }
     void updateOtherRadius();
     void setAnotherEdge(QPointF p);
+
+    MyPointItem *getAnotherEdgeItem();
 
 protected:
     virtual QRectF boundingRect() const override;

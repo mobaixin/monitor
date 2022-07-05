@@ -317,10 +317,10 @@ QList<ShapeItemData> ImgArea::getShapeItems()
 
             switch (item->getType()) {
             case MyGraphicsItem::ItemType::Rectangle:{
-                qDebug() << "item type: " << item->getType();
-                qDebug() << "real center:" << item->getRealCenter().x() << " " << item->getRealCenter().y();
-                qDebug() << "center" << item->getCenter().x() << " " << item->getCenter().y();
-                qDebug() << "edge" << item->getEdge().x() << " " << item->getEdge().y();
+//                qDebug() << "item type: " << item->getType();
+//                qDebug() << "real center:" << item->getRealCenter().x() << " " << item->getRealCenter().y();
+//                qDebug() << "center" << item->getCenter().x() << " " << item->getCenter().y();
+//                qDebug() << "edge" << item->getEdge().x() << " " << item->getEdge().y();
 
                 int width  = abs(item->getEdge().x() - item->getCenter().x()) * 2;
                 int height = abs(item->getEdge().y() - item->getCenter().y()) * 2;
@@ -340,6 +340,7 @@ QList<ShapeItemData> ImgArea::getShapeItems()
                 break;
             case MyGraphicsItem::ItemType::Polygon: {
                 QList<QPointF> myList = item->getMyPointList();
+                myList.removeLast();
 
                 itemData.edge      = QString("");
                 itemData.pointList = pointListToStr(myList);
@@ -353,6 +354,36 @@ QList<ShapeItemData> ImgArea::getShapeItems()
                 // 记录圆形的半径
                 QPointF edge = QPointF(radius, radius);
                 itemData.edge      = QString("%1,%2").arg(edge.x()).arg(edge.y());
+
+                MyDataBase::getInstance()->addShapeItemData(itemData);
+            }
+                break;
+            case MyGraphicsItem::ItemType::Concentric_Circle: {
+                QList<QPointF> myList = item->getMyPointList();
+
+                if (myList.size() < 3) {
+                    break;
+                }
+
+                // 记录内外圆的半径
+                int radius1 = sqrt(pow(myList[1].x() - myList[0].x(), 2) + pow(myList[1].y() - myList[0].y(), 2));
+                int radius2 = sqrt(pow(myList[1].x() - myList[2].x(), 2) + pow(myList[1].y() - myList[2].y(), 2));
+
+                itemData.edge = QString("%1,%2").arg(radius1).arg(radius2);
+
+                MyDataBase::getInstance()->addShapeItemData(itemData);
+            }
+                break;
+            case MyGraphicsItem::ItemType::Curve: {
+                QList<QPointF> myList = item->getMyPointList();
+                if (myList.size() < 1) {
+                    break;
+                }
+
+                myList.removeLast();
+
+                itemData.edge      = QString("");
+                itemData.pointList = pointListToStr(myList);
 
                 MyDataBase::getInstance()->addShapeItemData(itemData);
             }
@@ -437,6 +468,28 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             }
         }
             break;
+        case MyGraphicsItem::ItemType::Curve: {
+            QStringList myStrList = itemDataList[i].pointList.split(',');
+            QPointF myEdgePoint;
+            QList<QPointF> myEdgePointList;
+
+            if (myStrList.size() > 2) {
+                MyCurve *myCurve = new MyCurve(MyGraphicsItem::ItemType::Curve);
+
+                for (int i = 0; i < myStrList.size() - 1; i+=2) {
+                    if (i + 1 < myStrList.size()) {
+                        myEdgePoint = QPointF(myStrList[i].toInt(), myStrList[i+1].toInt());
+                        myEdgePointList.append(myEdgePoint);
+                        myCurve->pushPoint(myEdgePoint, myEdgePointList, false);
+                    }
+                }
+                myCurve->pushPoint(myEdgePoint, myEdgePointList, true);
+                myCurve->setAccuracy(itemDataList[i].accuracy);
+                myCurve->setPixel(itemDataList[i].pixel);
+                m_pScene->addItem(myCurve);
+            }
+        }
+            break;
         case MyGraphicsItem::ItemType::Circle: {
             QStringList edgeList = itemDataList[i].edge.split(',');
             QPointF edge;
@@ -450,6 +503,18 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             m_pScene->addItem(myCircle);
         }
             break;
+        case MyGraphicsItem::ItemType::Concentric_Circle: {
+            QStringList edgeList = itemDataList[i].edge.split(',');
+            QPointF edge;
+            if (edgeList.size() >= 2) {
+                edge = QPointF(edgeList[0].toInt(), edgeList[1].toInt());
+            }
+
+            MyConcentricCircle *myConCircle = new MyConcentricCircle(center.x(), center.y(), edge.x(), edge.y(), MyGraphicsItem::ItemType::Concentric_Circle);
+            myConCircle->setAccuracy(itemDataList[i].accuracy);
+            myConCircle->setPixel(itemDataList[i].pixel);
+            m_pScene->addItem(myConCircle);
+        }
         default:
             break;
         }
@@ -805,6 +870,7 @@ int ImgArea::detectImage(QImage imgFg)
     }
 
     if (detectRes == DetectRes::NG) {
+        loadShapeItem(itemData);
         drawDetectResult(resPointList);
     }
 

@@ -88,7 +88,7 @@ int MyDataBase::initDataBase()
                                        "type INTEGER,"
                                        "center VARCHAR(20),"
                                        "edge VARCHAR(20),"
-                                       "point_list VARCHAR,"
+                                       "point_list TEXT,"
                                        "accuracy INTEGER,"
                                        "pixel INTEGER,"
                                        "other1 VARCHAR,"

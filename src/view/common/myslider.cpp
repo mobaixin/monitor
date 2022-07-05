@@ -82,6 +82,7 @@ void MySlider::setWidgetStyle()
     m_addBtn->setFont(btnFont);
 
     m_lineEdit->setFocusPolicy(Qt::NoFocus);
+    m_slider->setFocusPolicy(Qt::NoFocus);
     m_addBtn->setFocusPolicy(Qt::NoFocus);
     m_subBtn->setFocusPolicy(Qt::NoFocus);
 }

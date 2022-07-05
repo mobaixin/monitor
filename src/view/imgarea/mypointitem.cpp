@@ -42,7 +42,6 @@ void MyPointItem::setPoint(QPointF p)
 
 void MyPointItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    qDebug() << "MyPointItem::mousePressEvent";
     return QAbstractGraphicsShapeItem::mousePressEvent(event);
 }
 
@@ -62,7 +61,7 @@ void MyPointItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 
     switch (m_type) {
     case Center:
-//        painter->drawEllipse(-4, -4, 8, 8);
+        painter->drawEllipse(-4, -4, 8, 8);
         break;
     case Edge:
         painter->drawRect(QRectF(-5, -5, 10, 10));

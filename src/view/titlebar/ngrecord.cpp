@@ -58,8 +58,8 @@ void NGRecord::setWidgetStyle()
     this->setFixedSize(700, 300);
     this->setWindowTitle("NG记录");
 
-    m_ngTableView->setFixedSize(320, this->height());
-    m_recordText->setFixedSize(230, this->height());
+    m_ngTableView->setFixedSize(325, this->height());
+    m_recordText->setFixedSize(225, this->height());
     m_resultLab->setFixedSize(140, 30);
     m_resetBtn->setFixedSize(135, 30);
     m_optRecordBtn->setFixedSize(135, 30);
