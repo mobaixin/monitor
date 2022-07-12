@@ -1,4 +1,4 @@
-#include <QDebug>
+﻿#include <QDebug>
 #include <QtMath>
 
 #include "mypointitem.h"
@@ -117,8 +117,8 @@ void MyPointItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 rectangle->setEdge(m_point);
             }
                 break;
-            case MyGraphicsItem::ItemType::Polygon_Mask:
-            case MyGraphicsItem::ItemType::Polygon: {
+            case MyGraphicsItem::ItemType::Polygon:
+            case MyGraphicsItem::ItemType::Polygon_Mask: {
                 MyPolygon *polygon = dynamic_cast<MyPolygon *>(item);
                 polygon->updatePolygon(QPointF(event->lastScenePos().x(), event->lastScenePos().y()),
                                        QPointF(event->scenePos().x(), event->scenePos().y()));

@@ -158,8 +158,6 @@ void IOSetting::setWidgetUi()
     connect(m_resetBtn, &QPushButton::clicked, this, &IOSetting::resetBtnClick);
     connect(m_testModeBtn, &QPushButton::clicked, this, &IOSetting::testModeBtnClick);
     connect(m_saveBtn, &QPushButton::clicked, this, &IOSetting::saveBtnClick);
-
-
 }
 
 void IOSetting::setWidgetStyle()
@@ -234,8 +232,8 @@ void IOSetting::setWidgetStyle()
 void IOSetting::setData()
 {
     for (int i = 0; i < m_frameList.size(); i++) {
-//        int num = MySettings::getInstance()->getValue(IOSetSection, QString())
-//        m_frameList[i]->setSelectNum(num);
+        int num = MySettings::getInstance()->getValue(IOSetSection, QString("frameList%1").arg(i)).toInt();
+        m_frameList[i]->setSelectNum(num);
     }
 
     m_sliderList[0]->setValue(0);

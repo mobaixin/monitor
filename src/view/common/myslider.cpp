@@ -143,7 +143,7 @@ void MySlider::setValue(int value, bool isSetEdit)
     m_slider->setValue(value);
 
     if (isSetEdit) {
-        qDebug() << m_slider->value();
+//        qDebug() << m_slider->value();
         m_lineEdit->setText(QString::number(m_slider->value()));
     }
 }

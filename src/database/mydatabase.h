@@ -14,6 +14,7 @@
 const QString SHAPEITEM = "shape_item"; // 图形标注表
 const QString IMGMOLD   = "image_mold"; // 图像模板表
 const QString NGRECORD  = "ng_record";  // NG记录表
+const QString CAMERAIPDEPLOY = "camera_ip_deploy";  // 相机IP配置
 
 enum DB_RETURN_STATUS{              //数据库操作结果返回表
     DB_OP_SUCC          = (0),      //数据库操作成功
@@ -59,6 +60,15 @@ typedef struct NGRecordData{
     QString result;
     QString imgPath;
 }NGRecordData;
+
+typedef struct CameraIPData {
+    int cameraId;
+    QString serialId;
+    QString nickName;
+    QString portIp;
+    QString state;
+    QString cameraIp;
+}CameraIPData;
 
 class MyDataBase : public QObject
 {
@@ -109,6 +119,15 @@ public:
     // 获取所有的记录
     QList<NGRecordData> queAllNGRecordData();
 
+    // CameraIPDeploy表操作
+    int addCameraIPData(CameraIPData cameraIPData);
+    int delCameraIPData(CameraIPData cameraIPData);
+    CameraIPData queCameraIPData(CameraIPData cameraIPData);
+    int altCameraIPData(CameraIPData cameraIPData);
+
+    // 获取所有的记录
+    QList<CameraIPData> queAllCameraIPData();
+
 public:
     static QString dbFilePath;
     static QString imgFilePath;
@@ -117,6 +136,7 @@ private:
     bool checkShapeItemData(ShapeItemData itemData);
     bool checkImgMoldData(ImageMoldData imgData);
     bool checkNGRecordData(NGRecordData recordData);
+    bool checkCameraIPData(CameraIPData cameraIPData);
 
 private:
     QSqlDatabase m_database;//数据库

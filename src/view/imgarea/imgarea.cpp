@@ -389,7 +389,8 @@ QList<ShapeItemData> ImgArea::getShapeItems()
                 MyDataBase::getInstance()->addShapeItemData(itemData);
             }
                 break;
-            case MyGraphicsItem::ItemType::Polygon: {
+            case MyGraphicsItem::ItemType::Polygon:
+            case MyGraphicsItem::ItemType::Polygon_Mask: {
                 QList<QPointF> myList = item->getMyPointList();
                 myList.removeLast();
 
@@ -497,7 +498,8 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             m_pScene->addItem(myRect);
         }
             break;
-        case MyGraphicsItem::ItemType::Polygon: {
+        case MyGraphicsItem::ItemType::Polygon:
+        case MyGraphicsItem::ItemType::Polygon_Mask: {
             QStringList myStrList = itemDataList[i].pointList.split(',');
             QPointF myEdgePoint;
             QList<QPointF> myEdgePointList;
@@ -705,6 +707,7 @@ int ImgArea::initSDK()
         return -1;
     }
 
+    // 获取相机IP信息
     char* ipInfo[6];
     for (int i = 0; i < 6; i++) {
         ipInfo[i] = QString("0").toUtf8().data();
@@ -714,6 +717,32 @@ int ImgArea::initSDK()
 
     for (int i = 0; i < 6; i++) {
         qDebug() << ipInfo[i];
+    }
+
+    // 获取相机序列号信息
+//    BYTE* serialId[3];
+//    for (int i = 0; i < 3; i++) {
+//        serialId[i] =  (unsigned char *)QString("0").toUtf8().data();
+//        CameraReadSN(g_hCamera, serialId[i], i);
+//        qDebug() << serialId[i];
+//    }
+    qDebug() << tCameraEnumList[0].acProductSeries;
+    qDebug() << tCameraEnumList[0].acProductName;
+    qDebug() << tCameraEnumList[0].acFriendlyName;
+    qDebug() << tCameraEnumList[0].acLinkName;
+    qDebug() << tCameraEnumList[0].acSn;
+
+    // 数据库交互
+    CameraIPData cameraIPData;
+    cameraIPData.cameraId = 0;
+    cameraIPData.serialId = tCameraEnumList[0].acSn;
+    cameraIPData.nickName = tCameraEnumList[0].acFriendlyName;
+    cameraIPData.portIp   = ipInfo[3];
+    cameraIPData.state    = "可用";
+    cameraIPData.cameraIp = ipInfo[0];
+
+    if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
+        MyDataBase::getInstance()->addCameraIPData(cameraIPData);
     }
 
     //获得相机的特性描述结构体。该结构体中包含了相机可设置的各种参数的范围信息。决定了相关函数的参数
@@ -805,7 +834,7 @@ Ptr<BackgroundSubtractorMOG2> ImgArea::getMOG2Data(ShapeItemData itemData)
     Ptr<BackgroundSubtractorMOG2> myMOG2Data;
 
     Mat mask,srcFg, dstBg, dstFg;
-    mask = getShapeMask(itemData, QImage());
+    mask = getShapeMask(itemData, QImage(), itemData);
 
 
 
@@ -836,11 +865,22 @@ int ImgArea::detectImage(QImage imgFg)
         return -1;
     }
 
+    ShapeItemData maskItemData;
+    maskItemData.sceneId = -1;
+    for (int i = 0; i < itemDataList.size(); i++) {
+        if (itemDataList[i].type == MyGraphicsItem::ItemType::Polygon_Mask) {
+            maskItemData = itemDataList[i];
+            itemDataList.removeAt(i);
+
+            break;
+        }
+    }
+
     QList<Mat> shapeMaskList;
     QVector<QVector<QPointF>> resPointList;
 
     for (int i = 0; i < itemDataList.size(); i++) {
-        Mat shapeMask = getShapeMask(itemDataList[i], imgFg);
+        Mat shapeMask = getShapeMask(itemDataList[i], imgFg, maskItemData);
         shapeMaskList.append(shapeMask);
     }
 
@@ -910,7 +950,7 @@ int ImgArea::detectImage(QImage imgFg)
 
             imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
             imshow(QString("fgMaskMOG2_%1_%2").arg(i).arg(j).toStdString(), m_fgMaskMOG2);
-            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), srcFg);
+//            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), srcFg);
 
             m_pMOG2->clear();
         }
@@ -941,7 +981,7 @@ int ImgArea::getShapeItemNum()
     return count;
 }
 
-Mat ImgArea::getShapeMask(ShapeItemData itemData, QImage img)
+Mat ImgArea::getShapeMask(ShapeItemData itemData, QImage img, ShapeItemData maskItemData)
 {
     cv::Mat mask, dst;
 //    QImage img = m_pImageItem->pixmap().toImage();
@@ -987,6 +1027,22 @@ Mat ImgArea::getShapeMask(ShapeItemData itemData, QImage img)
 
     }
         break;
+    case MyGraphicsItem::ItemType::Curve: {
+        QStringList myStrList = itemData.pointList.split(',');
+        vector<vector<Point>> myEdgePointList;
+        vector<Point> myEdgePoint;
+
+        if (myStrList.size() > 2) {
+            for (int i = 0; i < myStrList.size() - 1; i+=2) {
+                if (i + 1 < myStrList.size()) {
+                    myEdgePoint.push_back(Point(myStrList[i].toInt(), myStrList[i+1].toInt()));
+                }
+            }
+            myEdgePointList.push_back(myEdgePoint);
+        }
+        cv::fillPoly(mask, myEdgePointList, Scalar(255, 255, 255));
+    }
+        break;
     case MyGraphicsItem::ItemType::Circle: {
         QStringList edgeList = itemData.edge.split(',');
         QPointF edge;
@@ -996,8 +1052,37 @@ Mat ImgArea::getShapeMask(ShapeItemData itemData, QImage img)
         cv::circle(mask, Point(center.x(), center.y()), edge.x(), Scalar(255, 255, 255), -1, 8, 0);
     }
         break;
+    case MyGraphicsItem::ItemType::Concentric_Circle: {
+        QStringList edgeList = itemData.edge.split(',');
+        QPointF edge;
+        if (edgeList.size() >= 2) {
+            edge = QPointF(edgeList[0].toInt(), edgeList[1].toInt());
+        }
+
+        int minRadius = edge.x() > edge.y() ? edge.y() : edge.x();
+        int maxRadius = edge.x() > edge.y() ? edge.x() : edge.y();
+        cv::circle(mask, Point(center.x(), center.y()), maxRadius, Scalar(255, 255, 255), -1, 8, 0);
+        cv::circle(mask, Point(center.x(), center.y()), minRadius, Scalar(0, 0, 0), -1, 8, 0);
+    }
+        break;
     default:
         break;
+    }
+
+    if (maskItemData.sceneId != -1) {
+        QStringList maskStrList = maskItemData.pointList.split(',');
+        vector<vector<Point>> maskEdgePointList;
+        vector<Point> maskEdgePoint;
+
+        if (maskStrList.size() > 2) {
+            for (int i = 0; i < maskStrList.size() - 1; i+=2) {
+                if (i + 1 < maskStrList.size()) {
+                    maskEdgePoint.push_back(Point(maskStrList[i].toInt(), maskStrList[i+1].toInt()));
+                }
+            }
+            maskEdgePointList.push_back(maskEdgePoint);
+        }
+        cv::fillPoly(mask, maskEdgePointList, Scalar(0, 0, 0));
     }
 
 //    imshow("single mask", mask);
@@ -1043,6 +1128,13 @@ void ImgArea::clearDetectResult()
 
     m_detectResItemList.clear();
     m_pResultLab->hide();
+
+    clearShapes();
+}
+
+void ImgArea::setShapeNoMove(bool noMove)
+{
+    m_pView->setAttribute(Qt::WA_TransparentForMouseEvents, noMove);
 }
 
 QImage ImgArea::matToQim(Mat &mat)

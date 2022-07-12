@@ -76,7 +76,7 @@ void CameraIpSet::setWidgetStyle()
 
     m_ipModel->setHorizontalHeaderLabels({"系列号", "自定义名称", "接口", "状态", "IP地址"});
     m_ipTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    m_ipTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_ipTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     m_ipTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_ipTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_ipTableView->setModel(m_ipModel);
@@ -105,7 +105,7 @@ void CameraIpSet::setData()
 {
     getModelData();
     m_ipTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-
+    m_ipTableView->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
 }
 
 void CameraIpSet::freshBtnClick()
@@ -135,11 +135,21 @@ void CameraIpSet::cancelBtnClick()
 
 void CameraIpSet::getModelData()
 {
-    for (int i = 0; i < 10; i++) {
-        m_ipModel->setItem(i, 0, new QStandardItem(QString(" DSGP20603090%1 ").arg(i)));
-        m_ipModel->setItem(i, 1, new QStandardItem(QString(" GP20603090%1 ").arg(i)));
-        m_ipModel->setItem(i, 2, new QStandardItem(QString(" 192.168.1.9%1 ").arg(i)));
-        m_ipModel->setItem(i, 3, new QStandardItem(QString(" 可用  ")));
-        m_ipModel->setItem(i, 4, new QStandardItem(QString(" 192.168.1.4%1 ").arg(i)));
+//    for (int i = 0; i < 10; i++) {
+//        m_ipModel->setItem(i, 0, new QStandardItem(QString(" DSGP20603090%1 ").arg(i)));
+//        m_ipModel->setItem(i, 1, new QStandardItem(QString(" GP20603090%1 ").arg(i)));
+//        m_ipModel->setItem(i, 2, new QStandardItem(QString(" 192.168.1.9%1 ").arg(i)));
+//        m_ipModel->setItem(i, 3, new QStandardItem(QString(" 可用  ")));
+//        m_ipModel->setItem(i, 4, new QStandardItem(QString(" 192.168.1.4%1 ").arg(i)));
+//    }
+
+    m_cameraIPDataList = MyDataBase::getInstance()->queAllCameraIPData();
+
+    for (int i = 0; i < m_cameraIPDataList.size(); i++) {
+        m_ipModel->setItem(i, 0, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].serialId)));
+        m_ipModel->setItem(i, 1, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].nickName)));
+        m_ipModel->setItem(i, 2, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].portIp)));
+        m_ipModel->setItem(i, 3, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].state)));
+        m_ipModel->setItem(i, 4, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].cameraIp)));
     }
 }

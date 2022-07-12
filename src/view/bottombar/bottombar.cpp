@@ -495,7 +495,7 @@ void BottomBar::maskBtnClick()
 
         m_pMaskBtn->setText("完成绘制");
 
-        MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
+        MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon_Mask);
         polygon->setMask(true);
         m_pAreaScene->addItem(polygon);
 

@@ -118,13 +118,14 @@ int MyDataBase::initDataBase()
                                        "other2 VARCHAR)"
                                        ));
 
-    queryRes &= queryInit.exec(QString("create table if not exists camera_ip ("
+    queryRes &= queryInit.exec(QString("create table if not exists camera_ip_deploy ("
                                        "id INTEGER primary key AUTOINCREMENT,"
-                                       "time VARCHAR,"
                                        "camera_id INTEGER,"
-                                       "scene_id INTEGER,"
-                                       "result INTEGER,"
-                                       "img_path VARCHAR,"
+                                       "serial_id VARCHAR,"
+                                       "nick_name VARCHAR,"
+                                       "port_ip VARCHAR,"
+                                       "state VARCHAR,"
+                                       "camera_ip VARCHAR,"
                                        "other1 VARCHAR,"
                                        "other2 VARCHAR)"
                                        ));
@@ -675,6 +676,143 @@ QList<NGRecordData> MyDataBase::queAllNGRecordData()
     return resDataList;
 }
 
+int MyDataBase::addCameraIPData(CameraIPData cameraIPData)
+{
+    bool queryRes = true;
+
+    if (!checkCameraIPData(cameraIPData)) {
+        return INVALID_INPUT;
+    } else {
+        if (m_database.isValid()) {
+            QSqlQuery query;
+
+            query.prepare("INSERT INTO camera_ip_deploy (camera_id, serial_id, nick_name, port_ip, state, camera_ip) VALUES "
+                          "(:camera_id, :serial_id, :nick_name, :port_ip, :state, :camera_ip)");
+
+            query.bindValue(":camera_id", QString::number(cameraIPData.cameraId));
+            query.bindValue(":serial_id", cameraIPData.serialId);
+            query.bindValue(":nick_name", cameraIPData.nickName);
+            query.bindValue(":port_ip",   cameraIPData.portIp);
+            query.bindValue(":state",     cameraIPData.state);
+            query.bindValue(":camera_ip", cameraIPData.cameraIp);
+
+            queryRes = query.exec();
+
+            if (queryRes) {
+                return DB_OP_SUCC;
+            } else {
+                return DB_OP_ADD_FAILED;
+            }
+        } else {
+            return DB_UNCONNECT;
+        }
+    }
+    return DB_OP_SUCC;
+}
+
+int MyDataBase::delCameraIPData(CameraIPData cameraIPData)
+{
+    bool queryRes = true;
+
+    if (checkCameraIPData(cameraIPData)) {
+        QSqlQuery query;
+
+        query.prepare("DELETE FROM camera_ip_deploy WHERE camera_id=:camera_id");
+
+        query.bindValue(":camera_id", QString::number(cameraIPData.cameraId));
+
+        queryRes = query.exec();
+    }
+
+    return DB_OP_SUCC;
+}
+
+CameraIPData MyDataBase::queCameraIPData(CameraIPData cameraIPData)
+{
+    CameraIPData resData;
+    resData.cameraId = -1;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM camera_ip_deploy WHERE serial_id=:serial_id");
+
+    query.bindValue(":serial_id", cameraIPData.serialId);
+
+    queryRes = query.exec();
+
+    if (query.next()) {
+        resData.cameraId = query.value("camera_id").toInt();
+        resData.serialId = query.value("serial_id").toString();
+        resData.nickName = query.value("nick_name").toString();
+        resData.portIp   = query.value("port_ip").toString();
+        resData.state    = query.value("state").toString();
+        resData.cameraIp = query.value("camera_ip").toString();
+    }
+
+    return resData;
+}
+
+int MyDataBase::altCameraIPData(CameraIPData cameraIPData)
+{
+    bool queryRes = true;
+
+    if (!checkCameraIPData(cameraIPData)) {
+        return INVALID_INPUT;
+    } else {
+        if (m_database.isValid()) {
+            QSqlQuery query;
+
+            query.prepare("UPDATE camera_ip_deploy SET serial_id=:serial_id, nick_name=:nick_name, port_ip=:port_ip, state=:state, camera_ip=:camera_ip"
+                          "WHERE camera_id=:camera_id");
+
+            query.bindValue(":serial_id", cameraIPData.serialId);
+            query.bindValue(":nick_name", cameraIPData.nickName);
+            query.bindValue(":port_ip",   cameraIPData.portIp);
+            query.bindValue(":state",     cameraIPData.state);
+            query.bindValue(":camera_ip", cameraIPData.cameraIp);
+
+            queryRes = query.exec();
+
+            if (queryRes) {
+                return DB_OP_SUCC;
+            } else {
+                return DB_OP_ADD_FAILED;
+            }
+        } else {
+            return DB_UNCONNECT;
+        }
+    }
+    return DB_OP_SUCC;
+}
+
+QList<CameraIPData> MyDataBase::queAllCameraIPData()
+{
+    QList<CameraIPData> resDataList;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM camera_ip_deploy");
+
+    queryRes = query.exec();
+
+    while (query.next()) {
+        CameraIPData resData;
+
+        resData.cameraId = query.value("camera_id").toInt();
+        resData.serialId = query.value("serial_id").toString();
+        resData.nickName = query.value("nick_name").toString();
+        resData.portIp   = query.value("port_ip").toString();
+        resData.state    = query.value("state").toString();
+        resData.cameraIp = query.value("camera_ip").toString();
+
+        resDataList.append(resData);
+    }
+
+    return resDataList;
+}
+
 bool MyDataBase::checkShapeItemData(ShapeItemData itemData)
 {
     bool checkRes = true;
@@ -718,6 +856,21 @@ bool MyDataBase::checkNGRecordData(NGRecordData recordData)
     }
 
     if (recordData.result.isEmpty()) {
+        return false;
+    }
+
+    return checkRes;
+}
+
+bool MyDataBase::checkCameraIPData(CameraIPData cameraIPData)
+{
+    bool checkRes = true;
+
+    if (cameraIPData.cameraId < 0) {
+        return false;
+    }
+
+    if (cameraIPData.serialId.isEmpty()) {
         return false;
     }
 

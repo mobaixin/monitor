@@ -146,7 +146,7 @@ public:
     int getShapeItemNum();
 
     // 获取opencv mask
-    Mat getShapeMask(ShapeItemData itemData, QImage img);
+    Mat getShapeMask(ShapeItemData itemData, QImage img, ShapeItemData maskItemData);
 
     // 设置显示状态
     void setShowState(bool isShow);
@@ -162,6 +162,9 @@ public:
 
     // 清除检测结果
     void clearDetectResult();
+
+    // 设置图形不允许移动
+    void setShapeNoMove(bool noMove);
 
 public:
     int status;

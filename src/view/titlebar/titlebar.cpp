@@ -142,7 +142,8 @@ void TitleBar::setWidgetStyle()
 
     QString btnStyleStr = "QPushButton{background:#00BFFF;color:#000000;border-radius:5px;font-size:14px;border: 1px groove #F3F781;}"
                           "QPushButton:hover{background:#58D3F7;color:#000000;}"
-                          "QPushButton:pressed{background:#00BFFF;color:#000000;}";
+                          "QPushButton:pressed{background:#00BFFF;color:#000000;}"
+                          "QPushButton:disabled{background:#A9E2F3;color:#000000}";
 
     QString runBtnStyleStr = "QPushButton{background:#00BFFF;color:#000000;border-radius:5px;font-size:14px;border: 1px groove #F3F781;}"
                              "QPushButton:hover{background:#58D3F7;color:#000000;}"
@@ -222,12 +223,14 @@ void TitleBar::monitorSetBtnClick()
         m_pIsSetMonitor = false;
 
         m_pMonitorSetBtn->setText("监视设定");
+        m_pTestBtn->setDisabled(false);
 
     } else {
         MainWindow::getInstance()->showMonitorSet(true);
         m_pIsSetMonitor = true;
 
         m_pMonitorSetBtn->setText("关闭设定");
+        m_pTestBtn->setDisabled(true);
     }
 }
 
@@ -240,6 +243,7 @@ void TitleBar::sysSettingBtnClick()
 void TitleBar::testBtnClick()
 {
     setAlarmBtnState(false);
+    ImgArea::getInstance()->setShapeNoMove(true);
     ImgArea::getInstance()->clearDetectResult();
 
     if (ImgArea::getInstance()->getCameraStatus() == 1) {
@@ -258,6 +262,7 @@ void TitleBar::addMoldBtnClick()
 
     setAlarmBtnState(false);
     ImgArea::getInstance()->clearDetectResult();
+    ImgArea::getInstance()->setShapeNoMove(false);
 
     NGRecordData ngData;
     ngData.time = timeStr;
@@ -289,6 +294,7 @@ void TitleBar::delAlarmBtnClick()
     setAlarmBtnState(false);
     ImgArea::getInstance()->clearDetectResult();
     SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
+    ImgArea::getInstance()->setShapeNoMove(false);
 }
 
 void TitleBar::closeBtnClick()
@@ -323,6 +329,7 @@ void TitleBar::detectCurImage()
         ImgArea::getInstance()->setDetectRes(true);
         SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
         setAlarmBtnState(false);
+        ImgArea::getInstance()->setShapeNoMove(false);
     } else {
         return ;
     }

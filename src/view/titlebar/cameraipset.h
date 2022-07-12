@@ -10,6 +10,8 @@
 #include <QHeaderView>
 #include <QStandardItemModel>
 
+#include "src/database/mydatabase.h"
+
 class CameraIpSet : public QDialog
 {
     Q_OBJECT
@@ -47,6 +49,8 @@ private:
 
     QHBoxLayout *m_mainLayout;
     QVBoxLayout *m_rightLayout;
+
+    QList<CameraIPData> m_cameraIPDataList;
 };
 
 #endif // CAMERAIPSET_H

@@ -1,5 +1,4 @@
 *.pro.user
 
-out/*
 out/linecount.txt
 out/linecount.json
