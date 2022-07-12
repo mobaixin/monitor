@@ -1,4 +1,4 @@
-#include <QSqlQuery>
+﻿#include <QSqlQuery>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QFileInfo>
@@ -108,6 +108,17 @@ int MyDataBase::initDataBase()
                                        ));
 
     queryRes &= queryInit.exec(QString("create table if not exists ng_record ("
+                                       "id INTEGER primary key AUTOINCREMENT,"
+                                       "time VARCHAR,"
+                                       "camera_id INTEGER,"
+                                       "scene_id INTEGER,"
+                                       "result INTEGER,"
+                                       "img_path VARCHAR,"
+                                       "other1 VARCHAR,"
+                                       "other2 VARCHAR)"
+                                       ));
+
+    queryRes &= queryInit.exec(QString("create table if not exists camera_ip ("
                                        "id INTEGER primary key AUTOINCREMENT,"
                                        "time VARCHAR,"
                                        "camera_id INTEGER,"

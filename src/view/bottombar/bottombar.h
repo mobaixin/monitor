@@ -1,4 +1,4 @@
-#ifndef BOTTOM_BAR
+﻿#ifndef BOTTOM_BAR
 #define BOTTOM_BAR
 
 #include <QWidget>

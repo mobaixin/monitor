@@ -1,4 +1,4 @@
-#ifndef IMG_AREA
+﻿#ifndef IMG_AREA
 #define IMG_AREA
 
 #include <QWidget>
@@ -45,6 +45,12 @@ typedef struct myMOG2Data {
     int pixel;
 } myMOG2Data;
 
+enum CameraState {
+    OffLine = 0,
+    Running = 1,
+    Pause   = 2,
+};
+
 enum DetectRes {
     NG = 0,
     OK = 1,
@@ -81,7 +87,7 @@ public:
     void clearShapes();
 
     // 设置运行状态
-    void setRunState(bool isStart);
+    void setRunState(int state);
 
     // 设置监视状态
     void setMonitorState(bool isMonitor);

@@ -1,4 +1,4 @@
-#ifndef MYPOINTITEM_H
+﻿#ifndef MYPOINTITEM_H
 #define MYPOINTITEM_H
 
 #include <QObject>
@@ -25,10 +25,12 @@ public:
     };
 
     MyPointItem(QAbstractGraphicsShapeItem* parent, QPointF p, PointType type);
-//    ~MyPointItem();
+    ~MyPointItem();
 
     QPointF getPoint();
     void setPoint(QPointF p);
+
+    PointType getPointType() { return m_type; }
 
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 

@@ -1,7 +1,12 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "src/view/titlebar/syssetting.h"
 #include "src/view/common/myselectframe.h"
+#include "src/view/common/mysettings.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 SysSetting::SysSetting(QWidget *parent)
     : QDialog(parent)
@@ -67,10 +72,17 @@ void SysSetting::setWidgetUi()
 
     this->setLayout(m_sysSetLayout);
 
+    connect(m_moldDelaySlider, &MySlider::valueChange, this, &SysSetting::updateMoldDelay);
+    connect(m_moldTimesSlider, &MySlider::valueChange, this, &SysSetting::updateMoldTimes);
+    connect(m_prodDelaySlider, &MySlider::valueChange, this, &SysSetting::updateProdDelay);
+    connect(m_prodTimesSlider, &MySlider::valueChange, this, &SysSetting::updateProdTimes);
+
+    connect(m_prodDetectBtn, &QRadioButton::clicked, this, &SysSetting::updateProdDetect);
+
     connect(m_changeTimeBtn, &QPushButton::clicked, this, &SysSetting::changeTimeBtnClick);
     connect(m_ioSettingsBtn, &QPushButton::clicked, this, &SysSetting::ioSettingsBtnClick);
     connect(m_cameraParaBtn, &QPushButton::clicked, this, &SysSetting::cameraParaBtnClick);
-    connect(m_closeSetBtn, &QPushButton::clicked, this, &SysSetting::closeSetBtnClick);
+    connect(m_closeSetBtn,   &QPushButton::clicked, this, &SysSetting::closeSetBtnClick);
 
 }
 
@@ -96,10 +108,10 @@ void SysSetting::setWidgetStyle()
     m_prodDelaySlider->setValueRange(0, 20);
     m_prodTimesSlider->setValueRange(0, 40);
 
-    m_moldDelaySlider->setValue(6);
-    m_moldTimesSlider->setValue(4);
-    m_prodDelaySlider->setValue(4);
-    m_prodTimesSlider->setValue(2);
+//    m_moldDelaySlider->setValue(6);
+//    m_moldTimesSlider->setValue(4);
+//    m_prodDelaySlider->setValue(4);
+//    m_prodTimesSlider->setValue(2);
 
     m_changeTimeBtn->setFixedSize(100, 30);
     m_ioSettingsBtn->setFixedSize(100, 30);
@@ -123,7 +135,18 @@ void SysSetting::setWidgetStyle()
 
 void SysSetting::setData()
 {
-//    m_moldDelaySlider->setStep(1);
+    int moldDelay  = MySettings::getInstance()->getValue(SysSection, "moldDelay").toInt();
+    int moldTimes  = MySettings::getInstance()->getValue(SysSection, "moldTimes").toInt();
+    int prodDelay  = MySettings::getInstance()->getValue(SysSection, "prodDelay").toInt();
+    int prodTimes  = MySettings::getInstance()->getValue(SysSection, "prodTimes").toInt();
+    int prodDetect = MySettings::getInstance()->getValue(SysSection, "prodDetect").toInt();
+
+    m_moldDelaySlider->setValue(moldDelay);
+    m_moldTimesSlider->setValue(moldTimes);
+    m_prodDelaySlider->setValue(prodDelay);
+    m_prodTimesSlider->setValue(prodTimes);
+
+    m_prodDetectBtn->setChecked(prodDetect);
 }
 
 void SysSetting::changeTimeBtnClick()
@@ -146,4 +169,30 @@ void SysSetting::cameraParaBtnClick()
 void SysSetting::closeSetBtnClick()
 {
     this->close();
+}
+
+void SysSetting::updateMoldDelay(int value)
+{
+    MySettings::getInstance()->setValue(SysSection, "moldDelay", QString::number(value));
+}
+
+void SysSetting::updateMoldTimes(int value)
+{
+    MySettings::getInstance()->setValue(SysSection, "moldTimes", QString::number(value));
+}
+
+void SysSetting::updateProdDelay(int value)
+{
+    MySettings::getInstance()->setValue(SysSection, "prodDelay", QString::number(value));
+}
+
+void SysSetting::updateProdTimes(int value)
+{
+    MySettings::getInstance()->setValue(SysSection, "prodTimes", QString::number(value));
+}
+
+void SysSetting::updateProdDetect(bool checked)
+{
+    int value = checked ? 1 : 0;
+    MySettings::getInstance()->setValue(SysSection, "prodDetect", QString::number(value));
 }

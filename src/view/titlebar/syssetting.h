@@ -1,4 +1,4 @@
-#ifndef SYSSETTING_H
+﻿#ifndef SYSSETTING_H
 #define SYSSETTING_H
 
 #include <QObject>
@@ -32,6 +32,12 @@ private:
     void ioSettingsBtnClick();
     void cameraParaBtnClick();
     void closeSetBtnClick();
+
+    void updateMoldDelay(int value);
+    void updateMoldTimes(int value);
+    void updateProdDelay(int value);
+    void updateProdTimes(int value);
+    void updateProdDetect(bool checked);
 
 private:
     QLabel *m_moldDelayLab;

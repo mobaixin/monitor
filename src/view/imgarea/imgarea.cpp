@@ -1,4 +1,4 @@
-#include <QMessageBox>
+﻿#include <QMessageBox>
 #include <QPixmap>
 #include <QDebug>
 #include <QApplication>
@@ -11,10 +11,14 @@
 #include "src/view/sidebar/sidebar.h"
 #include "src/view/bottombar/bottombar.h"
 
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
+
 #ifdef _WIN64
-#pragma comment(lib,"../camera/MVCAMSDK_X64.lib")
+#pragma comment(lib,"D:\\Documents\\QTProjects\\monitor\\src\\camera\\lib\\MVCAMSDK_X64.lib")
 #else
-#pragma comment(lib,"../../camera/MVCAMSDK.lib")
+#pragma comment(lib,"D:\\Documents\\QTProjects\\monitor\\src\\camera\\lib\\MVCAMSDK.lib")
 #endif
 
 // SDK
@@ -155,8 +159,12 @@ void ImgArea::setData()
 {
     m_isShowImage = true;
 
+//    status =0;
+//    setRunState(CameraState::OffLine);
+
     if(initSDK()==-1){
         status =0;
+        setRunState(CameraState::OffLine);
     } else {
         initParameter(g_hCamera,&g_tCapability);
 //        CameraSetOnceWB(g_hCamera);
@@ -164,6 +172,7 @@ void ImgArea::setData()
         m_thread->start();
         m_thread->stream();
         status = 1;
+        setRunState(CameraState::Running);
     }
     qDebug() << "status: " << status;
 }
@@ -190,35 +199,77 @@ void ImgArea::eraseShape()
     if (!m_pScene->selectedItems().isEmpty()) {
         QGraphicsItem *temp = m_pScene->selectedItems().first();
         m_pScene->removeItem(temp);
-        delete temp;
+
+        // todo
+//        delete temp;
+        MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(temp);
+        shapeItem->deleteLater();
     }
 }
 
 void ImgArea::clearShapes()
 {
-    for (auto &temp : m_pScene->items()) {
-        if (temp != m_pImageItem) {
-            m_pScene->removeItem(temp);
-            delete temp;
+    QList<QGraphicsItem *> itemList = m_pScene->items();
+
+    for (int i = 0; i < itemList.size(); i++) {
+        if (itemList[i] != m_pImageItem && itemList[i] != nullptr) {
+            m_pScene->removeItem(itemList[i]);
+
+            // todo
+            bool isPoint = false;
+            MyPointItem *item = static_cast<MyPointItem *>(itemList[i]);
+//            qDebug() << "item->getPointType(): " << item->getPointType();
+            switch (item->getPointType()) {
+            case MyPointItem::Center:
+            case MyPointItem::Edge:
+            case MyPointItem::Special:
+            case MyPointItem::Other:
+                isPoint = true;
+                break;
+            default:
+                break;
+            }
+
+            if (isPoint) {
+                continue ;
+            }
+
+            MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(itemList[i]);
+
+            shapeItem->deleteLater();
         }
     }
+
+    qDebug() << "out clearShapes";
 }
 
-void ImgArea::setRunState(bool isStart)
+void ImgArea::setRunState(int state)
 {
-    if (isStart) {
-        m_pTipLab->setText("运行监视中");
-        m_pTipLab->setStyleSheet("color:#80FF00;font-size:20px;font-weight:10px;");
+    if (state == CameraState::Running && status == 0) {
+        state = CameraState::OffLine;
+    }
 
-//        m_pSampleLab->hide();
-//        m_pResultLab->hide();
+    QString runStyleStr = "color:#80FF00;font-size:20px;font-weight:10px;";
+    QString pauStyleStr = "color:red;font-size:20px;font-weight:10px;";
 
-    } else {
-        m_pTipLab->setText("保护停止");
-        m_pTipLab->setStyleSheet("color:red;font-size:20px;font-weight:10px;");
-
-//        m_pSampleLab->hide();
-//        m_pResultLab->hide();
+    switch (state) {
+    case CameraState::OffLine: {
+        m_pTipLab->setText(QString("相机断线"));
+        m_pTipLab->setStyleSheet(pauStyleStr);
+    }
+        break;
+    case CameraState::Running: {
+        m_pTipLab->setText(QString("运行监视中"));
+        m_pTipLab->setStyleSheet(runStyleStr);
+    }
+        break;
+    case CameraState::Pause: {
+        m_pTipLab->setText(QString("保护停止"));
+        m_pTipLab->setStyleSheet(pauStyleStr);
+    }
+        break;
+    default:
+        break;
     }
 }
 
@@ -376,6 +427,7 @@ QList<ShapeItemData> ImgArea::getShapeItems()
                 break;
             case MyGraphicsItem::ItemType::Curve: {
                 QList<QPointF> myList = item->getMyPointList();
+                qDebug() << "Curve myList.size: " << myList.size();
                 if (myList.size() < 1) {
                     break;
                 }

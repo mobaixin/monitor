@@ -1,7 +1,11 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "iosetting.h"
 #include "src/view/mainwindow.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 IOSetting::IOSetting(QWidget *parent)
     : QDialog(parent)
@@ -229,6 +233,11 @@ void IOSetting::setWidgetStyle()
 
 void IOSetting::setData()
 {
+    for (int i = 0; i < m_frameList.size(); i++) {
+//        int num = MySettings::getInstance()->getValue(IOSetSection, QString())
+//        m_frameList[i]->setSelectNum(num);
+    }
+
     m_sliderList[0]->setValue(0);
     m_sliderList[1]->setValue(3);
     m_sliderList[2]->setValue(20);

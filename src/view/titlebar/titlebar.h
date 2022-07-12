@@ -1,4 +1,4 @@
-#ifndef TITLE_BAR
+﻿#ifndef TITLE_BAR
 #define TITLE_BAR
 
 #include <QWidget>

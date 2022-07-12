@@ -108,7 +108,7 @@ void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             m_ploygonList.push_back(p);
             emit updatePolyPoint(p, m_ploygonList, false);
         } else if (event->buttons() == Qt::RightButton) {
-            finishCreatePloygon();
+//            finishCreatePloygon();
         }
     } else if (m_isCreateCurve) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
@@ -119,7 +119,7 @@ void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
             emit updateCurvePoint(p, m_curveList, false);
         } else if (event->buttons() == Qt::RightButton) {
-            finishCreateCurve();
+//            finishCreateCurve();
 
         }
     } else if (m_isCreateRect) {

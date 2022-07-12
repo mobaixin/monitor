@@ -1,8 +1,12 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "src/view/sidebar/sidebar.h"
 #include "src/view/mainwindow.h"
 #include "src/view/imgarea/imgarea.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 SideBar *SideBar::getInstance(QWidget *parent)
 {

@@ -15,17 +15,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += $$PWD/src/camera/include
+INCLUDEPATH += D:\Documents\QTProjects\monitor\src\camera\include
 
 #lib
-LIBS += -L$$PWD/src/camera/lib/ -lMVCAMSDK
-LIBS += -L$$PWD/src/camera/lib/ -lMVCAMSDK_X64
+LIBS += D:\Documents\QTProjects\monitor\src\camera\lib\MVCAMSDK.lib
+#LIBS += D:\Documents\QTProjects\monitor\src\camera\lib\MVCAMSDK_X64.lib
 
 
-INCLUDEPATH +=D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\include \
-              D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\include\opencv2
+LIBS += "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\legacy_stdio_definitions.lib"
+LIBS += D:\Documents\QTProjects\monitor\src\serialport\lib\Lucero.lib
+#LIBS += $$PWD\src\serialport\lib\Lucero.lib
 
-LIBS +=D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\x86\mingw\bin\libopencv_*.dll
+
+#INCLUDEPATH +=D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\include \
+#              D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\include\opencv2
+
+#LIBS +=D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\x86\mingw\bin\libopencv_*.dll
+
+INCLUDEPATH += D:\Documents\opencv3.4.14\opencv\sources\build\install\include \
+               D:\Documents\opencv3.4.14\opencv\sources\build\install\include\opencv2
+
+LIBS += D:\Documents\opencv3.4.14\opencv\sources\build\install\x86\vc14\lib\opencv_*.lib
 
 SOURCES += \
     main.cpp \
@@ -57,6 +67,8 @@ HEADERS += \
     src/camera/resource.h \
     src/database/mydatabase.h \
     src/serialport/myserialport.h \
+    src/serialport/usb2gpio.h \
+    src/serialport/usbdevice.h \
     src/view/common/myselectframe.h \
     src/view/common/mysettings.h \
     src/view/common/myslider.h \
@@ -88,7 +100,8 @@ DISTFILES += \
     data/img/page01.png \
     data/ver1.0_monitor.db \
     src/camera/lib/MVCAMSDK.lib \
-    src/camera/lib/MVCAMSDK_X64.lib
+    src/camera/lib/MVCAMSDK_X64.lib \
+    src/serialport/lib/Lucero.lib
 
 RESOURCES += \
     data/database/database.qrc \

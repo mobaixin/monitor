@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -23,6 +23,7 @@
 #include "src/view/sidebar/sidebar.h"
 #include "src/view/imgarea/imgarea.h"
 #include "src/database/mydatabase.h"
+#include "src/view/common/mysettings.h"
 
 class MainWindow : public QMainWindow
 {
@@ -44,7 +45,7 @@ public:
     void closeEvent(QCloseEvent *);
 
     // 设置运行状态
-    void setRunState(bool isStart);
+    void setRunState(int state);
 
     // 设置显示状态
     void showMonitorSet(bool isDisplay);

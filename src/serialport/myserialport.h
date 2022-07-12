@@ -1,9 +1,16 @@
-#ifndef SERIALPORT_H
+﻿#ifndef SERIALPORT_H
 #define SERIALPORT_H
 
 #include <QObject>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <string.h>
+#include <QTimer>
+
+//#pragma comment(lib, "D:\\Documents\\QTProjects\\monitor\\src\\serialport\\lib\\Lucero.lib")
+
+const unsigned int InputMask  = 0x03C0;
+const unsigned int OutputMask = 0x003F;
 
 class MySerialPort : public QObject
 {
@@ -20,13 +27,36 @@ public:
     // 打开串口
     void openPort();
 
+    // 关闭串口
+    void closePort(int devHandle);
+
+    // 设置输入端口 pinMask,选择引脚; puPd,配置引脚模式
+    int setInputPort(int devHandle, unsigned int pinMask, unsigned char puPd);
+
+    // 设置输出端口
+    int setOutputPort(int devHandle, unsigned int pinMask, unsigned char puPd);
+
+    // 写入信息数据 pinMask,选择引脚; pinValue,设置电平
+    int writeInfo(int devHandle,unsigned int pinMask, unsigned int pinValue);
+
+    // 读取信息数据 pinMask,选择引脚; *pinValue,读取电平
+    int readInfo(int devHandle,unsigned int pinMask, unsigned int *pinValue);
+
     void receiveInfo();
 
-signals:
+    void readTimesInfo();
 
 private:
     QSerialPort *m_serialPort;
     QStringList m_portNameList;
+
+
+    int m_devHandle[10];
+    bool m_state;
+    int m_ret;
+    unsigned int m_pinValue;
+
+    QTimer *m_timer;
 
 };
 

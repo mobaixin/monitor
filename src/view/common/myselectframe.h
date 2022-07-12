@@ -1,4 +1,4 @@
-#ifndef MYSELECTFRAME_H
+﻿#ifndef MYSELECTFRAME_H
 #define MYSELECTFRAME_H
 
 #include <QObject>
@@ -29,6 +29,9 @@ public:
 
     // 设置选项文字
     void setOptionText(QStringList btnNameList);
+
+    // 设置选择项
+    void setSelectNum(int num);
 
     // 获取选择项
     int getSelectNum();

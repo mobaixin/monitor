@@ -1,4 +1,4 @@
-#ifndef CAMERAIPSET_H
+﻿#ifndef CAMERAIPSET_H
 #define CAMERAIPSET_H
 
 #include <QObject>

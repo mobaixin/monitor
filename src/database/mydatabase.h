@@ -1,4 +1,4 @@
-#ifndef MYDATABASE_H
+﻿#ifndef MYDATABASE_H
 #define MYDATABASE_H
 
 #include <QSqlDatabase>

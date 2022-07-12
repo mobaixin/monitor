@@ -1,9 +1,14 @@
-#include <QDesktopWidget>
+﻿#include <QDesktopWidget>
 #include <QApplication>
 #include <QScreen>
 #include <QDebug>
 
 #include "mainwindow.h"
+#include "src/serialport/myserialport.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 MainWindow *MainWindow::getInstance()
 {
@@ -30,12 +35,17 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     m_pImgArea->deleteLater();
+
+    MyDataBase::getInstance()->deleteLater();
+    MySettings::getInstance()->deleteLater();
+    MySerialPort::getInstance()->deleteLater();
 }
 
 // 初始化组件
 void MainWindow::setWidgetUi()
 {
     MyDataBase::getInstance();
+    MySettings::getInstance();
     MySerialPort::getInstance();
 
     m_pMainWid   = new QWidget(this);
@@ -85,8 +95,6 @@ void MainWindow::setWidgetStyle()
                             this->width(), m_pImgArea->height());
     m_pSideBar->show();
 
-
-    m_pImgArea->setRunState(true);
     m_pImgArea->setFixedSize(this->width(), this->height() - m_pTitleBar->height());
     m_pImgArea->setSceneSize();
 
@@ -125,9 +133,9 @@ void MainWindow::closeEvent(QCloseEvent *)
     m_pImgArea->deleteLater();
 }
 
-void MainWindow::setRunState(bool isStart)
+void MainWindow::setRunState(int state)
 {
-    m_pImgArea->setRunState(isStart);
+    m_pImgArea->setRunState(state);
 }
 
 void MainWindow::showMonitorSet(bool isDisplay)

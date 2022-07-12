@@ -1,4 +1,4 @@
-#include "myselectframe.h"
+﻿#include "myselectframe.h"
 
 MySelectFrame::MySelectFrame(QWidget *parent, int btnNum)
     : QWidget(parent), m_radioBtnNum(btnNum)
@@ -60,13 +60,12 @@ void MySelectFrame::setWidgetStyle()
     for (int i = 0; i < m_radioBtnNum; i++) {
         m_radioBtnList.at(i)->setText("测试");
     }
-
-    m_radioBtnList.at(0)->setChecked(true);
 }
 
 void MySelectFrame::setData()
 {
-    m_selectNum = 1;
+    m_selectNum = 0;
+    m_radioBtnList.at(m_selectNum)->setChecked(true);
 }
 
 void MySelectFrame::setFrameName(QString name)
@@ -85,13 +84,13 @@ void MySelectFrame::setOptionText(QStringList btnNameList)
     }
 }
 
+void MySelectFrame::setSelectNum(int num)
+{
+    m_selectNum = num;
+    m_radioBtnList.at(m_selectNum)->setChecked(true);
+}
+
 int MySelectFrame::getSelectNum()
 {
-    for (int i = 0; i < m_radioBtnList.size(); i++) {
-        if (m_radioBtnList.at(i)->isChecked()) {
-            m_selectNum = i + 1;
-            break;
-        }
-    }
     return m_selectNum;
 }

@@ -1,7 +1,12 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "camerapara.h"
 #include "src/view/imgarea/imgarea.h"
+#include "src/view/common/mysettings.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 CameraPara::CameraPara(QWidget *parent)
     : QDialog(parent)
@@ -106,7 +111,6 @@ void CameraPara::setWidgetStyle()
     m_exposeTimeSlider->setValue(exposeTimeList.at(0) / exposeTimeList.at(3), false);
     m_cameraGainSlider->setValue(cameraGainList.at(0));
 
-    qDebug() << "expose time: " << exposeTimeList.at(0) / exposeTimeList.at(3);
     this->updateExposeTime(exposeTimeList.at(0) / exposeTimeList.at(3));
 
     m_defaultBtn->setFixedSize(100, 30);
@@ -149,16 +153,21 @@ void CameraPara::confirmBtnClick()
 
 void CameraPara::updateExposeTime(int value)
 {
+    value = value > 0 ? value : 0;
+    qDebug() << "value: " << value;
     ImgArea::getInstance()->setExposeTime(value);
 
     QList<double> timeList = ImgArea::getInstance()->getExposureTime();
     double time = (value * timeList.at(3)) / 1000;
     m_exposeTimeSlider->setEditValue(QString::number(time, 'f', 2));
 
+    MySettings::getInstance()->setValue(CameraSection, "exposeTime", QString::number(value));
 }
 
 void CameraPara::updateCameraGain(int value)
 {
-//    m_cameraGainSlider->setEditValue(QString::number(value));
+    value = value > 0 ? value : 0;
     ImgArea::getInstance()->setCameraGain(value);
+
+    MySettings::getInstance()->setValue(CameraSection, "cameraGain", QString::number(value));
 }

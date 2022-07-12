@@ -1,4 +1,4 @@
-#ifndef IOSETTING_H
+﻿#ifndef IOSETTING_H
 #define IOSETTING_H
 
 #include <QObject>

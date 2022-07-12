@@ -1,4 +1,4 @@
-#ifndef SIDE_BAR
+﻿#ifndef SIDE_BAR
 #define SIDE_BAR
 
 #include <QWidget>
@@ -11,7 +11,6 @@
 #include <QList>
 
 #include "src/view/imgarea/mygraphicsitem.h"
-#include "src/serialport/myserialport.h"
 
 enum RadioBtnState {
     NoState = 0,

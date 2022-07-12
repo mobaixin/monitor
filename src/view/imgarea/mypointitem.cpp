@@ -30,6 +30,11 @@ MyPointItem::MyPointItem(QAbstractGraphicsShapeItem* parent, QPointF p, PointTyp
 
 }
 
+MyPointItem::~MyPointItem()
+{
+
+}
+
 QPointF MyPointItem::getPoint()
 {
     return m_point;

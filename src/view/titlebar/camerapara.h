@@ -1,4 +1,4 @@
-#ifndef CAMERAPARA_H
+﻿#ifndef CAMERAPARA_H
 #define CAMERAPARA_H
 
 #include <QObject>

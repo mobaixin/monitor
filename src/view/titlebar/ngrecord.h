@@ -1,4 +1,4 @@
-#ifndef NGRECORD_H
+﻿#ifndef NGRECORD_H
 #define NGRECORD_H
 
 #include <QObject>

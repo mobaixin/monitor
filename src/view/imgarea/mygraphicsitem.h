@@ -1,4 +1,4 @@
-#ifndef MYGRAPHICSITEM_H
+﻿#ifndef MYGRAPHICSITEM_H
 #define MYGRAPHICSITEM_H
 
 #include <QObject>
@@ -27,6 +27,7 @@ public:
     };
 
     MyGraphicsItem(QPointF center, QPointF edge, ItemType type);
+    ~MyGraphicsItem();
 
     QPointF getCenter() { return m_center; }
     void setCenter(QPointF p) { m_center = p; }
@@ -171,6 +172,7 @@ class MyPolygon : public MyGraphicsItem
     Q_OBJECT
 public:
     MyPolygon(ItemType type);
+    ~MyPolygon();
     enum { Type = 28 };
     int type() const {
         return Type;
@@ -215,6 +217,8 @@ class MyCurve : public MyGraphicsItem
     Q_OBJECT
 public:
     MyCurve(ItemType type);
+    ~MyCurve();
+
     enum { Type = 29 };
     int type() const {
         return Type;

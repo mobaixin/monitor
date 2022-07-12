@@ -1,4 +1,4 @@
-#include <QVector>
+﻿#include <QVector>
 #include <QDebug>
 #include <QMenu>
 #include <QSpinBox>
@@ -21,6 +21,11 @@ MyGraphicsItem::MyGraphicsItem(QPointF center, QPointF edge, MyGraphicsItem::Ite
     this->setFlags(QGraphicsItem::ItemIsSelectable  |
                    QGraphicsItem::ItemIsMovable     |
                    QGraphicsItem::ItemIsFocusable);
+}
+
+MyGraphicsItem::~MyGraphicsItem()
+{
+
 }
 
 QList<QPointF> MyGraphicsItem::getMyPointList()
@@ -312,6 +317,17 @@ MyPolygon::MyPolygon(MyGraphicsItem::ItemType type)
     m_isAddedPoint = false;
 }
 
+MyPolygon::~MyPolygon()
+{
+    qDebug() << "~MyPolygon";
+
+//    for (int i = 0; i < m_pointList.size(); i++) {
+//        if (m_pointList[i] != nullptr) {
+//            m_pointList[i]->deleteLater();
+//        }
+//    }
+}
+
 QPointF MyPolygon::getCentroid(QList<QPointF> list)
 {
     qreal x = 0;
@@ -424,7 +440,8 @@ void MyPolygon::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
                 this->deleteLater();
                 return;
             }
-            m_pointList.append(new MyPointItem(this, m_center, MyPointItem::Center));
+            MyPointItem *point = new MyPointItem(this, m_center, MyPointItem::Center);
+            m_pointList.append(point);
             m_pointList.setRandColor();
             m_isCreateFinished = true;
         } else {
@@ -440,15 +457,6 @@ void MyPolygon::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
             }
 
             m_pointList.setColor(QColor(0, 255, 0));
-
-            if (m_isAddPoint) {
-                point->setAcceptedMouseButtons(Qt::LeftButton);
-                point->setFocus();
-//                QMouseEvent mouseEvent( QEvent::MouseButtonPress, p, Qt::LeftButton , Qt::LeftButton,Qt::NoModifier );
-//                QMouseEvent mouseEvent_1( QEvent::MouseButtonRelease, p, Qt::LeftButton , Qt::LeftButton,Qt::NoModifier );
-//                QApplication::sendEvent( this, &mouseEvent_1 );
-//                QApplication::sendEvent( point, &mouseEvent );
-            }
         }
 
         this->update();
@@ -522,6 +530,11 @@ MyCurve::MyCurve(MyGraphicsItem::ItemType type)
     : MyGraphicsItem(QPointF(0, 0), QPointF(0, 0), type)
 {
     m_isCreateFinished = false;
+}
+
+MyCurve::~MyCurve()
+{
+
 }
 
 QPointF MyCurve::getCentroid(QList<QPointF> list)

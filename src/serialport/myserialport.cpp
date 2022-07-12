@@ -1,6 +1,27 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "myserialport.h"
+
+#include <opencv2\opencv.hpp>
+
+#pragma comment (lib, "Advapi32.lib")
+
+#include <stdlib.h>
+#if _MSC_VER>=1900
+#include "stdio.h"
+_ACRTIMP_ALT FILE* __cdecl __acrt_iob_func(unsigned);
+#ifdef __cplusplus
+extern "C"
+#endif
+FILE* __cdecl __iob_func(unsigned i) {
+    return __acrt_iob_func(i);
+}
+#endif /* _MSC_VER>=1900 */
+
+#include "usbdevice.h"
+#include "usb2gpio.h"
+
+static DEVICE_INFO m_devInfo;
 
 MySerialPort *MySerialPort::getInstance(QObject *parent)
 {
@@ -18,6 +39,10 @@ MySerialPort::MySerialPort(QObject *parent)
     m_portNameList = getPortNameList();
 
     openPort();
+
+    m_timer = new QTimer(this);
+    m_timer->start(1000);
+//    connect(m_timer, &QTimer::timeout, this, &MySerialPort::readTimesInfo);
 }
 
 MySerialPort::~MySerialPort()
@@ -66,6 +91,63 @@ void MySerialPort::openPort()
     m_serialPort->setStopBits(QSerialPort::OneStop);            // 一位停止
 
     connect(m_serialPort, &QSerialPort::readyRead, this, &MySerialPort::receiveInfo);
+
+
+    // 扫描查找设备
+    m_ret = USB_ScanDevice(m_devHandle);
+    if (m_ret <= 0) {
+        qDebug() << "No device connected!";
+        return ;
+    } else {
+        qDebug() << "Found devices:";
+
+        for (int i = 0; i < m_ret; i++) {
+            qDebug() << QString().sprintf("%08X", m_devHandle[i]);
+        }
+    }
+
+    // 打开设备
+    m_state = USB_OpenDevice(m_devHandle[0]);
+    if (!m_state) {
+        qDebug() << "Open device error!";
+        return ;
+    }
+
+    // 初始化输出端口
+    setOutputPort(m_devHandle[0], OutputMask, 0);
+
+    // 初始化输入端口
+    setInputPort(m_devHandle[0], InputMask, 0);
+
+    writeInfo(m_devHandle[0], OutputMask, OutputMask);
+}
+
+void MySerialPort::closePort(int devHandle)
+{
+    USB_CloseDevice(devHandle);
+}
+
+int MySerialPort::setInputPort(int devHandle, unsigned int pinMask, unsigned char puPd)
+{
+    return GPIO_SetInput(devHandle, pinMask, puPd);
+}
+
+int MySerialPort::setOutputPort(int devHandle, unsigned int pinMask, unsigned char puPd)
+{
+    return GPIO_SetOutput(devHandle, pinMask, puPd);
+}
+
+int MySerialPort::writeInfo(int devHandle, unsigned int pinMask, unsigned int pinValue)
+{
+    return GPIO_Write(devHandle, pinMask, pinValue);
+}
+
+int MySerialPort::readInfo(int devHandle, unsigned int pinMask, unsigned int *pinValue)
+{
+    int res = GPIO_Read(devHandle, pinMask, pinValue);
+    qDebug() << QString().sprintf("READ DATA:%04X", *pinValue);
+
+    return res;
 }
 
 void MySerialPort::receiveInfo()
@@ -73,6 +155,13 @@ void MySerialPort::receiveInfo()
     QByteArray info = m_serialPort->readAll();
 
     qDebug() << "receive info: " << info;
+}
+
+void MySerialPort::readTimesInfo()
+{
+    unsigned int value = 0;
+    readInfo(m_devHandle[0], OutputMask, &value);
+    qDebug() << "readTimesInfo";
 }
 
 

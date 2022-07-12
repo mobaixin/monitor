@@ -1,8 +1,13 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "src/view/bottombar/bottombar.h"
 #include "src/view/imgarea/imgarea.h"
 #include "src/view/mainwindow.h"
+#include "src/view/common/mysettings.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 BottomBar *BottomBar::getInstance(QWidget *parent)
 {
@@ -535,6 +540,8 @@ void BottomBar::updateItemAcc(int acc)
         item->setAccuracy(acc);
         item->update();
     }
+
+    MySettings::getInstance()->setValue(ShapeSection, "accuracy", QString::number(acc));
 }
 
 void BottomBar::updateItemPix(int pix)
@@ -550,5 +557,7 @@ void BottomBar::updateItemPix(int pix)
         item->setPixel(pix);
         item->update();
     }
+
+    MySettings::getInstance()->setValue(ShapeSection, "pixel", QString::number(pix));
 }
 

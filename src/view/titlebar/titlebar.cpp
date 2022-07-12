@@ -1,10 +1,14 @@
-#include <QMessageBox>
+﻿#include <QMessageBox>
 #include <QApplication>
 #include <QDebug>
 
 
 #include "src/view/titlebar/titlebar.h"
 #include "src/view/mainwindow.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 TitleBar *TitleBar::getInstance(QWidget *parent)
 {
@@ -198,16 +202,16 @@ void TitleBar::setAlarmBtnState(bool isShow)
 
 void TitleBar::startBtnClick()
 {
-    MainWindow::getInstance()->setRunState(true);
-
+    ImgArea::getInstance()->setRunState(CameraState::Running);
     ImgArea::getInstance()->startCamera();
 }
 
 void TitleBar::stopBtnClick()
 {
-    MainWindow::getInstance()->setRunState(false);
+//    MainWindow::getInstance()->setRunState(false);
 //    MainWindow::getInstance()->setDetectObject();
 
+    ImgArea::getInstance()->setRunState(CameraState::Pause);
     ImgArea::getInstance()->pauseCamera();
 }
 
@@ -238,7 +242,9 @@ void TitleBar::testBtnClick()
     setAlarmBtnState(false);
     ImgArea::getInstance()->clearDetectResult();
 
-    detectCurImage();
+    if (ImgArea::getInstance()->getCameraStatus() == 1) {
+        detectCurImage();
+    }
 }
 
 void TitleBar::addMoldBtnClick()
@@ -267,7 +273,9 @@ void TitleBar::reDetectBtnClick()
 {
     ImgArea::getInstance()->clearDetectResult();
 
-    detectCurImage();
+    if (ImgArea::getInstance()->getCameraStatus() == 1) {
+        detectCurImage();
+    }
 }
 
 void TitleBar::NGRecordBtnClick()
