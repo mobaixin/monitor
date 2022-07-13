@@ -1,4 +1,4 @@
-﻿#include <QMessageBox>
+#include <QMessageBox>
 #include <QPixmap>
 #include <QDebug>
 #include <QApplication>
@@ -60,7 +60,7 @@ ImgArea::ImgArea(QWidget *parent)
 
 ImgArea::~ImgArea()
 {
-    delete  m_pMainImg;
+    qDebug() << "~ImgArea";
 
     m_thread->stop();
     while (!m_thread->wait(100) )
@@ -83,6 +83,8 @@ ImgArea::~ImgArea()
         CameraUnInit(g_hCamera);
         g_hCamera=-1;
     }
+
+    delete  m_pMainImg;
 }
 
 void ImgArea::setWidgetUi()
@@ -210,6 +212,10 @@ void ImgArea::eraseShape()
 void ImgArea::clearShapes()
 {
     QList<QGraphicsItem *> itemList = m_pScene->items();
+
+    if (itemList.size() == 1) {
+        return ;
+    }
 
     for (int i = 0; i < itemList.size(); i++) {
         if (itemList[i] != m_pImageItem && itemList[i] != nullptr) {
@@ -505,7 +511,13 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             QList<QPointF> myEdgePointList;
 
             if (myStrList.size() > 2) {
-                MyPolygon *myPolygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
+                MyPolygon *myPolygon;
+
+                if (itemDataList[i].type == MyGraphicsItem::ItemType::Polygon) {
+                    myPolygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
+                } else {
+                    myPolygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon_Mask);
+                }
 
                 for (int i = 0; i < myStrList.size() - 1; i+=2) {
                     if (i + 1 < myStrList.size()) {
@@ -707,54 +719,52 @@ int ImgArea::initSDK()
         return -1;
     }
 
-    // 获取相机IP信息
-    char* ipInfo[6];
-    for (int i = 0; i < 6; i++) {
-        ipInfo[i] = QString("0").toUtf8().data();
-    }
-
-    CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
-
-    for (int i = 0; i < 6; i++) {
-        qDebug() << ipInfo[i];
-    }
-
     // 获取相机序列号信息
-//    BYTE* serialId[3];
-//    for (int i = 0; i < 3; i++) {
-//        serialId[i] =  (unsigned char *)QString("0").toUtf8().data();
-//        CameraReadSN(g_hCamera, serialId[i], i);
-//        qDebug() << serialId[i];
-//    }
     qDebug() << tCameraEnumList[0].acProductSeries;
     qDebug() << tCameraEnumList[0].acProductName;
     qDebug() << tCameraEnumList[0].acFriendlyName;
     qDebug() << tCameraEnumList[0].acLinkName;
     qDebug() << tCameraEnumList[0].acSn;
 
-    // 数据库交互
-    CameraIPData cameraIPData;
-    cameraIPData.cameraId = 0;
-    cameraIPData.serialId = tCameraEnumList[0].acSn;
-    cameraIPData.nickName = tCameraEnumList[0].acFriendlyName;
-    cameraIPData.portIp   = ipInfo[3];
-    cameraIPData.state    = "可用";
-    cameraIPData.cameraIp = ipInfo[0];
-
-    if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
-        MyDataBase::getInstance()->addCameraIPData(cameraIPData);
+    // 获取相机IP信息
+    char* ipInfo[6];
+    for (int i = 0; i < 6; i++) {
+        ipInfo[i] = QString("0").toUtf8().data();
     }
+
+//    CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
+
+    for (int i = 0; i < 6; i++) {
+        qDebug() << ipInfo[i];
+    }
+
+    // 数据库交互
+//    CameraIPData cameraIPData;
+//    cameraIPData.cameraId = 0;
+//    cameraIPData.serialId = tCameraEnumList[0].acSn;
+//    cameraIPData.nickName = tCameraEnumList[0].acFriendlyName;
+//    cameraIPData.portIp   = ipInfo[3];
+//    cameraIPData.state    = "可用";
+//    cameraIPData.cameraIp = ipInfo[0];
+
+//    if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
+//        MyDataBase::getInstance()->addCameraIPData(cameraIPData);
+//    }
+    qDebug() << "2";
 
     //获得相机的特性描述结构体。该结构体中包含了相机可设置的各种参数的范围信息。决定了相关函数的参数
     CameraGetCapability(g_hCamera,&g_tCapability);
+    qDebug() << "3";
 
     g_pRgbBuffer = (unsigned char*)malloc(g_tCapability.sResolutionRange.iHeightMax*g_tCapability.sResolutionRange.iWidthMax*3);
     g_readBuf = (unsigned char*)malloc(g_tCapability.sResolutionRange.iHeightMax*g_tCapability.sResolutionRange.iWidthMax*3);
+    qDebug() << "4";
 
     /*让SDK进入工作模式，开始接收来自相机发送的图像
     数据。如果当前相机是触发模式，则需要接收到
     触发帧以后才会更新图像。    */
     CameraPlay(g_hCamera);
+    qDebug() << "5";
 
     /*
         设置图像处理的输出格式，彩色黑白都支持RGB24位
@@ -764,6 +774,8 @@ int ImgArea::initSDK()
     }else{
         CameraSetIspOutFormat(g_hCamera,CAMERA_MEDIA_TYPE_RGB8);
     }
+    qDebug() << "6";
+
     return 0;
 }
 

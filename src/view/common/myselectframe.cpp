@@ -1,7 +1,7 @@
 ﻿#include "myselectframe.h"
 
-MySelectFrame::MySelectFrame(QWidget *parent, int btnNum)
-    : QWidget(parent), m_radioBtnNum(btnNum)
+MySelectFrame::MySelectFrame(QWidget *parent, int frameId, int btnNum)
+    : QWidget(parent), m_frameId(frameId), m_radioBtnNum(btnNum)
 {
     // 初始化组件
     setWidgetUi();
@@ -26,6 +26,7 @@ void MySelectFrame::setWidgetUi()
         radioBtn = new QRadioButton(this);
         m_radioBtnList.append(radioBtn);
         m_frameLayout->addWidget(radioBtn);
+        connect(radioBtn, &QRadioButton::clicked, this, &MySelectFrame::radioButtonClick);
     }
 
     m_frameLayout->setContentsMargins(5, 5, 5, 5);
@@ -65,7 +66,7 @@ void MySelectFrame::setWidgetStyle()
 void MySelectFrame::setData()
 {
     m_selectNum = 0;
-    m_radioBtnList.at(m_selectNum)->setChecked(true);
+//    m_radioBtnList.at(m_selectNum)->setChecked(true);
 }
 
 void MySelectFrame::setFrameName(QString name)
@@ -88,9 +89,21 @@ void MySelectFrame::setSelectNum(int num)
 {
     m_selectNum = num;
     m_radioBtnList.at(m_selectNum)->setChecked(true);
+
+    emit valueChange(m_frameId, m_selectNum);
 }
 
 int MySelectFrame::getSelectNum()
 {
     return m_selectNum;
+}
+
+void MySelectFrame::radioButtonClick()
+{
+    for (int i = 0; i < m_radioBtnList.size(); i++) {
+        if (m_radioBtnList[i]->isChecked()) {
+            setSelectNum(i);
+            break;
+        }
+    }
 }

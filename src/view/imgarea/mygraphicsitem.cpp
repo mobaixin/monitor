@@ -93,15 +93,17 @@ void MyGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    //设置笔的颜色，和笔刷颜色
-    painter->setPen(this->pen());
-    painter->setBrush(this->brush());
+    if (m_accuracy != -1) {
+        //设置笔的颜色，和笔刷颜色
+        painter->setPen(this->pen());
+        painter->setBrush(this->brush());
 
-    QFont font = painter->font();
-    font.setPixelSize(18);
-    painter->setFont(font);
+        QFont font = painter->font();
+        font.setPixelSize(18);
+        painter->setFont(font);
 
-    painter->drawText(m_center.x() - 40, m_center.y(), QString("(%1, %2)").arg(m_accuracy).arg(m_pixel));
+        painter->drawText(m_center.x() - 40, m_center.y(), QString("(%1, %2)").arg(m_accuracy).arg(m_pixel));
+    }
 }
 
 
@@ -317,16 +319,16 @@ MyPolygon::MyPolygon(MyGraphicsItem::ItemType type)
     m_isAddedPoint = false;
 }
 
-MyPolygon::~MyPolygon()
-{
-    qDebug() << "~MyPolygon";
+//MyPolygon::~MyPolygon()
+//{
+//    qDebug() << "~MyPolygon";
 
-//    for (int i = 0; i < m_pointList.size(); i++) {
-//        if (m_pointList[i] != nullptr) {
-//            m_pointList[i]->deleteLater();
-//        }
-//    }
-}
+////    for (int i = 0; i < m_pointList.size(); i++) {
+////        if (m_pointList[i] != nullptr) {
+////            m_pointList[i]->deleteLater();
+////        }
+////    }
+//}
 
 QPointF MyPolygon::getCentroid(QList<QPointF> list)
 {
@@ -489,7 +491,9 @@ void MyPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
         }
     }
 
-    return MyGraphicsItem::paint(painter, option, widget);
+    if (m_isCreateFinished) {
+        return MyGraphicsItem::paint(painter, option, widget);
+    }
 }
 
 void MyPolygon::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -628,5 +632,7 @@ void MyCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         }
     }
 
-    return MyGraphicsItem::paint(painter, option, widget);
+    if (m_isCreateFinished) {
+        return MyGraphicsItem::paint(painter, option, widget);
+    }
 }

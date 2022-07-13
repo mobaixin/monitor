@@ -231,6 +231,7 @@ void TitleBar::monitorSetBtnClick()
 
         m_pMonitorSetBtn->setText("关闭设定");
         m_pTestBtn->setDisabled(true);
+        ImgArea::getInstance()->setShapeNoMove(false);
     }
 }
 
@@ -304,6 +305,7 @@ void TitleBar::closeBtnClick()
 //       QApplication* app;
 //       app->exit(0);
         MainWindow::getInstance()->close();
+        MainWindow::getInstance()->deleteLater();
     }
 }
 

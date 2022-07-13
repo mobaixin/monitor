@@ -383,7 +383,7 @@ void SideBar::checkMoldBtnClick()
     m_isDetectMold = true;
     m_sceneId = 1;
     MainWindow::getInstance()->setDetectObject();
-    ImgArea::getInstance()->clearShapes();
+//    ImgArea::getInstance()->clearShapes();
     updateOrderLab();
 }
 
@@ -392,7 +392,7 @@ void SideBar::productBtnClick()
     m_isDetectMold = false;
     m_sceneId = 2;
     MainWindow::getInstance()->setDetectObject();
-    ImgArea::getInstance()->clearShapes();
+//    ImgArea::getInstance()->clearShapes();
     updateOrderLab();
 }
 

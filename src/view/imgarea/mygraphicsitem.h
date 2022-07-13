@@ -172,7 +172,7 @@ class MyPolygon : public MyGraphicsItem
     Q_OBJECT
 public:
     MyPolygon(ItemType type);
-    ~MyPolygon();
+//    ~MyPolygon();
     enum { Type = 28 };
     int type() const {
         return Type;

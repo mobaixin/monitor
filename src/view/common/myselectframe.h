@@ -13,7 +13,7 @@ class MySelectFrame : public QWidget
 {
     Q_OBJECT
 public:
-    MySelectFrame(QWidget *parent = nullptr, int btnNum = 2);
+    MySelectFrame(QWidget *parent = nullptr, int frameId = -1, int btnNum = 2);
 
     // 初始化组件
     void setWidgetUi();
@@ -37,7 +37,10 @@ public:
     int getSelectNum();
 
 private:
+    void radioButtonClick();
 
+signals:
+    void valueChange(int frameId, int selectNum);
 
 private:
     QLabel *m_frameNameLab;
@@ -46,6 +49,7 @@ private:
     QHBoxLayout *m_frameLayout;
     QHBoxLayout *m_mainLayout;
 
+    int m_frameId;
     int m_radioBtnNum;
     int m_selectNum;
 };

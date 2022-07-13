@@ -499,9 +499,8 @@ void BottomBar::maskBtnClick()
         polygon->setMask(true);
         m_pAreaScene->addItem(polygon);
 
-        polygon->setAccuracy(getAccuracy());
-        polygon->setPixel(getPixel());
-
+        polygon->setAccuracy(-1);
+        polygon->setPixel(-1);
         connect(m_pAreaScene, &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
     } else {
@@ -537,8 +536,11 @@ void BottomBar::updateItemAcc(int acc)
     if (!m_pAreaScene->selectedItems().isEmpty()) {
         QGraphicsItem *temp = m_pAreaScene->selectedItems().first();
         MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
-        item->setAccuracy(acc);
-        item->update();
+
+        if (item->getAccuracy() != -1) {
+            item->setAccuracy(acc);
+            item->update();
+        }
     }
 
     MySettings::getInstance()->setValue(ShapeSection, "accuracy", QString::number(acc));
@@ -554,8 +556,11 @@ void BottomBar::updateItemPix(int pix)
     if (!m_pAreaScene->selectedItems().isEmpty()) {
         QGraphicsItem *temp = m_pAreaScene->selectedItems().first();
         MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
-        item->setPixel(pix);
-        item->update();
+
+        if (item->getPixel() != -1) {
+            item->setPixel(pix);
+            item->update();
+        }
     }
 
     MySettings::getInstance()->setValue(ShapeSection, "pixel", QString::number(pix));
