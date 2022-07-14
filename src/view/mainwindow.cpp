@@ -130,7 +130,7 @@ void MainWindow::setData()
 
 void MainWindow::closeEvent(QCloseEvent *)
 {
-    m_pImgArea->deleteLater();
+    this->deleteLater();
 }
 
 void MainWindow::setRunState(int state)
@@ -155,10 +155,12 @@ void MainWindow::showMonitorSet(bool isDisplay)
 
 void MainWindow::setDetectObject()
 {
-    bool isDetectMold = m_pSideBar->getIsDetectMold();
-    int  curIdx = m_pSideBar->getCurrentIdx();
+    if (m_pTitleBar->getMonitorSetState()) {
+        bool isDetectMold = m_pSideBar->getIsDetectMold();
+        int  curIdx = m_pSideBar->getCurrentIdx();
 
-    m_pImgArea->setSampleLab(isDetectMold, curIdx);
+        m_pImgArea->setSampleLab(isDetectMold, curIdx);
+    }
 }
 
 void MainWindow::saveMold()

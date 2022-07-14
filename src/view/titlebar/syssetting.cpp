@@ -3,6 +3,7 @@
 #include "src/view/titlebar/syssetting.h"
 #include "src/view/common/myselectframe.h"
 #include "src/view/common/mysettings.h"
+#include "src/view/titlebar/optrecord.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -151,23 +152,30 @@ void SysSetting::setData()
 
 void SysSetting::changeTimeBtnClick()
 {
+    OptRecord::addOptRecord("点击修改时间");
 
 }
 
 void SysSetting::ioSettingsBtnClick()
 {
+    OptRecord::addOptRecord("点击IO设置");
+
     m_ioSetting = new IOSetting();
     m_ioSetting->exec();
 }
 
 void SysSetting::cameraParaBtnClick()
 {
+    OptRecord::addOptRecord("点击相机参数");
+
     m_cameraPara = new CameraPara();
     m_cameraPara->exec();
 }
 
 void SysSetting::closeSetBtnClick()
 {
+    OptRecord::addOptRecord("点击关闭");
+
     this->close();
 }
 

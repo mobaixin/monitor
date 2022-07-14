@@ -1,4 +1,4 @@
-#include <QMessageBox>
+﻿#include <QMessageBox>
 #include <QPixmap>
 #include <QDebug>
 #include <QApplication>
@@ -161,21 +161,22 @@ void ImgArea::setData()
 {
     m_isShowImage = true;
 
-//    status =0;
-//    setRunState(CameraState::OffLine);
+    status =0;
+    setRunState(CameraState::OffLine);
 
-    if(initSDK()==-1){
-        status =0;
-        setRunState(CameraState::OffLine);
-    } else {
-        initParameter(g_hCamera,&g_tCapability);
-//        CameraSetOnceWB(g_hCamera);
-
-        m_thread->start();
-        m_thread->stream();
-        status = 1;
-        setRunState(CameraState::Running);
-    }
+//    if(initSDK()==-1){
+//        status =0;
+//        setRunState(CameraState::OffLine);
+//    } else {
+//        qDebug() << "before initParameter";
+//        initParameter(g_hCamera,&g_tCapability);
+////        CameraSetOnceWB(g_hCamera);
+//        qDebug() << "after initParameter";
+//        m_thread->start();
+//        m_thread->stream();
+//        status = 1;
+//        setRunState(CameraState::Running);
+//    }
     qDebug() << "status: " << status;
 }
 
@@ -202,16 +203,15 @@ void ImgArea::eraseShape()
         QGraphicsItem *temp = m_pScene->selectedItems().first();
         m_pScene->removeItem(temp);
 
-        // todo
+//        MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(temp);
 //        delete temp;
-        MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(temp);
-        shapeItem->deleteLater();
     }
 }
 
 void ImgArea::clearShapes()
 {
     QList<QGraphicsItem *> itemList = m_pScene->items();
+    qDebug() << "itemList.size: " << itemList.size();
 
     if (itemList.size() == 1) {
         return ;
@@ -240,9 +240,11 @@ void ImgArea::clearShapes()
                 continue ;
             }
 
-            MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(itemList[i]);
+//            MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(itemList[i]);
 
-            shapeItem->deleteLater();
+//            shapeItem->deleteLater();
+
+            delete itemList[i];
         }
     }
 
@@ -398,6 +400,7 @@ QList<ShapeItemData> ImgArea::getShapeItems()
             case MyGraphicsItem::ItemType::Polygon:
             case MyGraphicsItem::ItemType::Polygon_Mask: {
                 QList<QPointF> myList = item->getMyPointList();
+                qDebug() << "myList.size: " << myList.size();
                 myList.removeLast();
 
                 itemData.edge      = QString("");
@@ -725,6 +728,7 @@ int ImgArea::initSDK()
     qDebug() << tCameraEnumList[0].acFriendlyName;
     qDebug() << tCameraEnumList[0].acLinkName;
     qDebug() << tCameraEnumList[0].acSn;
+    qDebug() << "1";
 
     // 获取相机IP信息
     char* ipInfo[6];

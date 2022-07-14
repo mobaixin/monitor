@@ -1,6 +1,7 @@
 ﻿#include <QDebug>
 
 #include "cameraipset.h"
+#include "src/view/titlebar/optrecord.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -105,31 +106,36 @@ void CameraIpSet::setData()
 {
     getModelData();
     m_ipTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    m_ipTableView->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    m_ipTableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
 void CameraIpSet::freshBtnClick()
 {
+    OptRecord::addOptRecord("点击刷新IP");
 
 }
 
 void CameraIpSet::changeIpBtnClick()
 {
+    OptRecord::addOptRecord("点击修改IP");
 
 }
 
 void CameraIpSet::autoGetIpBtnClick()
 {
+    OptRecord::addOptRecord("点击自动分配IP");
 
 }
 
 void CameraIpSet::confirmBtnClick()
 {
+    OptRecord::addOptRecord("点击确认");
 
 }
 
 void CameraIpSet::cancelBtnClick()
 {
+    OptRecord::addOptRecord("点击取消");
     this->close();
 }
 

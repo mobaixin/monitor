@@ -405,6 +405,8 @@ void BottomBar::circleBtnClick()
 //    circle->setPixel(getPixel());
 
     m_pAreaScene->startCreateCircle();
+
+    OptRecord::addOptRecord("点击圆形");
 }
 
 void BottomBar::ellipseBtnClick()
@@ -425,6 +427,8 @@ void BottomBar::conCircleBtnClick()
 //    conCircle->setPixel(getPixel());
 
     m_pAreaScene->startCreateConCircle();
+
+    OptRecord::addOptRecord("点击环形");
 }
 
 void BottomBar::rectBtnClick()
@@ -436,6 +440,8 @@ void BottomBar::rectBtnClick()
 //    rectangle->setPixel(getPixel());
 
     m_pAreaScene->startCreateRect();
+
+    OptRecord::addOptRecord("点击矩形");
 }
 
 void BottomBar::polygonBtnClick()
@@ -454,11 +460,15 @@ void BottomBar::polygonBtnClick()
 
         connect(m_pAreaScene, &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
+
+        OptRecord::addOptRecord("点击多边形");
     } else {
         m_pPolyBtn->setText("多边形");
         m_isCreatePolygon = false;
 
         m_pAreaScene->finishCreatePloygon();
+
+        OptRecord::addOptRecord("点击完成绘制");
     }
 }
 
@@ -479,11 +489,15 @@ void BottomBar::curveBtnClick()
         connect(m_pAreaScene, &MyGraphicsScene::updateCurvePoint, curve, &MyCurve::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
 
+        OptRecord::addOptRecord("点击曲线");
+
     } else {
         m_pCurvBtn->setText("曲线");
         m_isCreateCurve = false;
 
         m_pAreaScene->finishCreateCurve();
+
+        OptRecord::addOptRecord("点击完成绘制");
     }
 }
 
@@ -503,17 +517,23 @@ void BottomBar::maskBtnClick()
         polygon->setPixel(-1);
         connect(m_pAreaScene, &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
+
+        OptRecord::addOptRecord("点击屏蔽区");
     } else {
         m_pMaskBtn->setText("屏蔽区");
         m_isCreateMask = false;
 
         m_pAreaScene->finishCreatePloygon();
+
+        OptRecord::addOptRecord("点击完成绘制");
     }
 }
 
 void BottomBar::CopyBtnClick()
 {
 
+
+    OptRecord::addOptRecord("点击复制");
 }
 
 void BottomBar::positionBtnClick()

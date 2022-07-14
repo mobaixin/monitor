@@ -283,32 +283,40 @@ void IOSetting::updateMaxReDeteNum(int value)
 
 void IOSetting::restartBtnClick()
 {
+    OptRecord::addOptRecord("点击重启");
 
 }
 
 void IOSetting::passwordBtnClick()
 {
+    OptRecord::addOptRecord("点击按钮子密码");
 
 }
 
 void IOSetting::ipsetBtnClick()
 {
+    OptRecord::addOptRecord("点击相机ip配置");
+
     m_cameraIpSet = new CameraIpSet();
     m_cameraIpSet->exec();
 }
 
 void IOSetting::resetBtnClick()
 {
+    OptRecord::addOptRecord("点击恢复默认");
 
+    MySettings::getInstance()->setIOInitValue();
 }
 
 void IOSetting::testModeBtnClick()
 {
+    OptRecord::addOptRecord("点击测试模式");
 
 }
 
 void IOSetting::saveBtnClick()
 {
+    OptRecord::addOptRecord("点击保存");
 
     this->close();
 }

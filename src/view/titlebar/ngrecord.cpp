@@ -50,9 +50,9 @@ void NGRecord::setWidgetUi()
 
     this->setLayout(m_mainLayout);
 
-    connect(m_resetBtn, &QPushButton::clicked, this, &NGRecord::resetBtnClick);
+    connect(m_resetBtn,     &QPushButton::clicked, this, &NGRecord::resetBtnClick);
     connect(m_optRecordBtn, &QPushButton::clicked, this, &NGRecord::optRecordBtnClick);
-    connect(m_closeBtn, &QPushButton::clicked, this, &NGRecord::closeBtnClick);
+    connect(m_closeBtn,     &QPushButton::clicked, this, &NGRecord::closeBtnClick);
 
 }
 
@@ -74,7 +74,7 @@ void NGRecord::setWidgetStyle()
     m_ngTableView->setFont(viewFont);
     m_ngTableView->setAlternatingRowColors(true);
 
-    m_ngModel->setHorizontalHeaderLabels({"时间", " 相机 ", " 场景 ", " 结果 "});
+    m_ngModel->setHorizontalHeaderLabels({" 时间 ", " 相机 ", " 场景 ", " 结果 "});
     m_ngTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_ngTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     m_ngTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -110,6 +110,8 @@ void NGRecord::setData()
     m_ngTotalNum = 0;
     getModelData();
     m_ngTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    m_ngTableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+
 
     m_recordText->setText("10:40:07\n版本号:2.1.3.0(20220505)\n"
                           "10:40:14\n相机1场景1 收到触发信号\n"
@@ -140,16 +142,23 @@ void NGRecord::addNgRecord(NGRecordData ngData)
 
 void NGRecord::resetBtnClick()
 {
+    OptRecord::addOptRecord("点击清零");
+
     m_resultLab->setText("正常0次，异常0次");
 }
 
 void NGRecord::optRecordBtnClick()
 {
+    OptRecord::addOptRecord("点击操作记录");
 
+    m_optRecord = new OptRecord();
+    m_optRecord->exec();
 }
 
 void NGRecord::closeBtnClick()
 {
+    OptRecord::addOptRecord("点击关闭");
+
     this->close();
 }
 

@@ -13,6 +13,7 @@
 #include <QTextEdit>
 
 #include "src/database/mydatabase.h"
+#include "src/view/titlebar/optrecord.h"
 
 class NGRecord : public QDialog
 {
@@ -58,6 +59,7 @@ private:
     int m_okTotalNum;
     int m_ngTotalNum;
 
+    OptRecord *m_optRecord;
 };
 
 #endif // NGRECORD_H

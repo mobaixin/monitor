@@ -201,10 +201,17 @@ void TitleBar::setAlarmBtnState(bool isShow)
     }
 }
 
+bool TitleBar::getMonitorSetState()
+{
+    return m_pIsSetMonitor;
+}
+
 void TitleBar::startBtnClick()
 {
     ImgArea::getInstance()->setRunState(CameraState::Running);
     ImgArea::getInstance()->startCamera();
+
+    OptRecord::addOptRecord("点击开始运行");
 }
 
 void TitleBar::stopBtnClick()
@@ -214,6 +221,8 @@ void TitleBar::stopBtnClick()
 
     ImgArea::getInstance()->setRunState(CameraState::Pause);
     ImgArea::getInstance()->pauseCamera();
+
+    OptRecord::addOptRecord("点击停止运行");
 }
 
 void TitleBar::monitorSetBtnClick()
@@ -225,6 +234,8 @@ void TitleBar::monitorSetBtnClick()
         m_pMonitorSetBtn->setText("监视设定");
         m_pTestBtn->setDisabled(false);
 
+        OptRecord::addOptRecord("点击关闭设定");
+
     } else {
         MainWindow::getInstance()->showMonitorSet(true);
         m_pIsSetMonitor = true;
@@ -232,6 +243,8 @@ void TitleBar::monitorSetBtnClick()
         m_pMonitorSetBtn->setText("关闭设定");
         m_pTestBtn->setDisabled(true);
         ImgArea::getInstance()->setShapeNoMove(false);
+
+        OptRecord::addOptRecord("点击监视设定");
     }
 }
 
@@ -239,6 +252,8 @@ void TitleBar::sysSettingBtnClick()
 {
     m_pSysSetting = new SysSetting();
     m_pSysSetting->exec();
+
+    OptRecord::addOptRecord("点击系统设定");
 }
 
 void TitleBar::testBtnClick()
@@ -250,6 +265,8 @@ void TitleBar::testBtnClick()
     if (ImgArea::getInstance()->getCameraStatus() == 1) {
         detectCurImage();
     }
+
+    OptRecord::addOptRecord("点击测试");
 }
 
 void TitleBar::addMoldBtnClick()
@@ -273,6 +290,8 @@ void TitleBar::addMoldBtnClick()
     ngData.imgPath  = filePath;
 
     MyDataBase::getInstance()->addNGRecordData(ngData);
+
+    OptRecord::addOptRecord("点击添加模板");
 }
 
 void TitleBar::reDetectBtnClick()
@@ -282,12 +301,16 @@ void TitleBar::reDetectBtnClick()
     if (ImgArea::getInstance()->getCameraStatus() == 1) {
         detectCurImage();
     }
+
+    OptRecord::addOptRecord("点击重检");
 }
 
 void TitleBar::NGRecordBtnClick()
 {
     m_pNGRecord = new NGRecord();
     m_pNGRecord->exec();
+
+    OptRecord::addOptRecord("点击NG记录");
 }
 
 void TitleBar::delAlarmBtnClick()
@@ -296,6 +319,8 @@ void TitleBar::delAlarmBtnClick()
     ImgArea::getInstance()->clearDetectResult();
     SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
     ImgArea::getInstance()->setShapeNoMove(false);
+
+    OptRecord::addOptRecord("点击删除报警");
 }
 
 void TitleBar::closeBtnClick()

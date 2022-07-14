@@ -112,8 +112,17 @@ int MyDataBase::initDataBase()
                                        "time VARCHAR,"
                                        "camera_id INTEGER,"
                                        "scene_id INTEGER,"
-                                       "result INTEGER,"
+                                       "result VARCHAR,"
                                        "img_path VARCHAR,"
+                                       "other1 VARCHAR,"
+                                       "other2 VARCHAR)"
+                                       ));
+
+    queryRes &= queryInit.exec(QString("create table if not exists opt_record ("
+                                       "id INTEGER primary key AUTOINCREMENT,"
+                                       "time VARCHAR,"
+                                       "optor_name VARCHAR,"
+                                       "opt_log VARCHAR,"
                                        "other1 VARCHAR,"
                                        "other2 VARCHAR)"
                                        ));
@@ -676,6 +685,107 @@ QList<NGRecordData> MyDataBase::queAllNGRecordData()
     return resDataList;
 }
 
+int MyDataBase::addOptRecordData(OptRecordData recordData)
+{
+    bool queryRes = true;
+
+    if (!checkOptRecordData(recordData)) {
+        return INVALID_INPUT;
+    } else {
+        if (m_database.isValid()) {
+            QSqlQuery query;
+
+            query.prepare("INSERT INTO opt_record (time, optor_name, opt_log) VALUES "
+                          "(:time, :optor_name, :opt_log)");
+
+            query.bindValue(":time",       recordData.time);
+            query.bindValue(":optor_name", recordData.optorName);
+            query.bindValue(":opt_log",    recordData.optLog);
+
+            queryRes = query.exec();
+
+            if (queryRes) {
+                return DB_OP_SUCC;
+            } else {
+                return DB_OP_ADD_FAILED;
+            }
+        } else {
+            return DB_UNCONNECT;
+        }
+    }
+    return DB_OP_SUCC;
+}
+
+int MyDataBase::delOptRecordData(OptRecordData recordData)
+{
+    bool queryRes = true;
+
+    if (checkOptRecordData(recordData)) {
+        QSqlQuery query;
+
+        query.prepare("DELETE FROM opt_record WHERE id=:id");
+
+        query.bindValue(":id", QString::number(recordData.recordId));
+
+        queryRes = query.exec();
+    }
+
+    return DB_OP_SUCC;
+}
+
+OptRecordData MyDataBase::queOptRecordData(OptRecordData recordData)
+{
+    OptRecordData resData;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM opt_record WHERE id=:id");
+
+    query.bindValue(":id", QString::number(recordData.recordId));
+
+    queryRes = query.exec();
+
+    if (query.next()) {
+        resData.recordId   = query.value("id").toInt();
+        resData.time       = query.value("time").toString();
+        resData.optorName  = query.value("optor_name").toInt();
+        resData.optLog     = query.value("opt_log").toString();
+    }
+
+    return resData;
+}
+
+//int MyDataBase::altOptRecordData(OptRecordData recordData)
+//{
+
+//}
+
+QList<OptRecordData> MyDataBase::queAllOptRecordData()
+{
+    QList<OptRecordData> resDataList;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM opt_record");
+
+    queryRes = query.exec();
+
+    while (query.next()) {
+        OptRecordData resData;
+
+        resData.recordId  = query.value("id").toInt();
+        resData.time      = query.value("time").toString();
+        resData.optorName = query.value("optor_name").toString();
+        resData.optLog    = query.value("opt_log").toString();
+
+        resDataList.append(resData);
+    }
+
+    return resDataList;
+}
+
 int MyDataBase::addCameraIPData(CameraIPData cameraIPData)
 {
     bool queryRes = true;
@@ -856,6 +966,17 @@ bool MyDataBase::checkNGRecordData(NGRecordData recordData)
     }
 
     if (recordData.result.isEmpty()) {
+        return false;
+    }
+
+    return checkRes;
+}
+
+bool MyDataBase::checkOptRecordData(OptRecordData recordData)
+{
+    bool checkRes = true;
+
+    if (recordData.optLog.isEmpty()) {
         return false;
     }
 

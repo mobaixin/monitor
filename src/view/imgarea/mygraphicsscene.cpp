@@ -1,4 +1,4 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "mygraphicsscene.h"
 #include "src/view/bottombar/bottombar.h"

@@ -3,6 +3,7 @@
 #include "camerapara.h"
 #include "src/view/imgarea/imgarea.h"
 #include "src/view/common/mysettings.h"
+#include "src/view/titlebar/optrecord.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -137,16 +138,21 @@ void CameraPara::setData()
 
 void CameraPara::defaultBtnClick()
 {
+    OptRecord::addOptRecord("点击默认相机参数");
 
 }
 
 void CameraPara::cancelBtnClick()
 {
+    OptRecord::addOptRecord("点击取消");
+
     this->close();
 }
 
 void CameraPara::confirmBtnClick()
 {
+    OptRecord::addOptRecord("点击确定");
+
     ImgArea::getInstance()->saveCameraPara();
     this->close();
 }

@@ -59,7 +59,8 @@ SOURCES += \
     src/view/titlebar/iosetting.cpp \
     src/view/titlebar/ngrecord.cpp \
     src/view/titlebar/syssetting.cpp \
-    src/view/titlebar/titlebar.cpp
+    src/view/titlebar/titlebar.cpp \
+    src/view/titlebar/optrecord.cpp
 
 HEADERS += \
     src/camera/camera.h \
@@ -86,7 +87,8 @@ HEADERS += \
     src/view/sidebar/sidebar.h      \
     src/view/imgarea/imgarea.h      \
     src/model/model.h               \
-    src/controller/controller.h
+    src/controller/controller.h \
+    src/view/titlebar/optrecord.h
 
 TRANSLATIONS += \
     monitor_zh_CN.ts

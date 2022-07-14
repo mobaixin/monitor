@@ -38,6 +38,9 @@ public:
     // 设置报警相关按钮的显示状态
     void setAlarmBtnState(bool isShow);
 
+    // 获取当前监视状态
+    bool getMonitorSetState();
+
 private:
     void startBtnClick();
     void stopBtnClick();

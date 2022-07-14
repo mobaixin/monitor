@@ -385,6 +385,8 @@ void SideBar::checkMoldBtnClick()
     MainWindow::getInstance()->setDetectObject();
 //    ImgArea::getInstance()->clearShapes();
     updateOrderLab();
+
+    OptRecord::addOptRecord("点击检模");
 }
 
 void SideBar::productBtnClick()
@@ -394,10 +396,14 @@ void SideBar::productBtnClick()
     MainWindow::getInstance()->setDetectObject();
 //    ImgArea::getInstance()->clearShapes();
     updateOrderLab();
+
+    OptRecord::addOptRecord("点击产品");
 }
 
 void SideBar::saveMoldBtnClick()
 {
+    OptRecord::addOptRecord("点击保存模板");
+
 //    if (ImgArea::getInstance()->getShapeItemNum() == 0) {
 //        return ;
 //    }
@@ -427,6 +433,8 @@ void SideBar::saveMoldBtnClick()
 
 void SideBar::addMoldBtnClick()
 {
+    OptRecord::addOptRecord("点击添加模板");
+
     if (ImgArea::getInstance()->getCameraStatus() == 0) {
         return ;
     }
@@ -457,6 +465,8 @@ void SideBar::addMoldBtnClick()
 
 void SideBar::homePageBtnClick()
 {
+    OptRecord::addOptRecord("点击首页");
+
     if (m_isDetectMold) {
         if (m_deteMoldNum > 0) {
             m_curDeteMoldIdx = 1;
@@ -478,6 +488,8 @@ void SideBar::homePageBtnClick()
 
 void SideBar::prevPageBtnClick()
 {
+    OptRecord::addOptRecord("点击前一页");
+
     bool isChange = false;
     if (m_isDetectMold) {
         if (m_curDeteMoldIdx - 1 > 0) {
@@ -501,6 +513,8 @@ void SideBar::prevPageBtnClick()
 
 void SideBar::nextPageBtnClick()
 {
+    OptRecord::addOptRecord("点击后一页");
+
     bool isChange = false;
     if (m_isDetectMold) {
         if (m_curDeteMoldIdx + 1 <= m_deteMoldNum) {
@@ -523,6 +537,8 @@ void SideBar::nextPageBtnClick()
 
 void SideBar::delMoldBtnClick()
 {
+    OptRecord::addOptRecord("点击删除模板");
+
     bool isChange = false;
     ImageMoldData imgData;
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
@@ -566,6 +582,8 @@ void SideBar::delMoldBtnClick()
 
 void SideBar::clearMoldBtnClick()
 {
+    OptRecord::addOptRecord("点击清空模板");
+
     if (m_isDetectMold) {
         m_deteImgItemList.clear();
         m_deteShapeItemList.clear();

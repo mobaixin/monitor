@@ -18,7 +18,7 @@ class MyPointItem : public QObject, public QAbstractGraphicsShapeItem
     Q_OBJECT
 public:
     enum PointType {
-        Center = 0, // 中心点
+        Center = 1, // 中心点
         Edge,       // 边缘点（可拖动改变图形的形状、大小）
         Special,    // 特殊功能点
         Other       // 普通点

@@ -11,9 +11,10 @@
 #include <QApplication>
 #include <QDir>
 
-const QString SHAPEITEM = "shape_item"; // 图形标注表
-const QString IMGMOLD   = "image_mold"; // 图像模板表
-const QString NGRECORD  = "ng_record";  // NG记录表
+const QString SHAPEITEM = "shape_item";     // 图形标注表
+const QString IMGMOLD   = "image_mold";     // 图像模板表
+const QString NGRECORD  = "ng_record";      // NG记录表
+const QString OPTRECORD = "opt_record";     // 操作记录表
 const QString CAMERAIPDEPLOY = "camera_ip_deploy";  // 相机IP配置
 
 enum DB_RETURN_STATUS{              //数据库操作结果返回表
@@ -61,6 +62,13 @@ typedef struct NGRecordData{
     QString imgPath;
 }NGRecordData;
 
+typedef struct OptRecordData{
+    int recordId;
+    QString time;
+    QString optorName;
+    QString optLog;
+}OptRecordData;
+
 typedef struct CameraIPData {
     int cameraId;
     QString serialId;
@@ -95,6 +103,7 @@ public:
     // 更新图形的模板ID
     int updateItemMoldId(ShapeItemData itemData);
 
+
     // -----ImgMold表操作-----
     int addImgMoldData(ImageMoldData imgData);
     int delImgMoldData(ImageMoldData imgData);
@@ -110,16 +119,28 @@ public:
     // 获取当前场景中图片模板的数量
     int getImageMoldNum(ImageMoldData imgData);
 
-    // NGRecord表操作
+
+    // -----NGRecord表操作-----
     int addNGRecordData(NGRecordData recordData);
     int delNGRecordData(NGRecordData recordData);
     NGRecordData queNGRecordData(NGRecordData recordData);
     int altNGRecordData(NGRecordData recordData);
 
-    // 获取所有的记录
+    // 获取所有的NG记录
     QList<NGRecordData> queAllNGRecordData();
 
-    // CameraIPDeploy表操作
+
+    // -----OptRecord表操作-----
+    int addOptRecordData(OptRecordData recordData);
+    int delOptRecordData(OptRecordData recordData);
+    OptRecordData queOptRecordData(OptRecordData recordData);
+//    int altOptRecordData(OptRecordData recordData);
+
+    // 获取所有的操作记录
+    QList<OptRecordData> queAllOptRecordData();
+
+
+    // -----CameraIPDeploy表操作-----
     int addCameraIPData(CameraIPData cameraIPData);
     int delCameraIPData(CameraIPData cameraIPData);
     CameraIPData queCameraIPData(CameraIPData cameraIPData);
@@ -136,6 +157,7 @@ private:
     bool checkShapeItemData(ShapeItemData itemData);
     bool checkImgMoldData(ImageMoldData imgData);
     bool checkNGRecordData(NGRecordData recordData);
+    bool checkOptRecordData(OptRecordData recordData);
     bool checkCameraIPData(CameraIPData cameraIPData);
 
 private:
