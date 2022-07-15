@@ -19,6 +19,7 @@
 #include <QTimer>
 #include <windows.h>
 #include <opencv2\opencv.hpp>
+#include <aruco.hpp>
 
 #include "src/view/imgarea/mygraphicsitem.h"
 #include "src/view/imgarea/mygraphicsscene.h"
@@ -140,7 +141,7 @@ public:
     void pauseCamera();
 
     // 图片检测
-    int detectImage(QImage imgFg);
+    int detectImage(QImage imgFg, int sceneId = -1);
 
     // 获取item数
     int getShapeItemNum();

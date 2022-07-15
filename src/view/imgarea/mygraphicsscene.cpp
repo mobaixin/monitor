@@ -11,6 +11,9 @@ MyGraphicsScene::MyGraphicsScene(QObject *parent)
 
 void MyGraphicsScene::setData()
 {
+//    m_ploygonList = [];
+//    m_curveList = [];
+
     m_isCreatePolygon = false;
 
     m_isCreateCurve = false;

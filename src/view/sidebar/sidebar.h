@@ -64,8 +64,14 @@ public:
 
     // 设置顶针状态
     void setThimbleState(int state);
+
+    // 设置开模状态
     void setOpenMoldState(int state);
+
+    // 设置可顶针状态
     void setCanThimbleState(int state);
+
+    // 设置可合模状态
     void setCanClampMoldState(int state);
 
 private:

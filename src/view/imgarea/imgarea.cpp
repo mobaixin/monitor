@@ -161,22 +161,22 @@ void ImgArea::setData()
 {
     m_isShowImage = true;
 
-    status =0;
-    setRunState(CameraState::OffLine);
+//    status =0;
+//    setRunState(CameraState::OffLine);
 
-//    if(initSDK()==-1){
-//        status =0;
-//        setRunState(CameraState::OffLine);
-//    } else {
-//        qDebug() << "before initParameter";
-//        initParameter(g_hCamera,&g_tCapability);
-////        CameraSetOnceWB(g_hCamera);
-//        qDebug() << "after initParameter";
-//        m_thread->start();
-//        m_thread->stream();
-//        status = 1;
-//        setRunState(CameraState::Running);
-//    }
+    if(initSDK()==-1){
+        status =0;
+        setRunState(CameraState::OffLine);
+    } else {
+        qDebug() << "before initParameter";
+        initParameter(g_hCamera,&g_tCapability);
+//        CameraSetOnceWB(g_hCamera);
+        qDebug() << "after initParameter";
+        m_thread->start();
+        m_thread->stream();
+        status = 1;
+        setRunState(CameraState::Running);
+    }
     qDebug() << "status: " << status;
 }
 
@@ -203,8 +203,8 @@ void ImgArea::eraseShape()
         QGraphicsItem *temp = m_pScene->selectedItems().first();
         m_pScene->removeItem(temp);
 
-//        MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(temp);
-//        delete temp;
+        MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(temp);
+        delete temp;
     }
 }
 
@@ -857,7 +857,7 @@ Ptr<BackgroundSubtractorMOG2> ImgArea::getMOG2Data(ShapeItemData itemData)
     return myMOG2Data;
 }
 
-int ImgArea::detectImage(QImage imgFg)
+int ImgArea::detectImage(QImage imgFg, int sceneId)
 {
     int detectRes = DetectRes::NG;
 
@@ -869,11 +869,17 @@ int ImgArea::detectImage(QImage imgFg)
     itemData.sceneId  = SideBar::getInstance()->getCurSceneID();
     itemData.moldId   = 1;
 
+    // 自动检测时设置场景id
+    itemData.sceneId = sceneId != -1 ? sceneId : itemData.sceneId;
+
     QList<ShapeItemData> itemDataList = MyDataBase::getInstance()->queShapeItemData(itemData);
 
     ImageMoldData imgData;
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
     imgData.sceneId  = SideBar::getInstance()->getCurSceneID();
+
+    // 自动检测时设置场景id
+    imgData.sceneId = sceneId != -1 ? sceneId : imgData.sceneId;
 
     QList<ImageMoldData> imgDataList = MyDataBase::getInstance()->queAllImgMoldData(imgData);
 

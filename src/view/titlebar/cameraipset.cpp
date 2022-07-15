@@ -119,6 +119,8 @@ void CameraIpSet::changeIpBtnClick()
 {
     OptRecord::addOptRecord("点击修改IP");
 
+    m_myIpInputDialog = new MyIpInputDialog();
+    m_myIpInputDialog->exec();
 }
 
 void CameraIpSet::autoGetIpBtnClick()
@@ -158,4 +160,93 @@ void CameraIpSet::getModelData()
         m_ipModel->setItem(i, 3, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].state)));
         m_ipModel->setItem(i, 4, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].cameraIp)));
     }
+}
+
+MyIpInputDialog::MyIpInputDialog(QWidget *parent)
+    : QDialog(parent)
+{
+    // 初始化组件
+    setWidgetUi();
+
+    // 设置组件样式
+    setWidgetStyle();
+
+    // 设置初始数据
+    setData();
+}
+
+void MyIpInputDialog::setWidgetUi()
+{
+    // 初始化组件
+    m_captionLab  = new QLabel(this);
+    m_ipInputEdit = new QLineEdit(this);
+    m_cancelBtn   = new QPushButton(this);
+    m_confirmBtn  = new QPushButton(this);
+
+    m_btnLayout  = new QHBoxLayout();
+    m_mainLayout = new QVBoxLayout(this);
+
+    // 组件布局
+    m_btnLayout->addWidget(m_cancelBtn);
+    m_btnLayout->addWidget(m_confirmBtn);
+    m_btnLayout->setContentsMargins(0, 0, 0, 0);
+    m_btnLayout->setSpacing(5);
+
+    m_mainLayout->addWidget(m_captionLab);
+    m_mainLayout->addWidget(m_ipInputEdit);
+    m_mainLayout->addLayout(m_btnLayout);
+    m_mainLayout->setContentsMargins(5, 5, 5, 5);
+    m_mainLayout->setSpacing(10);
+
+    this->setLayout(m_mainLayout);
+
+    connect(m_cancelBtn,  &QPushButton::clicked, this, &MyIpInputDialog::cancelBtnClick);
+    connect(m_confirmBtn, &QPushButton::clicked, this, &MyIpInputDialog::confirmBtnClick);
+
+}
+
+void MyIpInputDialog::setWidgetStyle()
+{
+    this->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
+    this->setModal(true);
+    this->setFixedSize(300, 110);
+    this->setWindowTitle("修改IP");
+
+    m_captionLab->setFixedHeight(20);
+    m_ipInputEdit->setFixedHeight(30);
+    m_cancelBtn->setFixedHeight(30);
+    m_confirmBtn->setFixedHeight(30);
+
+    m_captionLab->setText("请输入IP地址:");
+    m_cancelBtn->setText("取消");
+    m_confirmBtn->setText("确定");
+
+    QFont viewFont = this->font();
+    viewFont.setPixelSize(15);
+
+    m_captionLab->setFont(viewFont);
+    m_ipInputEdit->setFont(viewFont);
+    m_cancelBtn->setFont(viewFont);
+    m_confirmBtn->setFont(viewFont);
+
+    m_cancelBtn->setFocusPolicy(Qt::NoFocus);
+//    m_confirmBtn->setFocusPolicy(Qt::NoFocus);
+
+}
+
+void MyIpInputDialog::setData()
+{
+
+}
+
+void MyIpInputDialog::cancelBtnClick()
+{
+    this->close();
+}
+
+void MyIpInputDialog::confirmBtnClick()
+{
+    emit getValues(m_ipInputEdit->text());
+
+    this->close();
 }

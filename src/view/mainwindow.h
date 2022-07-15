@@ -62,6 +62,9 @@ public:
     // 调整底边栏位置
     void adjustBottomBarPos();
 
+    // 自动检测
+    int autoDetectImage(int sceneId);
+
 public:
     int status;
 

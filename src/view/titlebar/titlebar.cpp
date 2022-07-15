@@ -334,7 +334,7 @@ void TitleBar::closeBtnClick()
     }
 }
 
-void TitleBar::detectCurImage()
+int TitleBar::detectCurImage(int sceneId, bool isShowNGRes)
 {
     m_detectTime     = QDateTime::currentDateTime();
     QString fileName = m_detectTime.toString("yyyy-MM-dd-HH-mm-ss");
@@ -346,18 +346,40 @@ void TitleBar::detectCurImage()
     QImage targetImg = QImage(filePath);
 //    QImage targetImg = ImgArea::getInstance()->getImageItem();
 
-    int detectRes = ImgArea::getInstance()->detectImage(targetImg);
+    int detectRes = ImgArea::getInstance()->detectImage(targetImg, sceneId);
+
+    if (sceneId == -1) {
+        sceneId = SideBar::getInstance()->getCurSceneID();
+    }
 
     if (detectRes == DetectRes::NG) {
+        if (!isShowNGRes) {
+            return detectRes;
+        }
+
         ImgArea::getInstance()->setDetectRes(false);
-        SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Wrong);
+        if (sceneId == 1) {
+            SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Wrong);
+        } else {
+            SideBar::getInstance()->setCanThimbleState(RadioBtnState::Wrong);
+        }
+
         setAlarmBtnState(true);
+
+        return detectRes;
     } else if (detectRes == DetectRes::OK) {
         ImgArea::getInstance()->setDetectRes(true);
-        SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
+        if (sceneId == 1) {
+            SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
+        } else {
+            SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
+        }
+
         setAlarmBtnState(false);
         ImgArea::getInstance()->setShapeNoMove(false);
+
+        return detectRes;
     } else {
-        return ;
+        return -1;
     }
 }

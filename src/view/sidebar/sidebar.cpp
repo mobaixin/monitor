@@ -3,6 +3,8 @@
 #include "src/view/sidebar/sidebar.h"
 #include "src/view/mainwindow.h"
 #include "src/view/imgarea/imgarea.h"
+#include "src/view/titlebar/titlebar.h"
+#include "src/serialport/myserialport.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -360,11 +362,23 @@ void SideBar::setOpenMoldState(int state)
 void SideBar::setCanThimbleState(int state)
 {
     setRadioBtnState(m_canThimbleBox, state);
+
+    if (state == RadioBtnState::Correct) {
+        MySerialPort::getInstance()->writeInfo(ThimbleMask, CanThimbleValue);
+    } else if (state == RadioBtnState::Wrong) {
+        MySerialPort::getInstance()->writeInfo(ThimbleMask, NotThimbleValue);
+    }
 }
 
 void SideBar::setCanClampMoldState(int state)
 {
     setRadioBtnState(m_canClampMoldBox, state);
+
+    if (state == RadioBtnState::Correct) {
+        MySerialPort::getInstance()->writeInfo(ClampMoldMask, CanClampMoldValue);
+    } else if (state == RadioBtnState::Wrong) {
+        MySerialPort::getInstance()->writeInfo(ClampMoldMask, NotClampMoldValue);
+    }
 }
 
 void SideBar::positionBtnClick()
@@ -386,6 +400,10 @@ void SideBar::checkMoldBtnClick()
 //    ImgArea::getInstance()->clearShapes();
     updateOrderLab();
 
+    if (TitleBar::getInstance()->getMonitorSetState()) {
+        loadCurMold();
+    }
+
     OptRecord::addOptRecord("点击检模");
 }
 
@@ -396,6 +414,10 @@ void SideBar::productBtnClick()
     MainWindow::getInstance()->setDetectObject();
 //    ImgArea::getInstance()->clearShapes();
     updateOrderLab();
+
+    if (TitleBar::getInstance()->getMonitorSetState()) {
+        loadCurMold();
+    }
 
     OptRecord::addOptRecord("点击产品");
 }
@@ -644,7 +666,7 @@ void SideBar::loadCurImage()
 {
     ImageMoldData imgData;
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
-    imgData.sceneId  = m_isDetectMold ? 1 : 2;
+    imgData.sceneId  = m_sceneId;
     imgData.moldId   = getCurrentIdx();
 
     qDebug() << "load img";

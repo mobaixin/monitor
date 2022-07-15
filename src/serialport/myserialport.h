@@ -12,6 +12,16 @@
 const unsigned int InputMask  = 0x03C0;
 const unsigned int OutputMask = 0x003F;
 
+// 可顶针
+const unsigned int ThimbleMask      = 0x0001;
+const unsigned int CanThimbleValue  = 0x0001;
+const unsigned int NotThimbleValue  = 0x0000;
+
+// 可合模
+const unsigned int ClampMoldMask      = 0x0002;
+const unsigned int CanClampMoldValue  = 0x0002;
+const unsigned int NotClampMoldValue  = 0x0000;
+
 class MySerialPort : public QObject
 {
     Q_OBJECT
@@ -37,7 +47,7 @@ public:
     int setOutputPort(int devHandle, unsigned int pinMask, unsigned char puPd);
 
     // 写入信息数据 pinMask,选择引脚; pinValue,设置电平
-    int writeInfo(int devHandle,unsigned int pinMask, unsigned int pinValue);
+    int writeInfo(unsigned int pinMask, unsigned int pinValue);
 
     // 读取信息数据 pinMask,选择引脚; *pinValue,读取电平
     int readInfo(int devHandle,unsigned int pinMask, unsigned int *pinValue);

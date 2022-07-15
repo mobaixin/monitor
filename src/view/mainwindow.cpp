@@ -1,6 +1,7 @@
 ﻿#include <QDesktopWidget>
 #include <QApplication>
 #include <QScreen>
+#include <QTimer>
 #include <QDebug>
 
 #include "mainwindow.h"
@@ -126,6 +127,7 @@ void MainWindow::setData()
         dir.mkdir(imgFilePath);
     }
 
+//    autoDetectImage(1);
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -159,6 +161,8 @@ void MainWindow::setDetectObject()
         bool isDetectMold = m_pSideBar->getIsDetectMold();
         int  curIdx = m_pSideBar->getCurrentIdx();
 
+        m_pImgArea->clearShapes();
+        m_pImgArea->setShowState(false);
         m_pImgArea->setSampleLab(isDetectMold, curIdx);
     }
 }
@@ -198,6 +202,49 @@ void MainWindow::adjustBottomBarPos()
         m_pBottomBar->setGeometry(0, 50,
                                   m_pBottomBar->width(), m_pBottomBar->height());
     }
+}
+
+int MainWindow::autoDetectImage(int sceneId)
+{
+    double delayTime  = 0;
+    int reDetectTimes = 0;
+
+    if (sceneId == 1) {
+        delayTime = MySettings::getInstance()->getValue(SysSection, "moldDelay").toDouble();
+        reDetectTimes = MySettings::getInstance()->getValue(SysSection, "moldTimes").toInt();
+    } else {
+        delayTime = MySettings::getInstance()->getValue(SysSection, "prodDelay").toDouble();
+        reDetectTimes = MySettings::getInstance()->getValue(SysSection, "prodTimes").toInt();
+    }
+
+    QTimer *myDelayTimer = new QTimer(this);
+
+    connect(myDelayTimer, &QTimer::timeout, [=](){
+        myDelayTimer->stop();
+        myDelayTimer->deleteLater();
+
+        int detectRes = 0;
+
+        m_pImgArea->setShapeNoMove(true);
+        m_pImgArea->clearDetectResult();
+
+        if (m_pImgArea->getCameraStatus() == 1) {
+            for (int i = 0; i < reDetectTimes; i++) {
+                bool isShowNGRes = (i == reDetectTimes - 1);
+
+                detectRes = m_pTitleBar->detectCurImage(sceneId, isShowNGRes);
+
+                if (detectRes == DetectRes::OK) {
+                    break;
+                }
+            }
+        }
+    });
+    myDelayTimer->start(int(delayTime * 1000));
+
+
+
+    return 0;
 }
 
 

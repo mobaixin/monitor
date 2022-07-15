@@ -1,6 +1,7 @@
 ﻿#include <QDebug>
 
 #include "myserialport.h"
+#include "src/view/mainwindow.h"
 
 #include <opencv2\opencv.hpp>
 
@@ -20,6 +21,11 @@ FILE* __cdecl __iob_func(unsigned i) {
 
 #include "usbdevice.h"
 #include "usb2gpio.h"
+
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 static DEVICE_INFO m_devInfo;
 
@@ -119,7 +125,7 @@ void MySerialPort::openPort()
     // 初始化输入端口
     setInputPort(m_devHandle[0], InputMask, 0);
 
-    writeInfo(m_devHandle[0], OutputMask, OutputMask);
+    writeInfo(OutputMask, OutputMask);
 }
 
 void MySerialPort::closePort(int devHandle)
@@ -137,9 +143,17 @@ int MySerialPort::setOutputPort(int devHandle, unsigned int pinMask, unsigned ch
     return GPIO_SetOutput(devHandle, pinMask, puPd);
 }
 
-int MySerialPort::writeInfo(int devHandle, unsigned int pinMask, unsigned int pinValue)
+int MySerialPort::writeInfo(unsigned int pinMask, unsigned int pinValue)
 {
-    return GPIO_Write(devHandle, pinMask, pinValue);
+//    return GPIO_Write(m_devHandle[0], pinMask, pinValue);
+
+    GPIO_Write(m_devHandle[0], pinMask, pinValue);
+
+    unsigned int value = 0x0000;
+    GPIO_Read(m_devHandle[0], OutputMask, &value);
+    qDebug() << "get output value: " << QString().sprintf("READ DATA:%04X", value);
+
+    return 0;
 }
 
 int MySerialPort::readInfo(int devHandle, unsigned int pinMask, unsigned int *pinValue)
@@ -159,9 +173,35 @@ void MySerialPort::receiveInfo()
 
 void MySerialPort::readTimesInfo()
 {
+    unsigned int openMoldSig = 0x0080;
+    unsigned int topBackSig  = 0x0040;
+
     unsigned int value = 0;
-    readInfo(m_devHandle[0], OutputMask, &value);
-    qDebug() << "readTimesInfo";
+    int res = readInfo(m_devHandle[0], InputMask, &value);
+
+    if (res != GPIO_SUCCESS) {
+        return ;
+    } else {
+        qDebug() << "readTimesInfo: " << value;
+
+        for (int i = 0; i < 4; i++) {
+            if ((value & (0x40 << i)) != 0x00) {
+                qDebug() << QString("P[%1]为高电平").arg(i);
+            } else {
+                qDebug() << QString("P[%1]为低电平").arg(i);
+            }
+        }
+
+        // 产品
+        if ((value & openMoldSig) != 0x0000) {
+            MainWindow::getInstance()->autoDetectImage(2);
+        // 检模
+        } else if ((value == topBackSig) != 0x0000) {
+            MainWindow::getInstance()->autoDetectImage(1);
+        }
+
+    }
+
 }
 
 

@@ -41,6 +41,9 @@ public:
     // 获取当前监视状态
     bool getMonitorSetState();
 
+    // 检测当前的图片
+    int detectCurImage(int sceneId = -1, bool isShowNGRes = true);
+
 private:
     void startBtnClick();
     void stopBtnClick();
@@ -52,8 +55,6 @@ private:
     void NGRecordBtnClick();
     void delAlarmBtnClick();
     void closeBtnClick();
-
-    void detectCurImage();
 
 private:
     // 左上方标识
