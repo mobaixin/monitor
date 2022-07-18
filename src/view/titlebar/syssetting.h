@@ -39,6 +39,8 @@ private:
     void updateProdTimes(int value);
     void updateProdDetect(bool checked);
 
+    void updateDisPlay(bool isShowProd);
+
 private:
     QLabel *m_moldDelayLab;
     QLabel *m_moldTimesLab;

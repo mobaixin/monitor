@@ -218,6 +218,8 @@ void SideBar::setData()
 //    m_curProdMoldIdx = 0;
 
     updateOrderLab();
+
+    setDetectScene();
 }
 
 void SideBar::setDisplayState(bool isDisplay)
@@ -378,6 +380,21 @@ void SideBar::setCanClampMoldState(int state)
         MySerialPort::getInstance()->writeInfo(ClampMoldMask, CanClampMoldValue);
     } else if (state == RadioBtnState::Wrong) {
         MySerialPort::getInstance()->writeInfo(ClampMoldMask, NotClampMoldValue);
+    }
+}
+
+void SideBar::setDetectScene()
+{
+    int sceneValue = MySettings::getInstance()->getValue(SysSection, "prodDetect").toInt();
+
+    if (sceneValue == 0) {
+        if (m_sceneId == 2) {
+            m_checkMoldBtn->click();
+        }
+
+        m_productBtn->hide();
+    } else {
+        m_productBtn->show();
     }
 }
 

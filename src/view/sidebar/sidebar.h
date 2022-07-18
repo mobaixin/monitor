@@ -74,6 +74,9 @@ public:
     // 设置可合模状态
     void setCanClampMoldState(int state);
 
+    // 设置检测场景
+    void setDetectScene();
+
 private:
     void positionBtnClick();
     void checkMoldBtnClick();

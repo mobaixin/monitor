@@ -318,6 +318,14 @@ void ImgArea::setDetectRes(bool isOK)
         m_pResultLab->setText("检模OK");
         m_pResultLab->setStyleSheet("color:#80FF00;font-family:Microsoft YaHei;font-size:20px;font-weight:10px;");
 
+        QTimer *resultTimer = new QTimer(this);
+        connect(resultTimer, &QTimer::timeout, [=](){
+            resultTimer->stop();
+            resultTimer->deleteLater();
+            m_pResultLab->hide();
+        });
+        resultTimer->start(3000);
+
     } else {
         m_pResultLab->setText("检模NG");
         m_pResultLab->setStyleSheet("color:red;font-family:Microsoft YaHei;font-size:20px;font-weight:10px;");

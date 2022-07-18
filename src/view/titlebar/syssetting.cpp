@@ -4,6 +4,7 @@
 #include "src/view/common/myselectframe.h"
 #include "src/view/common/mysettings.h"
 #include "src/view/titlebar/optrecord.h"
+#include "src/view/sidebar/sidebar.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -148,6 +149,8 @@ void SysSetting::setData()
     m_prodTimesSlider->setValue(prodTimes);
 
     m_prodDetectBtn->setChecked(prodDetect);
+
+    updateDisPlay(prodDetect);
 }
 
 void SysSetting::changeTimeBtnClick()
@@ -203,4 +206,23 @@ void SysSetting::updateProdDetect(bool checked)
 {
     int value = checked ? 1 : 0;
     MySettings::getInstance()->setValue(SysSection, "prodDetect", QString::number(value));
+
+    SideBar::getInstance()->setDetectScene();
+
+    updateDisPlay(checked);
+}
+
+void SysSetting::updateDisPlay(bool isShowProd)
+{
+    if (isShowProd) {
+        m_prodDelayLab->show();
+        m_prodTimesLab->show();
+        m_prodDelaySlider->show();
+        m_prodTimesSlider->show();
+    } else {
+        m_prodDelayLab->hide();
+        m_prodTimesLab->hide();
+        m_prodDelaySlider->hide();
+        m_prodTimesSlider->hide();
+    }
 }
