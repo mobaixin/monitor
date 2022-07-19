@@ -1,4 +1,5 @@
-﻿#include <QDebug>
+﻿#include <QFile>
+#include <QDebug>
 
 #include "src/view/sidebar/sidebar.h"
 #include "src/view/mainwindow.h"
@@ -611,8 +612,14 @@ void SideBar::delMoldBtnClick()
     bool isChange = false;
     ImageMoldData imgData;
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
-    imgData.sceneId  = m_isDetectMold ? 1 : 2;
+    imgData.sceneId  = m_sceneId;
     imgData.moldId   = getCurrentIdx();
+
+    ImageMoldData resImgData = MyDataBase::getInstance()->queImgMoldData(imgData);
+    QFile imgMoldFile(resImgData.imgPath);
+    if (imgMoldFile.exists()) {
+        imgMoldFile.remove();
+    }
 
     if (m_isDetectMold) {
         if (m_deteMoldNum > 0) {
@@ -653,6 +660,20 @@ void SideBar::clearMoldBtnClick()
 {
     OptRecord::addOptRecord("点击清空模板");
 
+    ImageMoldData imgData;
+    imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
+    imgData.sceneId  = m_sceneId;
+    imgData.moldId   = getCurrentIdx();
+
+    QList<ImageMoldData> resImgDataList = MyDataBase::getInstance()->queAllImgMoldData(imgData);
+    QFile imgMoldFile;
+    for (int i = 0; i < resImgDataList.size(); i++) {
+        imgMoldFile.setFileName(resImgDataList[i].imgPath);
+        if (imgMoldFile.exists()) {
+            imgMoldFile.remove();
+        }
+    }
+
     if (m_isDetectMold) {
         m_deteImgItemList.clear();
         m_deteShapeItemList.clear();
@@ -669,9 +690,9 @@ void SideBar::clearMoldBtnClick()
     updateOrderLab();
     MainWindow::getInstance()->setDetectObject();
 
-    ImageMoldData imgData;
-    imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
-    imgData.sceneId  = m_isDetectMold ? 1 : 2;
+//    ImageMoldData imgData;
+//    imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
+//    imgData.sceneId  = m_isDetectMold ? 1 : 2;
 
     MyDataBase::getInstance()->delSceneImgMoldData(imgData);
 

@@ -152,6 +152,7 @@ public:
 public:
     static QString dbFilePath;
     static QString imgFilePath;
+    static QString imgNgFilePath;
 
 private:
     bool checkShapeItemData(ShapeItemData itemData);

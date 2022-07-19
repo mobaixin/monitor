@@ -206,6 +206,7 @@ void ImgArea::loadImage(QString filePath)
     QPixmap imgPix = (QPixmap::fromImage(*m_pMainImg));
     imgPix = imgPix.scaled(this->size());
     m_pImageItem->setPixmap(imgPix);
+    m_pImageItem->show();
 }
 
 void ImgArea::eraseShape()
@@ -332,20 +333,27 @@ void ImgArea::setSceneSize()
     setShapeNoMove(true);
 
     updateShapeImgMold(1, 1);
+    updateShapeImgMold(1, 2);
 
     connect(SideBar::getInstance(), &SideBar::updateShapeImgMoldSig, this, &ImgArea::updateShapeImgMold, Qt::QueuedConnection);
 }
 
-void ImgArea::setDetectRes(bool isOK)
+void ImgArea::setDetectRes(bool isOK, int sceneId)
 {
+    if (sceneId == -1) {
+        sceneId = SideBar::getInstance()->getCurSceneID();
+    }
+
+    QString sceneName = sceneId == 1 ? "检模" : "产品";
+
     if (isOK) {
-        m_pResultLab->setText("检模OK");
+        m_pResultLab->setText(QString("%1OK").arg(sceneName));
         m_pResultLab->setStyleSheet("color:#80FF00;font-family:Microsoft YaHei;font-size:20px;font-weight:10px;");
 
         m_resTimer->start(3000);
 
     } else {
-        m_pResultLab->setText("检模NG");
+        m_pResultLab->setText(QString("%1NG").arg(sceneName));
         m_pResultLab->setStyleSheet("color:red;font-family:Microsoft YaHei;font-size:20px;font-weight:10px;");
     }
     m_pResultLab->show();
@@ -616,7 +624,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
     }
 }
 
-QImage ImgArea::saveAsImage()
+QImage ImgArea::saveAsImage(QString imgPath)
 {
     qDebug() << m_sceneSize.width() << " " << m_sceneSize.height();
     QImage image(m_sceneSize, QImage::Format_RGB32);
@@ -624,7 +632,7 @@ QImage ImgArea::saveAsImage()
     painter.setRenderHint(QPainter::Antialiasing);
     m_pScene->render(&painter);
 
-    image.save("D:/image/save03.png");
+    image.save(imgPath);
 
     return image;
 }
@@ -1025,6 +1033,9 @@ int ImgArea::detectImage(QImage imgFg, int sceneId)
     // 自动检测时设置场景id
     itemData.sceneId = sceneId != -1 ? sceneId : itemData.sceneId;
 
+    // 设置当前检测场景id
+    m_detectSceneId = itemData.sceneId;
+
 //    QList<ShapeItemData> itemDataList = MyDataBase::getInstance()->queShapeItemData(itemData);
 
     // 获取图片模板
@@ -1132,7 +1143,6 @@ int ImgArea::detectImage(QImage imgFg, int sceneId)
             Mat contoursMat = Mat::zeros(m_fgMaskMOG2.size(), CV_8UC1);
             vector<vector<Point>> approxPoint(contours.size());
 
-
             for (int k = 0; k < int(contours.size()); k++) {
                 if (contourArea(contours[k]) > pix) {
 
@@ -1140,7 +1150,6 @@ int ImgArea::detectImage(QImage imgFg, int sceneId)
 
                     // 绘制轮廓
                     drawContours(srcFg, contours, k, Scalar(0, 0, 255), 2, 8, hierarchy);
-                    qDebug() << "11";
 
                     // 出现NG
                     imgMoldDeteRes = DetectRes::NG;
@@ -1152,18 +1161,16 @@ int ImgArea::detectImage(QImage imgFg, int sceneId)
                         }
                         resPointList.append(singlePointList);
                     }
-                    qDebug() << "11";
                 }
             }
 
-//            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
-//            imshow(QString("fgMaskMOG2_%1_%2").arg(i).arg(j).toStdString(), myMOG2Data.fgMaskMat);
+            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
+            imshow(QString("fgMaskMOG2_%1_%2").arg(i).arg(j).toStdString(), myMOG2Data.fgMaskMat);
 //            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), srcFg);
 
 //            myMOG2Data.myMOG2->clear();
         }
 
-        qDebug() << "11";
         if (imgMoldDeteRes == DetectRes::OK) {
             detectRes = DetectRes::OK;
             break;
@@ -1313,6 +1320,11 @@ void ImgArea::setShowState(bool isShow)
     }
 }
 
+bool ImgArea::getShowState()
+{
+    return m_isShowImage;
+}
+
 QImage ImgArea::getCurImage()
 {
     return m_pCurImage;
@@ -1353,6 +1365,11 @@ void ImgArea::clearDetectResult()
 void ImgArea::setShapeNoMove(bool noMove)
 {
     m_pView->setAttribute(Qt::WA_TransparentForMouseEvents, noMove);
+}
+
+int ImgArea::getDetectSceneId()
+{
+    return m_detectSceneId;
 }
 
 QImage ImgArea::matToQim(Mat &mat)

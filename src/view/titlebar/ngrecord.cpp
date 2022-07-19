@@ -1,4 +1,7 @@
-﻿#include "ngrecord.h"
+﻿#include <QDebug>
+
+#include "ngrecord.h"
+#include "src/view/imgarea/imgarea.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -54,6 +57,7 @@ void NGRecord::setWidgetUi()
     connect(m_optRecordBtn, &QPushButton::clicked, this, &NGRecord::optRecordBtnClick);
     connect(m_closeBtn,     &QPushButton::clicked, this, &NGRecord::closeBtnClick);
 
+    connect(m_ngTableView, &QTableView::clicked, this, &NGRecord::showNgRecordImg);
 }
 
 void NGRecord::setWidgetStyle()
@@ -140,6 +144,11 @@ void NGRecord::addNgRecord(NGRecordData ngData)
     m_ngModel->appendRow(itemList);
 }
 
+void NGRecord::closeEvent(QCloseEvent *event)
+{
+
+}
+
 void NGRecord::resetBtnClick()
 {
     OptRecord::addOptRecord("点击清零");
@@ -171,16 +180,31 @@ void NGRecord::getModelData()
 //        m_ngModel->setItem(i, 3, new QStandardItem(QString(" 异常 ")));
 //    }
 
-    QList<NGRecordData> recordDataList = MyDataBase::getInstance()->queAllNGRecordData();
+    m_recordDataList = MyDataBase::getInstance()->queAllNGRecordData();
 
-    for (int i = 0; i < recordDataList.size(); i++) {
-        m_ngModel->setItem(i, 0, new QStandardItem(QString(" %1 ").arg(recordDataList[i].time)));
-        m_ngModel->setItem(i, 1, new QStandardItem(QString(" %1 ").arg(recordDataList[i].cameraId)));
-        m_ngModel->setItem(i, 2, new QStandardItem(QString(" %1 ").arg(recordDataList[i].sceneId)));
-        m_ngModel->setItem(i, 3, new QStandardItem(QString(" %1 ").arg(recordDataList[i].result)));
+    for (int i = 0; i < m_recordDataList.size(); i++) {
+        m_ngModel->setItem(i, 0, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].time)));
+        m_ngModel->setItem(i, 1, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].cameraId)));
+        m_ngModel->setItem(i, 2, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].sceneId)));
+        m_ngModel->setItem(i, 3, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].result)));
 
-        if (recordDataList[i].result == "异常") {
+        if (m_recordDataList[i].result == "异常") {
             m_ngTotalNum++;
         }
     }
+}
+
+void NGRecord::showNgRecordImg(const QModelIndex &index)
+{
+    m_imgAreaShowState = ImgArea::getInstance()->getShowState();
+
+    int row = index.row();
+    QString ngImgPath = m_recordDataList[row].imgPath;
+
+    if (m_imgAreaShowState) {
+        ImgArea::getInstance()->setShowState(false);
+    }
+
+    ImgArea::getInstance()->clearShapes();
+    ImgArea::getInstance()->loadImage(ngImgPath);
 }

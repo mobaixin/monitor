@@ -9,6 +9,7 @@
 
 QString MyDataBase::dbFilePath = "";
 QString MyDataBase::imgFilePath = "";
+QString MyDataBase::imgNgFilePath = "";
 
 MyDataBase *MyDataBase::getInstance()
 {
@@ -43,11 +44,13 @@ MyDataBase::MyDataBase(QObject *parent)
     // create folder
     dbFilePath  = QCoreApplication::applicationDirPath() + "/data";
     imgFilePath = dbFilePath + "/imgmold";
+    imgNgFilePath = dbFilePath + "/imgng";
 
     QDir dir(dbFilePath);
     if (!dir.exists()) {
         bool ismkdir = dir.mkdir(dbFilePath);
         ismkdir = dir.mkdir(imgFilePath);
+        ismkdir = dir.mkdir(imgNgFilePath);
         if(!ismkdir)
             qDebug() << "Create path fail" << endl;
         else
@@ -562,13 +565,14 @@ int MyDataBase::addNGRecordData(NGRecordData recordData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("INSERT INTO ng_record (time, camera_id, scene_id, result) VALUES "
-                          "(:time, :camera_id, :scene_id, :result)");
+            query.prepare("INSERT INTO ng_record (time, camera_id, scene_id, result, img_path) VALUES "
+                          "(:time, :camera_id, :scene_id, :result, :img_path)");
 
             query.bindValue(":time",      recordData.time);
             query.bindValue(":camera_id", QString::number(recordData.cameraId));
             query.bindValue(":scene_id",  QString::number(recordData.sceneId));
             query.bindValue(":result",    recordData.result);
+            query.bindValue(":img_path",  recordData.imgPath);
 
             queryRes = query.exec();
 

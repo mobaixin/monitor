@@ -85,12 +85,11 @@ void SysSetting::setWidgetUi()
     m_mainLayout->setContentsMargins(5, 5, 5, 5);
     m_mainLayout->setSpacing(5);
 
-    this->setLayout(m_sysSetLayout);
+    this->setLayout(m_mainLayout);
 
-
-//    if (ImgArea::getInstance()->getCameraCounts() == 0) {
+    if (ImgArea::getInstance()->getCameraCounts() == 0) {
         m_cameraParaBtn->hide();
-//    }
+    }
 
     connect(m_moldDelaySlider, &MySlider::valueChange, this, &SysSetting::updateMoldDelay);
     connect(m_moldTimesSlider, &MySlider::valueChange, this, &SysSetting::updateMoldTimes);

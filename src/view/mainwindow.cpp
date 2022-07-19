@@ -112,11 +112,13 @@ void MainWindow::setData()
     // create folder
     QString dbFilePath  = QCoreApplication::applicationDirPath() + "/data";
     QString imgFilePath = dbFilePath + "/imgmold";
+    QString imgNgFilePath = dbFilePath + "/imgng";
 
     QDir dir(dbFilePath);
     if (!dir.exists()) {
         bool ismkdir = dir.mkdir(dbFilePath);
         ismkdir = dir.mkdir(imgFilePath);
+        ismkdir = dir.mkdir(imgNgFilePath);
         if(!ismkdir)
             qDebug() << "Create path fail" << endl;
         else
@@ -125,6 +127,10 @@ void MainWindow::setData()
     dir.setPath(imgFilePath);
     if (!dir.exists()) {
         dir.mkdir(imgFilePath);
+    }
+    dir.setPath(imgNgFilePath);
+    if (!dir.exists()) {
+        dir.mkdir(imgNgFilePath);
     }
 
 //    autoDetectImage(1);

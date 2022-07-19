@@ -116,7 +116,7 @@ public:
     void setSceneSize();
 
     // 设置检模结果
-    void setDetectRes(bool isOK);
+    void setDetectRes(bool isOK, int sceneId = -1);
 
     // 设置样本显示
     void setSampleLab(bool isDetectMold, int curIdx = 1);
@@ -130,7 +130,7 @@ public:
     void loadShapeItem(ShapeItemData itemData);
 
     // 保存为图片
-    QImage saveAsImage();
+    QImage saveAsImage(QString imgPath);
 
     // 设置分辨率
     void setResolution(int index);
@@ -171,6 +171,9 @@ public:
     // 设置显示状态
     void setShowState(bool isShow);
 
+    // 获取显示状态
+    bool getShowState();
+
     // 获取当前图片
     QImage getCurImage();
 
@@ -189,7 +192,8 @@ public:
     // 设置图形不允许移动
     void setShapeNoMove(bool noMove);
 
-
+    // 获取当前检测场景id
+    int getDetectSceneId();
 
 public:
     int status;
@@ -226,6 +230,9 @@ private:
     QImage m_pCurImage;
 
     QSize m_sceneSize;
+
+    // 当前检测场景id
+    int m_detectSceneId;
 
     // 相机数
     int m_cameraCounts;

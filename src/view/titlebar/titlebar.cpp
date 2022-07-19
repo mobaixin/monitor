@@ -2,9 +2,9 @@
 #include <QApplication>
 #include <QDebug>
 
-
 #include "src/view/titlebar/titlebar.h"
 #include "src/view/mainwindow.h"
+#include "src/view/sidebar/sidebar.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -211,6 +211,13 @@ void TitleBar::startBtnClick()
     ImgArea::getInstance()->setRunState(CameraState::Running);
     ImgArea::getInstance()->startCamera();
 
+    ShapeItemData itemData;
+    itemData.cameraId = m_cameraId;
+    itemData.sceneId  = SideBar::getInstance()->getCurSceneID();
+    itemData.moldId   = 1;
+    ImgArea::getInstance()->loadShapeItem(itemData);
+    ImgArea::getInstance()->setShowState(true);
+
     OptRecord::addOptRecord("点击开始运行");
 }
 
@@ -274,14 +281,15 @@ void TitleBar::addMoldBtnClick()
 {
     QString fileName = m_detectTime.toString("yyyy-MM-dd-HH-mm-ss");
     QString timeStr  = m_detectTime.toString("yyyy-MM-dd HH:mm:ss");
-    QString filePath = QString("%1/%2.png").arg(MyDataBase::imgFilePath).arg(fileName);
+    QString filePath = QString("%1/%2.png").arg(MyDataBase::imgNgFilePath).arg(fileName);
 
     SideBar::getInstance()->addAlarmImageMold(filePath, timeStr);
     SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
 
     setAlarmBtnState(false);
+    ImgArea::getInstance()->saveAsImage(filePath);
     ImgArea::getInstance()->clearDetectResult();
-    ImgArea::getInstance()->setShapeNoMove(false);
+//    ImgArea::getInstance()->setShapeNoMove(false);
 
     NGRecordData ngData;
     ngData.time = timeStr;
@@ -318,8 +326,14 @@ void TitleBar::delAlarmBtnClick()
 {
     setAlarmBtnState(false);
     ImgArea::getInstance()->clearDetectResult();
-    SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
-    ImgArea::getInstance()->setShapeNoMove(false);
+
+    if (ImgArea::getInstance()->getDetectSceneId() == 1) {
+        SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
+    } else {
+        SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
+    }
+
+//    ImgArea::getInstance()->setShapeNoMove(false);
 
     OptRecord::addOptRecord("点击删除报警");
 }
@@ -358,7 +372,7 @@ int TitleBar::detectCurImage(int sceneId, bool isShowNGRes)
             return detectRes;
         }
 
-        ImgArea::getInstance()->setDetectRes(false);
+        ImgArea::getInstance()->setDetectRes(false, sceneId);
         if (sceneId == 1) {
             SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Wrong);
         } else {
@@ -369,7 +383,7 @@ int TitleBar::detectCurImage(int sceneId, bool isShowNGRes)
 
         return detectRes;
     } else if (detectRes == DetectRes::OK) {
-        ImgArea::getInstance()->setDetectRes(true);
+        ImgArea::getInstance()->setDetectRes(true, sceneId);
         if (sceneId == 1) {
             SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
         } else {
@@ -377,7 +391,7 @@ int TitleBar::detectCurImage(int sceneId, bool isShowNGRes)
         }
 
         setAlarmBtnState(false);
-        ImgArea::getInstance()->setShapeNoMove(false);
+//        ImgArea::getInstance()->setShapeNoMove(false);
 
         return detectRes;
     } else {
