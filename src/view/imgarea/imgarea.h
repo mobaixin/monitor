@@ -30,6 +30,7 @@
 using namespace cv;
 using namespace std;
 
+// 相机SDK数据
 typedef struct _WIDTH_HEIGHT{
     int     display_width;
     int     display_height;
@@ -40,18 +41,33 @@ typedef struct _WIDTH_HEIGHT{
     int     buffer_size;
 }Width_Height;
 
-typedef struct myMOG2Data {
+// MOG2数据
+typedef struct MyMOG2Data {
+    int cameraId;
+    int sceneId;
     Ptr<BackgroundSubtractorMOG2> myMOG2;
-    int accuracy;
+    Mat fgMaskMat;
+    double accuracy;
     int pixel;
-} myMOG2Data;
+} MyMOG2Data;
 
+// 相机检测数据
+typedef struct CameraDetectData {
+    int cameraId;
+    QList<Mat> moldShapeMaskList;
+    QList<Mat> prodShapeMaskList;
+    QList<MyMOG2Data> moldMOG2DataList;
+    QList<MyMOG2Data> prodMOG2DataList;
+} CameraDetectData;
+
+// 相机运行状态
 enum CameraState {
     OffLine = 0,
     Running = 1,
     Pause   = 2,
 };
 
+// 检测结果
 enum DetectRes {
     NG = 0,
     OK = 1,
@@ -140,6 +156,9 @@ public:
     // 停止运行
     void pauseCamera();
 
+    // 更新图形图片模板
+    void updateShapeImgMold(int cameraId, int sceneId);
+
     // 图片检测
     int detectImage(QImage imgFg, int sceneId = -1);
 
@@ -147,13 +166,16 @@ public:
     int getShapeItemNum();
 
     // 获取opencv mask
-    Mat getShapeMask(ShapeItemData itemData, QImage img, ShapeItemData maskItemData);
+    Mat getShapeMask(ShapeItemData itemData, QImage img, QList<ShapeItemData> maskItemData);
 
     // 设置显示状态
     void setShowState(bool isShow);
 
     // 获取当前图片
     QImage getCurImage();
+
+    // 获取相机数
+    int getCameraCounts();
 
     // 获取相机状态
     int getCameraStatus();
@@ -166,6 +188,8 @@ public:
 
     // 设置图形不允许移动
     void setShapeNoMove(bool noMove);
+
+
 
 public:
     int status;
@@ -203,7 +227,9 @@ private:
 
     QSize m_sceneSize;
 
-    QTimer *m_timer;
+    // 相机数
+    int m_cameraCounts;
+    QTimer *m_resTimer;
     CaptureThread *m_thread;
 
     bool m_isShowImage;
@@ -224,9 +250,14 @@ private:
     Mat m_frame;
     Mat m_fgMaskMOG2;
     Mat m_maskCountour;
-    Ptr<BackgroundSubtractorMOG2> m_pMOG2;
+//    Ptr<BackgroundSubtractorMOG2> m_pMOG2;
 
-    QList<myMOG2Data> myMOG2DataList;
+    QList<Mat> m_moldShapeMaskList;
+    QList<Mat> m_prodShapeMaskList;
+    QList<MyMOG2Data> m_moldMOG2DataList;
+    QList<MyMOG2Data> m_prodMOG2DataList;
+
+    QList<CameraDetectData> m_cameraDetectDataList;
 
     QList<QGraphicsPolygonItem *> m_detectResItemList;
 };

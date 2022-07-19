@@ -233,6 +233,7 @@ void TitleBar::monitorSetBtnClick()
 
         m_pMonitorSetBtn->setText("监视设定");
         m_pTestBtn->setDisabled(false);
+        ImgArea::getInstance()->setShapeNoMove(true);
 
         OptRecord::addOptRecord("点击关闭设定");
 

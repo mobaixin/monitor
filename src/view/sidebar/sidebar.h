@@ -77,6 +77,9 @@ public:
     // 设置检测场景
     void setDetectScene();
 
+signals:
+    void updateShapeImgMoldSig(int cameraId, int sceneId);
+
 private:
     void positionBtnClick();
     void checkMoldBtnClick();

@@ -109,7 +109,6 @@ void SideBar::setWidgetUi()
     connect(m_nextPageBtn,  &QPushButton::clicked, this, &SideBar::nextPageBtnClick);
     connect(m_delMoldBtn,   &QPushButton::clicked, this, &SideBar::delMoldBtnClick);
     connect(m_clearMoldBtn, &QPushButton::clicked, this, &SideBar::clearMoldBtnClick);
-
 }
 
 // 设置组件样式
@@ -288,6 +287,12 @@ void SideBar::saveImageMold(QGraphicsPixmapItem *imgItem)
     } else {
         m_prodImgItemList.append(imgItem);
     }
+
+    // 更新模板
+    int cameraId = TitleBar::getInstance()->getCurCameraId();
+//    ImgArea::getInstance()->updateShapeImgMold(cameraId, m_sceneId);
+    emit updateShapeImgMoldSig(cameraId, m_sceneId);
+
 }
 
 void SideBar::saveShapeMold(QList<QGraphicsItem *> itemList)
@@ -419,6 +424,13 @@ void SideBar::checkMoldBtnClick()
 
     if (TitleBar::getInstance()->getMonitorSetState()) {
         loadCurMold();
+    } else {
+        ShapeItemData itemData;
+        itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+        itemData.sceneId  = m_sceneId;
+        itemData.moldId   = 1;
+
+        ImgArea::getInstance()->loadShapeItem(itemData);
     }
 
     OptRecord::addOptRecord("点击检模");
@@ -434,6 +446,13 @@ void SideBar::productBtnClick()
 
     if (TitleBar::getInstance()->getMonitorSetState()) {
         loadCurMold();
+    } else {
+        ShapeItemData itemData;
+        itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+        itemData.sceneId  = m_sceneId;
+        itemData.moldId   = 1;
+
+        ImgArea::getInstance()->loadShapeItem(itemData);
     }
 
     OptRecord::addOptRecord("点击产品");
@@ -468,6 +487,11 @@ void SideBar::saveMoldBtnClick()
 //    updateOrderLab();
 
     ImgArea::getInstance()->getShapeItems();
+
+    // 更新模板
+    int cameraId = TitleBar::getInstance()->getCurCameraId();
+    emit updateShapeImgMoldSig(cameraId, m_sceneId);
+
 }
 
 void SideBar::addMoldBtnClick()
@@ -500,6 +524,12 @@ void SideBar::addMoldBtnClick()
     if (isFirstAdd) {
         loadCurImage();
     }
+
+    // 更新模板
+    int cameraId = TitleBar::getInstance()->getCurCameraId();
+    emit updateShapeImgMoldSig(cameraId, m_sceneId);
+
+    return ;
 }
 
 void SideBar::homePageBtnClick()

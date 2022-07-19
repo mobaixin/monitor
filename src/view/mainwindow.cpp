@@ -51,9 +51,9 @@ void MainWindow::setWidgetUi()
 
     m_pMainWid   = new QWidget(this);
     m_pTitleBar  = TitleBar::getInstance(this);
-    m_pImgArea   = ImgArea::getInstance(this);
     m_pBottomBar = BottomBar::getInstance(this);
     m_pSideBar   = SideBar::getInstance(this);
+    m_pImgArea   = ImgArea::getInstance(this);
 
     m_pMainLayout = new QVBoxLayout(m_pMainWid);
 
@@ -148,7 +148,7 @@ void MainWindow::showMonitorSet(bool isDisplay)
         setDetectObject();
     } else {
         m_pBottomBar->hide();
-        ImgArea::getInstance()->clearShapes();
+//        ImgArea::getInstance()->clearShapes();
         m_pImgArea->setShowState(true);
         m_pImgArea->setMonitorState(false);
     }
@@ -161,8 +161,11 @@ void MainWindow::setDetectObject()
         bool isDetectMold = m_pSideBar->getIsDetectMold();
         int  curIdx = m_pSideBar->getCurrentIdx();
 
-        m_pImgArea->clearShapes();
-        m_pImgArea->setShowState(false);
+//        m_pImgArea->clearShapes();
+        if (curIdx == 0) {
+            m_pImgArea->setShowState(false);
+        }
+
         m_pImgArea->setSampleLab(isDetectMold, curIdx);
     }
 }

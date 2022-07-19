@@ -61,6 +61,8 @@ private:
     QPushButton *m_closeSetBtn;
 
     QGridLayout *m_sysSetLayout;
+    QHBoxLayout *m_btnLayout;
+    QVBoxLayout *m_mainLayout;
 
     CameraPara *m_cameraPara;
     IOSetting *m_ioSetting;

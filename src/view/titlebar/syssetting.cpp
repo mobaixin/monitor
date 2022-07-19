@@ -5,6 +5,7 @@
 #include "src/view/common/mysettings.h"
 #include "src/view/titlebar/optrecord.h"
 #include "src/view/sidebar/sidebar.h"
+#include "src/view/imgarea/imgarea.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -49,7 +50,9 @@ void SysSetting::setWidgetUi()
     m_cameraParaBtn = new QPushButton(this);
     m_closeSetBtn = new QPushButton(this);
 
-    m_sysSetLayout = new QGridLayout(this);
+    m_sysSetLayout = new QGridLayout();
+    m_btnLayout    = new QHBoxLayout();
+    m_mainLayout   = new QVBoxLayout(this);
 
     // 组件布局
     m_sysSetLayout->addWidget(m_moldDelayLab, 0, 0, 1, 1);
@@ -64,15 +67,30 @@ void SysSetting::setWidgetUi()
     m_sysSetLayout->addWidget(m_prodTimesSlider, 3, 1, 1, 3);
     m_sysSetLayout->addWidget(m_prodDetectBtn, 4, 1, 1, 1);
 
-    m_sysSetLayout->addWidget(m_changeTimeBtn, 5, 0, 1, 1);
-    m_sysSetLayout->addWidget(m_ioSettingsBtn, 5, 1, 1, 1);
-    m_sysSetLayout->addWidget(m_cameraParaBtn, 5, 2, 1, 1);
-    m_sysSetLayout->addWidget(m_closeSetBtn, 5, 3, 1, 1);
+    m_sysSetLayout->setContentsMargins(5, 5, 5, 5);
+    m_sysSetLayout->setSpacing(20);
 
-    m_sysSetLayout->setContentsMargins(0, 0, 0, 0);
-    m_sysSetLayout->setSpacing(5);
+    m_btnLayout->addWidget(m_changeTimeBtn);
+    m_btnLayout->addWidget(m_ioSettingsBtn);
+    m_btnLayout->addWidget(m_cameraParaBtn);
+    m_btnLayout->addWidget(m_closeSetBtn);
+
+    m_btnLayout->setContentsMargins(0, 0, 0, 0);
+    m_btnLayout->setSpacing(5);
+
+    m_mainLayout->addLayout(m_sysSetLayout);
+    m_mainLayout->addStretch();
+    m_mainLayout->addLayout(m_btnLayout);
+
+    m_mainLayout->setContentsMargins(5, 5, 5, 5);
+    m_mainLayout->setSpacing(5);
 
     this->setLayout(m_sysSetLayout);
+
+
+//    if (ImgArea::getInstance()->getCameraCounts() == 0) {
+        m_cameraParaBtn->hide();
+//    }
 
     connect(m_moldDelaySlider, &MySlider::valueChange, this, &SysSetting::updateMoldDelay);
     connect(m_moldTimesSlider, &MySlider::valueChange, this, &SysSetting::updateMoldTimes);
@@ -85,7 +103,6 @@ void SysSetting::setWidgetUi()
     connect(m_ioSettingsBtn, &QPushButton::clicked, this, &SysSetting::ioSettingsBtnClick);
     connect(m_cameraParaBtn, &QPushButton::clicked, this, &SysSetting::cameraParaBtnClick);
     connect(m_closeSetBtn,   &QPushButton::clicked, this, &SysSetting::closeSetBtnClick);
-
 }
 
 void SysSetting::setWidgetStyle()
@@ -115,10 +132,10 @@ void SysSetting::setWidgetStyle()
 //    m_prodDelaySlider->setValue(4);
 //    m_prodTimesSlider->setValue(2);
 
-    m_changeTimeBtn->setFixedSize(100, 30);
-    m_ioSettingsBtn->setFixedSize(100, 30);
-    m_cameraParaBtn->setFixedSize(100, 30);
-    m_closeSetBtn->setFixedSize(100, 30);
+    m_changeTimeBtn->setFixedHeight(30);
+    m_ioSettingsBtn->setFixedHeight(30);
+    m_cameraParaBtn->setFixedHeight(30);
+    m_closeSetBtn->setFixedHeight(30);
 
     m_moldDelayLab->setText("检模拍照延时(秒):");
     m_moldTimesLab->setText("检模重检次数:");
