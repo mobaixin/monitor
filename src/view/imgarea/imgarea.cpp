@@ -222,6 +222,7 @@ void ImgArea::eraseShape()
 
 void ImgArea::clearShapes()
 {
+    qDebug() << "in clearShapes";
     QList<QGraphicsItem *> itemList = m_pScene->items();
     qDebug() << "itemList.size: " << itemList.size();
 
@@ -229,14 +230,15 @@ void ImgArea::clearShapes()
         return ;
     }
 
+    QList<int> clearItemIdxList;
     for (int i = itemList.size() - 1; i >= 0; i--) {
-        if (itemList[i] != m_pImageItem && itemList[i] != nullptr && itemList[i]->scene() != nullptr) {
-            m_pScene->removeItem(itemList[i]);
+//        if (itemList[i] != m_pImageItem && itemList[i] != nullptr && itemList[i]->scene() != nullptr && itemList[i]->parentItem() == nullptr) {
+        if (itemList[i] != m_pImageItem && itemList[i] != nullptr) {
 
             // todo
             bool isPoint = false;
             MyPointItem *item = static_cast<MyPointItem *>(itemList[i]);
-//            qDebug() << "item->getPointType(): " << item->getPointType();
+
             switch (item->getPointType()) {
             case MyPointItem::Center:
             case MyPointItem::Edge:
@@ -252,12 +254,18 @@ void ImgArea::clearShapes()
                 continue ;
             }
 
-//            MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(itemList[i]);
-
-//            shapeItem->deleteLater();
-
-            delete itemList[i];
+//            qDebug() << "item->getPointType(): " << item->getPointType();
+            clearItemIdxList.append(i);
         }
+    }
+
+    // 清除图形 回收内存
+    for (int i = clearItemIdxList.size() - 1; i >= 0; i--) {
+        m_pScene->removeItem(itemList[clearItemIdxList[i]]);
+
+        MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(itemList[i]);
+        shapeItem->deleteLater();
+//        delete itemList[clearItemIdxList[i]];
     }
 
     qDebug() << "out clearShapes";
@@ -392,12 +400,15 @@ QImage ImgArea::getImageItem()
 
 QList<ShapeItemData> ImgArea::getShapeItems()
 {
+    qDebug() << "getShapeItems: " << m_pScene->items().size();
     QList<ShapeItemData> shapeList;
     for (QGraphicsItem *temp : m_pScene->items()) {
-        if (temp != m_pImageItem) {
+        if (temp != m_pImageItem && temp != nullptr && temp->scene() != nullptr) {
 
+            qDebug() << "1";
             MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
             QPoint center = item->getRealCenter().toPoint();
+            qDebug() << "2";
 
             ShapeItemData itemData;
             itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
@@ -407,6 +418,8 @@ QList<ShapeItemData> ImgArea::getShapeItems()
             itemData.center   = QString("%1,%2").arg(center.x()).arg(center.y());
             itemData.accuracy = item->getAccuracy();
             itemData.pixel    = item->getPixel();
+            qDebug() << "3";
+            qDebug() << "item->getType(): " << item->getType();
 
             switch (item->getType()) {
             case MyGraphicsItem::ItemType::Rectangle:{
@@ -618,6 +631,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             myConCircle->setPixel(itemDataList[i].pixel);
             m_pScene->addItem(myConCircle);
         }
+            break;
         default:
             break;
         }

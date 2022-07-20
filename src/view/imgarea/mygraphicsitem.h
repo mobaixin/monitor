@@ -12,7 +12,7 @@ class MyGraphicsItem : public QObject, public QAbstractGraphicsShapeItem
     Q_OBJECT
 public:
     enum ItemType {
-        Circle = 1,         // 圆
+        Circle = 11,         // 圆
         Ellipse,            // 椭圆
         Concentric_Circle,  // 同心圆
         Pie,                // 饼

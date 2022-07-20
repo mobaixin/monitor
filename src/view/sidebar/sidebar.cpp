@@ -473,6 +473,7 @@ void SideBar::saveMoldBtnClick()
 
     MyDataBase::getInstance()->delSceneShapeItemData(itemData);
 
+    qDebug() << "after delSceneShapeItemData";
 //    if (m_isDetectMold) {
 //        if (m_deteMoldNum == 0) {
 //            m_curDeteMoldIdx = 1;
@@ -488,6 +489,7 @@ void SideBar::saveMoldBtnClick()
 //    updateOrderLab();
 
     ImgArea::getInstance()->getShapeItems();
+    qDebug() << "after getShapeItems";
 
     // 更新模板
     int cameraId = TitleBar::getInstance()->getCurCameraId();

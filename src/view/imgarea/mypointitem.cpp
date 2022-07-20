@@ -45,6 +45,11 @@ void MyPointItem::setPoint(QPointF p)
     m_point = p;
 }
 
+MyPointItem::PointType MyPointItem::getPointType()
+{
+    return m_type;
+}
+
 void MyPointItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     return QAbstractGraphicsShapeItem::mousePressEvent(event);
@@ -168,7 +173,8 @@ void MyPointItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void MyPointItemList::setRandColor()
 {
-    this->setColor(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
+//    this->setColor(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
+    this->setColor(QColor(243, 247, 129));
 }
 
 void MyPointItemList::setColor(const QColor color)

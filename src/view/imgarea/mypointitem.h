@@ -30,7 +30,7 @@ public:
     QPointF getPoint();
     void setPoint(QPointF p);
 
-    PointType getPointType() { return m_type; }
+    PointType getPointType();
 
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 
@@ -44,7 +44,7 @@ protected:
 
 private:
     QPointF m_point;
-    PointType m_type;
+    PointType m_type = PointType::Other;
 };
 
 
