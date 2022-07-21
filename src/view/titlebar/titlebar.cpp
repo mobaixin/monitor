@@ -194,10 +194,14 @@ void TitleBar::setAlarmBtnState(bool isShow)
         m_pAddMoldBtn->show();
         m_pReDetectBtn->show();
         m_pDelAlarmBtn->show();
+
+        m_pMonitorSetBtn->setDisabled(true);
     } else {
         m_pAddMoldBtn->hide();
         m_pReDetectBtn->hide();
         m_pDelAlarmBtn->hide();
+
+        m_pMonitorSetBtn->setDisabled(false);
     }
 }
 
@@ -210,6 +214,9 @@ void TitleBar::startBtnClick()
 {
     ImgArea::getInstance()->setRunState(CameraState::Running);
     ImgArea::getInstance()->startCamera();
+
+    // 清除检测结果
+    ImgArea::getInstance()->clearDetectResult();
 
     ShapeItemData itemData;
     itemData.cameraId = m_cameraId;
@@ -271,7 +278,8 @@ void TitleBar::testBtnClick()
     ImgArea::getInstance()->clearDetectResult();
 
     if (ImgArea::getInstance()->getCameraStatus() == 1) {
-        detectCurImage();
+        m_detectTime = QDateTime::currentDateTime();
+        ImgArea::getInstance()->detectCurImage(m_cameraId);
     }
 
     OptRecord::addOptRecord("点击测试");
@@ -281,14 +289,19 @@ void TitleBar::addMoldBtnClick()
 {
     QString fileName = m_detectTime.toString("yyyy-MM-dd-HH-mm-ss");
     QString timeStr  = m_detectTime.toString("yyyy-MM-dd HH:mm:ss");
-    QString filePath = QString("%1/%2.png").arg(MyDataBase::imgNgFilePath).arg(fileName);
+    QString moldFilePath = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
+    QString ngFilePath   = QString("%1/%2.png").arg(MyDataBase::imgNgFilePath).arg(fileName);
 
-    SideBar::getInstance()->addAlarmImageMold(filePath, timeStr);
+    QImage detectImage = ImgArea::getInstance()->getCurDetectImage();
+    detectImage.save(moldFilePath);
+
+    SideBar::getInstance()->addAlarmImageMold(moldFilePath, timeStr);
     SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
 
     setAlarmBtnState(false);
-    ImgArea::getInstance()->saveAsImage(filePath);
+    ImgArea::getInstance()->saveAsImage(ngFilePath);
     ImgArea::getInstance()->clearDetectResult();
+    ImgArea::getInstance()->setShowState(true);
 //    ImgArea::getInstance()->setShapeNoMove(false);
 
     NGRecordData ngData;
@@ -296,7 +309,7 @@ void TitleBar::addMoldBtnClick()
     ngData.cameraId = m_cameraId;
     ngData.sceneId  = SideBar::getInstance()->getCurSceneID();
     ngData.result   = "异常";
-    ngData.imgPath  = filePath;
+    ngData.imgPath  = ngFilePath;
 
     MyDataBase::getInstance()->addNGRecordData(ngData);
 
@@ -308,7 +321,8 @@ void TitleBar::reDetectBtnClick()
     ImgArea::getInstance()->clearDetectResult();
 
     if (ImgArea::getInstance()->getCameraStatus() == 1) {
-        detectCurImage();
+        m_detectTime = QDateTime::currentDateTime();
+        ImgArea::getInstance()->detectCurImage(m_cameraId);
     }
 
     OptRecord::addOptRecord("点击重检");
@@ -333,6 +347,7 @@ void TitleBar::delAlarmBtnClick()
         SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
     }
 
+    ImgArea::getInstance()->setShowState(true);
 //    ImgArea::getInstance()->setShapeNoMove(false);
 
     OptRecord::addOptRecord("点击删除报警");
@@ -349,52 +364,59 @@ void TitleBar::closeBtnClick()
     }
 }
 
-int TitleBar::detectCurImage(int sceneId, bool isShowNGRes)
-{
-    m_detectTime     = QDateTime::currentDateTime();
-    QString fileName = m_detectTime.toString("yyyy-MM-dd-HH-mm-ss");
+//int TitleBar::detectCurImage(int sceneId, bool isShowNGRes)
+//{
+//    m_detectTime     = QDateTime::currentDateTime();
+//    QString fileName = m_detectTime.toString("yyyy-MM-dd-HH-mm-ss");
 
-    QString filePath = QString("%1/%2.png").arg(MyDataBase::imgFilePath).arg(fileName);
-    QImage curImg = ImgArea::getInstance()->getCurImage();
-    curImg.save(filePath);
+//    QString filePath = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
+//    QImage curImg = ImgArea::getInstance()->getCurImage();
+//    curImg.save(filePath);
 
-    QImage targetImg = QImage(filePath);
-//    QImage targetImg = ImgArea::getInstance()->getImageItem();
+//    QImage targetImg = QImage(filePath);
+////    QImage targetImg = ImgArea::getInstance()->getImageItem();
 
-    int detectRes = ImgArea::getInstance()->detectImage(targetImg, sceneId);
+//    // 删除临时文件
+//    QFile tmpFile(filePath);
+//    tmpFile.remove();
 
-    if (sceneId == -1) {
-        sceneId = SideBar::getInstance()->getCurSceneID();
-    }
+//    // 获得检测结果
+//    int detectRes = ImgArea::getInstance()->detectImage(targetImg, m_cameraId, sceneId);
 
-    if (detectRes == DetectRes::NG) {
-        if (!isShowNGRes) {
-            return detectRes;
-        }
+//    // 手动检测时获取当前场景id
+//    if (sceneId == -1) {
+//        sceneId = SideBar::getInstance()->getCurSceneID();
+//    }
 
-        ImgArea::getInstance()->setDetectRes(false, sceneId);
-        if (sceneId == 1) {
-            SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Wrong);
-        } else {
-            SideBar::getInstance()->setCanThimbleState(RadioBtnState::Wrong);
-        }
+//    // 检测到NG
+//    if (detectRes == DetectRes::NG) {
+//        if (!isShowNGRes) {
+//            return detectRes;
+//        }
 
-        setAlarmBtnState(true);
+//        ImgArea::getInstance()->setDetectRes(false, sceneId);
+//        if (sceneId == 1) {
+//            SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Wrong);
+//        } else {
+//            SideBar::getInstance()->setCanThimbleState(RadioBtnState::Wrong);
+//        }
 
-        return detectRes;
-    } else if (detectRes == DetectRes::OK) {
-        ImgArea::getInstance()->setDetectRes(true, sceneId);
-        if (sceneId == 1) {
-            SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
-        } else {
-            SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
-        }
+//        setAlarmBtnState(true);
 
-        setAlarmBtnState(false);
-//        ImgArea::getInstance()->setShapeNoMove(false);
+//        return detectRes;
+//    } else if (detectRes == DetectRes::OK) {
+//        ImgArea::getInstance()->setDetectRes(true, sceneId);
+//        if (sceneId == 1) {
+//            SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
+//        } else {
+//            SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
+//        }
 
-        return detectRes;
-    } else {
-        return -1;
-    }
-}
+//        setAlarmBtnState(false);
+////        ImgArea::getInstance()->setShapeNoMove(false);
+
+//        return detectRes;
+//    } else {
+//        return -1;
+//    }
+//}

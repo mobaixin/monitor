@@ -7,9 +7,9 @@
 
 #include "mydatabase.h"
 
-QString MyDataBase::dbFilePath = "";
-QString MyDataBase::imgFilePath = "";
-QString MyDataBase::imgNgFilePath = "";
+QString MyDataBase::dbFilePath      = "";
+QString MyDataBase::imgMoldFilePath = "";
+QString MyDataBase::imgNgFilePath   = "";
 
 MyDataBase *MyDataBase::getInstance()
 {
@@ -42,14 +42,14 @@ MyDataBase::MyDataBase(QObject *parent)
 
     // todo 数据库路径问题
     // create folder
-    dbFilePath  = QCoreApplication::applicationDirPath() + "/data";
-    imgFilePath = dbFilePath + "/imgmold";
-    imgNgFilePath = dbFilePath + "/imgng";
+    dbFilePath      = QCoreApplication::applicationDirPath() + "/data";
+    imgMoldFilePath = dbFilePath + "/imgmold";
+    imgNgFilePath   = dbFilePath + "/imgng";
 
     QDir dir(dbFilePath);
     if (!dir.exists()) {
         bool ismkdir = dir.mkdir(dbFilePath);
-        ismkdir = dir.mkdir(imgFilePath);
+        ismkdir = dir.mkdir(imgMoldFilePath);
         ismkdir = dir.mkdir(imgNgFilePath);
         if(!ismkdir)
             qDebug() << "Create path fail" << endl;

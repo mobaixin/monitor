@@ -417,6 +417,9 @@ void SideBar::positionBtnClick()
 
 void SideBar::checkMoldBtnClick()
 {
+    // 清除检测结果
+    ImgArea::getInstance()->clearDetectResult();
+
     m_isDetectMold = true;
     m_sceneId = 1;
     MainWindow::getInstance()->setDetectObject();
@@ -439,6 +442,9 @@ void SideBar::checkMoldBtnClick()
 
 void SideBar::productBtnClick()
 {
+    // 清除检测结果
+    ImgArea::getInstance()->clearDetectResult();
+
     m_isDetectMold = false;
     m_sceneId = 2;
     MainWindow::getInstance()->setDetectObject();

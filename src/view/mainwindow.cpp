@@ -110,30 +110,30 @@ void MainWindow::setData()
 
 
     // create folder
-    QString dbFilePath  = QCoreApplication::applicationDirPath() + "/data";
-    QString imgFilePath = dbFilePath + "/imgmold";
-    QString imgNgFilePath = dbFilePath + "/imgng";
+    QString dbFilePath      = MyDataBase::dbFilePath;
+    QString imgMoldFilePath = MyDataBase::imgMoldFilePath;
+    QString imgNgFilePath   = MyDataBase::imgNgFilePath;
 
     QDir dir(dbFilePath);
     if (!dir.exists()) {
         bool ismkdir = dir.mkdir(dbFilePath);
-        ismkdir = dir.mkdir(imgFilePath);
+        ismkdir = dir.mkdir(imgMoldFilePath);
         ismkdir = dir.mkdir(imgNgFilePath);
         if(!ismkdir)
             qDebug() << "Create path fail" << endl;
         else
             qDebug() << "Create fullpath success" << endl;
     }
-    dir.setPath(imgFilePath);
+    dir.setPath(imgMoldFilePath);
     if (!dir.exists()) {
-        dir.mkdir(imgFilePath);
+        dir.mkdir(imgMoldFilePath);
     }
     dir.setPath(imgNgFilePath);
     if (!dir.exists()) {
         dir.mkdir(imgNgFilePath);
     }
 
-//    autoDetectImage(1);
+//    autoDetectImage(1, 1);
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -213,7 +213,7 @@ void MainWindow::adjustBottomBarPos()
     }
 }
 
-int MainWindow::autoDetectImage(int sceneId)
+int MainWindow::autoDetectImage(int cameraId, int sceneId)
 {
     double delayTime  = 0;
     int reDetectTimes = 0;
@@ -238,15 +238,17 @@ int MainWindow::autoDetectImage(int sceneId)
         m_pImgArea->clearDetectResult();
 
         if (m_pImgArea->getCameraStatus() == 1) {
-            for (int i = 0; i < reDetectTimes; i++) {
-                bool isShowNGRes = (i == reDetectTimes - 1);
+            detectRes = m_pImgArea->detectCurImage(cameraId, sceneId, reDetectTimes);
 
-                detectRes = m_pTitleBar->detectCurImage(sceneId, isShowNGRes);
+//            for (int i = 0; i < reDetectTimes; i++) {
+//                bool isShowNGRes = (i == reDetectTimes - 1);
 
-                if (detectRes == DetectRes::OK) {
-                    break;
-                }
-            }
+//                detectRes = m_pTitleBar->detectCurImage(sceneId, isShowNGRes);
+
+//                if (detectRes == DetectRes::OK) {
+//                    break;
+//                }
+//            }
         }
     });
     myDelayTimer->start(int(delayTime * 1000));

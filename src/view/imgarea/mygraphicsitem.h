@@ -68,6 +68,7 @@ protected:
 
     QPen m_penIsSelected;
     QPen m_penNoSelected;
+    QPen m_penMaskArea;
 };
 
 // 椭圆

@@ -194,10 +194,10 @@ void MySerialPort::readTimesInfo()
 
         // 产品
         if ((value & openMoldSig) != 0x0000) {
-            MainWindow::getInstance()->autoDetectImage(2);
+            MainWindow::getInstance()->autoDetectImage(1, 2);
         // 检模
         } else if ((value == topBackSig) != 0x0000) {
-            MainWindow::getInstance()->autoDetectImage(1);
+            MainWindow::getInstance()->autoDetectImage(1, 1);
         }
 
     }

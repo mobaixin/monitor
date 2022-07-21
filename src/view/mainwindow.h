@@ -63,7 +63,7 @@ public:
     void adjustBottomBarPos();
 
     // 自动检测
-    int autoDetectImage(int sceneId);
+    int autoDetectImage(int cameraId, int sceneId);
 
 public:
     int status;

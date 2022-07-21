@@ -17,9 +17,13 @@
 #include <QGraphicsPixmapItem>
 #include <QList>
 #include <QTimer>
+#include <QThread>
 #include <windows.h>
 #include <opencv2\opencv.hpp>
 #include <aruco.hpp>
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
 
 #include "src/view/imgarea/mygraphicsitem.h"
 #include "src/view/imgarea/mygraphicsscene.h"
@@ -72,6 +76,8 @@ enum DetectRes {
     NG = 0,
     OK = 1,
 };
+
+class DetectImageWork;
 
 class ImgArea : public QWidget
 {
@@ -159,8 +165,17 @@ public:
     // 更新图形图片模板
     void updateShapeImgMold(int cameraId, int sceneId);
 
+    // 检测当前的图片 手动检测时sceneId为-1 检测次数默认为1
+    int detectCurImage(int cameraId, int sceneId = -1, int detectTimes = 1);
+
     // 图片检测
-    int detectImage(QImage imgFg, int sceneId = -1);
+    int detectImage(QImage imgFg, int cameraId, int sceneId);
+
+    // 获取检测结果
+    void getDetectResult(int result, QVector<QVector<QPointF>> resPointList, QList<int> resAreaSizeList);
+
+    // 获取当前检测图片
+    QImage getCurDetectImage();
 
     // 获取item数
     int getShapeItemNum();
@@ -198,6 +213,12 @@ public:
 public:
     int status;
 
+signals:
+    void setCameraCountsSig(int cameraCounts);
+    void setSceneRectSizeSig(QSize size);
+    void startUpdateMoldSig(int cameraId, int sceneId, QList<ShapeItemData> itemDataList, QList<ImageMoldData> imgDataList);
+    void startDetectImageSig(QImage imgFg, int cameraId, int sceneId, int &detectRes);
+
 private:
     // SDK初始化
     int initSDK();
@@ -234,10 +255,23 @@ private:
     // 当前检测场景id
     int m_detectSceneId;
 
+    // 当前检测图片
+    QImage m_curDetectImage;
+
     // 相机数
     int m_cameraCounts;
     QTimer *m_resTimer;
     CaptureThread *m_thread;
+
+    // 检测图片线程
+    QThread *m_detectThread;
+    DetectImageWork *m_detectImageWork;
+
+    // NG区域的边缘点
+    QVector<QVector<QPointF>> m_resPointList;
+
+    // NG区域的范围大小
+    QList<int> m_resAreaSizeList;
 
     bool m_isShowImage;
 
@@ -267,9 +301,117 @@ private:
     QList<CameraDetectData> m_cameraDetectDataList;
 
     QList<QGraphicsPolygonItem *> m_detectResItemList;
+    QList<QGraphicsTextItem *> m_detectResTxtItemList;
 };
 
 
+class DetectImageWork : public QObject
+{
+    Q_OBJECT
+public:
+    explicit DetectImageWork(QObject *parent = nullptr);
+    virtual ~DetectImageWork();
 
+    // 设置相机数
+    void setCameraCounts(int cameraCounts);
+
+    // 设置检测场景尺寸
+    void setSceneRectSize(QSize size);
+
+    // 获取opencv mask
+    Mat getShapeMask(ShapeItemData itemData, QImage img, QList<ShapeItemData> maskItemDataList);
+
+    // 更新图形图片模板
+    void updateShapeImgMold(int cameraId, int sceneId, QList<ShapeItemData> itemDataList, QList<ImageMoldData> imgDataList);
+
+    // 图片检测
+    void detectImage(QImage imgFg, int cameraId, int sceneId, int &detectRes);
+
+signals:
+    void resultReadySig(int result, QVector<QVector<QPointF>> resPointList, QList<int> resAreaSizeList);
+
+private:
+    static QImage matToQim(Mat & mat);
+    static Mat qimToMat(QImage & qim);
+
+private:
+    QSize m_sceneRectSize;
+
+    // opencv
+    int m_minArea;
+    Mat m_frame;
+    Mat m_fgMaskMOG2;
+    Mat m_maskCountour;
+
+    QList<Mat> m_moldShapeMaskList;
+    QList<Mat> m_prodShapeMaskList;
+    QList<MyMOG2Data> m_moldMOG2DataList;
+    QList<MyMOG2Data> m_prodMOG2DataList;
+
+    QList<CameraDetectData> m_cameraDetectDataList;
+};
+
+
+static std::string base64Encode(const unsigned char* Data, int DataByte) {
+    //编码表
+    const char EncodeTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    //返回值
+    std::string strEncode;
+    unsigned char Tmp[4] = { 0 };
+    int LineLength = 0;
+    for (int i = 0; i < (int)(DataByte / 3); i++) {
+        Tmp[1] = *Data++;
+        Tmp[2] = *Data++;
+        Tmp[3] = *Data++;
+        strEncode += EncodeTable[Tmp[1] >> 2];
+        strEncode += EncodeTable[((Tmp[1] << 4) | (Tmp[2] >> 4)) & 0x3F];
+        strEncode += EncodeTable[((Tmp[2] << 2) | (Tmp[3] >> 6)) & 0x3F];
+        strEncode += EncodeTable[Tmp[3] & 0x3F];
+        if (LineLength += 4, LineLength == 76) { strEncode += "\r\n"; LineLength = 0; }
+    }
+    //对剩余数据进行编码
+    int Mod = DataByte % 3;
+    if (Mod == 1) {
+        Tmp[1] = *Data++;
+        strEncode += EncodeTable[(Tmp[1] & 0xFC) >> 2];
+        strEncode += EncodeTable[((Tmp[1] & 0x03) << 4)];
+        strEncode += "==";
+    }
+    else if (Mod == 2) {
+        Tmp[1] = *Data++;
+        Tmp[2] = *Data++;
+        strEncode += EncodeTable[(Tmp[1] & 0xFC) >> 2];
+        strEncode += EncodeTable[((Tmp[1] & 0x03) << 4) | ((Tmp[2] & 0xF0) >> 4)];
+        strEncode += EncodeTable[((Tmp[2] & 0x0F) << 2)];
+        strEncode += "=";
+    }
+
+
+    return strEncode;
+}
+
+//imgType 包括png bmp jpg jpeg等opencv能够进行编码解码的文件
+static std::string Mat2Base64(const cv::Mat &img, std::string imgType) {
+    //Mat转base64
+    std::string img_data;
+    std::vector<uchar> vecImg;
+    std::vector<int> vecCompression_params;
+    vecCompression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+    vecCompression_params.push_back(90);
+    imgType = "." + imgType;
+    cv::imencode(imgType, img, vecImg, vecCompression_params);
+    img_data = base64Encode(vecImg.data(), vecImg.size());
+    return img_data;
+}
+
+
+//static cv::Mat Base2Mat(std::string &base64_data) {
+//    cv::Mat img;
+//    std::string s_mat;
+//    s_mat = base64Decode(base64_data.data(), base64_data.size());
+//    std::vector<char> base64_img(s_mat.begin(), s_mat.end());
+//    img = cv::imdecode(base64_img, CV_LOAD_IMAGE_COLOR);
+//    return img;
+//}
 
 #endif // IMG_AREA

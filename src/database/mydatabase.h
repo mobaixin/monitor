@@ -151,7 +151,7 @@ public:
 
 public:
     static QString dbFilePath;
-    static QString imgFilePath;
+    static QString imgMoldFilePath;
     static QString imgNgFilePath;
 
 private:

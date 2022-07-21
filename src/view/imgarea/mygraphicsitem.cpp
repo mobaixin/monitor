@@ -16,6 +16,8 @@ MyGraphicsItem::MyGraphicsItem(QPointF center, QPointF edge, MyGraphicsItem::Ite
     m_penNoSelected.setWidth(2);
     m_penIsSelected.setColor(QColor(255, 0, 255));
     m_penIsSelected.setWidth(2);
+    m_penMaskArea.setColor(QColor(106, 8, 136));
+    m_penMaskArea.setWidth(2);
 
     this->setPen(m_penNoSelected);
     this->setFlags(QGraphicsItem::ItemIsSelectable  |
@@ -53,6 +55,10 @@ void MyGraphicsItem::focusOutEvent(QFocusEvent *event)
 {
     Q_UNUSED(event);
     this->setPen(m_penNoSelected);
+
+    if (m_accuracy == -1) {
+        this->setPen(m_penMaskArea);
+    }
 
 //    return QGraphicsItem::focusOutEvent(event);
 }
@@ -317,6 +323,10 @@ MyPolygon::MyPolygon(MyGraphicsItem::ItemType type)
     m_isCreateFinished = false;
     m_isAddPoint = false;
     m_isAddedPoint = false;
+
+    if (type == MyGraphicsItem::ItemType::Polygon_Mask) {
+        this->setPen(m_penMaskArea);
+    }
 }
 
 //MyPolygon::~MyPolygon()
