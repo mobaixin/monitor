@@ -31,6 +31,8 @@
 #include "src/camera/Include/CameraApi.h"
 #include "src/database/mydatabase.h"
 
+// netsh interface ipv4 set address name="以太网 2" source=static address=192.168.0.106 mask=255.255.255.0 gateway=192.168.0.1
+
 using namespace cv;
 using namespace std;
 
@@ -220,6 +222,9 @@ signals:
     void startDetectImageSig(QImage imgFg, int cameraId, int sceneId, int &detectRes);
 
 private:
+    // 本机IP地址初始化
+    int initLocalNetwork();
+
     // SDK初始化
     int initSDK();
     void cameraStatues();
@@ -262,6 +267,12 @@ private:
     int m_cameraCounts;
     QTimer *m_resTimer;
     CaptureThread *m_thread;
+
+    // 本机IP地址
+    QString m_ifaceIp  = QString("192.168.0.10%1");
+
+    // 相机IP地址
+    QString m_cameraIp = QString("192.168.0.11%1");
 
     // 检测图片线程
     QThread *m_detectThread;

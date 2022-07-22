@@ -55,6 +55,7 @@ void MySettings::setInitValue()
     m_settings->setValue(QString("%1/%2").arg(SysSection).arg("prodDelay"),  "4");
     m_settings->setValue(QString("%1/%2").arg(SysSection).arg("prodTimes"),  "2");
     m_settings->setValue(QString("%1/%2").arg(SysSection).arg("prodDetect"), "1");
+    m_settings->setValue(QString("%1/%2").arg(SysSection).arg("cameraCounts"), "1");
 
     // 相机参数
     m_settings->setValue(QString("%1/%2").arg(CameraSection).arg("exposeTime"), "1000");

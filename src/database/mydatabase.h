@@ -76,6 +76,8 @@ typedef struct CameraIPData {
     QString portIp;
     QString state;
     QString cameraIp;
+    QString cameraMask;
+    QString cameraGateway;
 }CameraIPData;
 
 class MyDataBase : public QObject

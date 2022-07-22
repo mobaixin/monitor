@@ -138,6 +138,8 @@ int MyDataBase::initDataBase()
                                        "port_ip VARCHAR,"
                                        "state VARCHAR,"
                                        "camera_ip VARCHAR,"
+                                       "camera_mask VARCHAR,"
+                                       "camera_gateway VARCHAR,"
                                        "other1 VARCHAR,"
                                        "other2 VARCHAR)"
                                        ));
@@ -800,8 +802,8 @@ int MyDataBase::addCameraIPData(CameraIPData cameraIPData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("INSERT INTO camera_ip_deploy (camera_id, serial_id, nick_name, port_ip, state, camera_ip) VALUES "
-                          "(:camera_id, :serial_id, :nick_name, :port_ip, :state, :camera_ip)");
+            query.prepare("INSERT INTO camera_ip_deploy (camera_id, serial_id, nick_name, port_ip, state, camera_ip, camera_mask, camera_gateway) VALUES "
+                          "(:camera_id, :serial_id, :nick_name, :port_ip, :state, :camera_ip, :camera_mask, :camera_gateway)");
 
             query.bindValue(":camera_id", QString::number(cameraIPData.cameraId));
             query.bindValue(":serial_id", cameraIPData.serialId);
@@ -809,6 +811,8 @@ int MyDataBase::addCameraIPData(CameraIPData cameraIPData)
             query.bindValue(":port_ip",   cameraIPData.portIp);
             query.bindValue(":state",     cameraIPData.state);
             query.bindValue(":camera_ip", cameraIPData.cameraIp);
+            query.bindValue(":camera_mask",    cameraIPData.cameraMask);
+            query.bindValue(":camera_gateway", cameraIPData.cameraGateway);
 
             queryRes = query.exec();
 
@@ -862,6 +866,8 @@ CameraIPData MyDataBase::queCameraIPData(CameraIPData cameraIPData)
         resData.portIp   = query.value("port_ip").toString();
         resData.state    = query.value("state").toString();
         resData.cameraIp = query.value("camera_ip").toString();
+        resData.cameraMask    = query.value("camera_mask").toString();
+        resData.cameraGateway = query.value("camera_gateway").toString();
     }
 
     return resData;
@@ -877,7 +883,8 @@ int MyDataBase::altCameraIPData(CameraIPData cameraIPData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("UPDATE camera_ip_deploy SET serial_id=:serial_id, nick_name=:nick_name, port_ip=:port_ip, state=:state, camera_ip=:camera_ip"
+            query.prepare("UPDATE camera_ip_deploy SET serial_id=:serial_id, nick_name=:nick_name, port_ip=:port_ip, state=:state, "
+                          "camera_ip=:camera_ip, camera_mask=:camera_mask, camera_gateway=:camera_gateway"
                           "WHERE camera_id=:camera_id");
 
             query.bindValue(":serial_id", cameraIPData.serialId);
@@ -885,6 +892,8 @@ int MyDataBase::altCameraIPData(CameraIPData cameraIPData)
             query.bindValue(":port_ip",   cameraIPData.portIp);
             query.bindValue(":state",     cameraIPData.state);
             query.bindValue(":camera_ip", cameraIPData.cameraIp);
+            query.bindValue(":camera_mask",    cameraIPData.cameraMask);
+            query.bindValue(":camera_gateway", cameraIPData.cameraGateway);
 
             queryRes = query.exec();
 
@@ -920,6 +929,8 @@ QList<CameraIPData> MyDataBase::queAllCameraIPData()
         resData.portIp   = query.value("port_ip").toString();
         resData.state    = query.value("state").toString();
         resData.cameraIp = query.value("camera_ip").toString();
+        resData.cameraMask    = query.value("camera_mask").toString();
+        resData.cameraGateway = query.value("camera_gateway").toString();
 
         resDataList.append(resData);
     }

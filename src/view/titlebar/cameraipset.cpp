@@ -75,7 +75,7 @@ void CameraIpSet::setWidgetStyle()
     m_ipTableView->setFont(viewFont);
     m_ipTableView->setAlternatingRowColors(true);
 
-    m_ipModel->setHorizontalHeaderLabels({"系列号", "自定义名称", "接口", "状态", "IP地址"});
+    m_ipModel->setHorizontalHeaderLabels({"系列号", "自定义名称", "接口", "状态", "IP地址", "子网掩码", "默认网关"});
     m_ipTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_ipTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     m_ipTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -96,7 +96,7 @@ void CameraIpSet::setWidgetStyle()
 
     m_freshBtn->setText("刷新");
     m_changeIpBtn->setText("修改IP");
-    m_autoGetIpBtn->setText("自定义分配IP");
+    m_autoGetIpBtn->setText("自动分配IP");
     m_confirmBtn->setText("确认");
     m_cancelBtn->setText("取消");
 
@@ -159,6 +159,8 @@ void CameraIpSet::getModelData()
         m_ipModel->setItem(i, 2, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].portIp)));
         m_ipModel->setItem(i, 3, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].state)));
         m_ipModel->setItem(i, 4, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].cameraIp)));
+        m_ipModel->setItem(i, 5, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].cameraMask)));
+        m_ipModel->setItem(i, 6, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].cameraGateway)));
     }
 }
 

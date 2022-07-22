@@ -4,6 +4,9 @@
 #include <QApplication>
 #include <QList>
 #include <QDateTime>
+#include <QNetworkInterface>
+#include <QNetworkAddressEntry>
+#include <QProcess>
 
 #include "src/view/imgarea/imgarea.h"
 #include "src/view/mainwindow.h"
@@ -203,22 +206,36 @@ void ImgArea::setData()
 //    status =0;
 //    setRunState(CameraState::OffLine);
 
-    if(initSDK()==-1){
-        status =0;
-        setRunState(CameraState::OffLine);
-    } else {
-        qDebug() << "before initParameter";
-        initParameter(g_hCamera,&g_tCapability);
-//        CameraSetOnceWB(g_hCamera);
-        qDebug() << "after initParameter";
-        m_thread->start();
-        m_thread->stream();
-        status = 1;
-        setRunState(CameraState::Running);
+    // 初始化本机IP地址
+    initLocalNetwork();
+
+    for (int i = 0; i < 3; i++) {
+        int initRes = initSDK();
+
+        if(initRes == -1){
+            status =0;
+            setRunState(CameraState::OffLine);
+        } else if (initRes == 2) {
+            QThread::msleep(2000);
+            continue ;
+        } else {
+            qDebug() << "before initParameter";
+            initParameter(g_hCamera,&g_tCapability);
+//            CameraSetOnceWB(g_hCamera);
+            qDebug() << "after initParameter";
+            m_thread->start();
+            m_thread->stream();
+            status = 1;
+            setRunState(CameraState::Running);
+        }
+        break;
     }
+
     qDebug() << "status: " << status;
 
-    emit setCameraCountsSig(m_cameraCounts);
+    // 获取设置的相机数
+    int count = MySettings::getInstance()->getValue(SysSection, "cameraCounts").toInt();
+    emit setCameraCountsSig(count);
 
     CameraDetectData cameraData;
     m_cameraDetectDataList.append(cameraData);
@@ -248,10 +265,31 @@ void ImgArea::eraseShape()
 {
     if (!m_pScene->selectedItems().isEmpty()) {
         QGraphicsItem *temp = m_pScene->selectedItems().first();
+
+        bool isPoint = false;
+        MyPointItem *item = static_cast<MyPointItem *>(temp);
+
+        switch (item->getPointType()) {
+        case MyPointItem::Center:
+        case MyPointItem::Edge:
+        case MyPointItem::Special:
+        case MyPointItem::Other:
+            isPoint = true;
+            break;
+        default:
+            break;
+        }
+
+        if (isPoint) {
+            return ;
+        }
+
+        // 清除图形 回收内存
         m_pScene->removeItem(temp);
 
         MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(temp);
-        delete temp;
+        shapeItem->deleteLater();
+//        delete temp;
     }
 }
 
@@ -799,6 +837,26 @@ int ImgArea::initSDK()
         return -1;
     }
 
+    // 获取相机IP信息
+    char* ipInfo[6];
+    for (int i = 0; i < 6; i++) {
+        ipInfo[i] = QString("0").toUtf8().data();
+    }
+
+    CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
+
+    // 判断本机IP和相机IP
+    QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1));
+    if (QString(ipInfo[0]) != cameraIp) {
+        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (QString(ipInfo[4]).toLatin1()).data(),
+                                 (QString(ipInfo[5]).toLatin1()).data(), true);
+        return 2;
+    }
+
+    for (int i = 0; i < 6; i++) {
+        qDebug() << QString(ipInfo[i]);
+    }
+
     //相机初始化。初始化成功后，才能调用任何其他相机相关的操作接口
     iStatus = CameraInit(&tCameraEnumList[0],-1,-1,&g_hCamera);
 
@@ -815,30 +873,20 @@ int ImgArea::initSDK()
     qDebug() << tCameraEnumList[0].acSn;
     qDebug() << "1";
 
-    // 获取相机IP信息
-    char* ipInfo[6];
-    for (int i = 0; i < 6; i++) {
-        ipInfo[i] = QString("0").toUtf8().data();
-    }
-
-//    CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
-
-    for (int i = 0; i < 6; i++) {
-        qDebug() << ipInfo[i];
-    }
-
     // 数据库交互
-//    CameraIPData cameraIPData;
-//    cameraIPData.cameraId = 0;
-//    cameraIPData.serialId = tCameraEnumList[0].acSn;
-//    cameraIPData.nickName = tCameraEnumList[0].acFriendlyName;
-//    cameraIPData.portIp   = ipInfo[3];
-//    cameraIPData.state    = "可用";
-//    cameraIPData.cameraIp = ipInfo[0];
+    CameraIPData cameraIPData;
+    cameraIPData.cameraId = 1;
+    cameraIPData.serialId = tCameraEnumList[0].acSn;
+    cameraIPData.nickName = tCameraEnumList[0].acFriendlyName;
+    cameraIPData.portIp   = QString(ipInfo[3]);
+    cameraIPData.state    = "可用";
+    cameraIPData.cameraIp = cameraIp;
+    cameraIPData.cameraMask    = QString(ipInfo[1]);
+    cameraIPData.cameraGateway = QString(ipInfo[2]);
 
-//    if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
-//        MyDataBase::getInstance()->addCameraIPData(cameraIPData);
-//    }
+    if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
+        MyDataBase::getInstance()->addCameraIPData(cameraIPData);
+    }
     qDebug() << "2";
 
     //获得相机的特性描述结构体。该结构体中包含了相机可设置的各种参数的范围信息。决定了相关函数的参数
@@ -1151,6 +1199,8 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
 
     if (detectRes == DetectRes::OK) {
         m_isShowImage = true;
+    } else {
+        QApplication::beep();
     }
 
     return detectRes;
@@ -1530,6 +1580,64 @@ void ImgArea::setShapeNoMove(bool noMove)
 int ImgArea::getDetectSceneId()
 {
     return m_detectSceneId;
+}
+
+int ImgArea::initLocalNetwork()
+{
+    QList<QNetworkInterface> ifaceList = QNetworkInterface::allInterfaces();
+    qDebug() << "ifaceList.size(): " << ifaceList.size();
+
+    QProcess cmd(this);
+    QString cmdStr = QString("netsh interface ipv4 set address name=\"%1\" source=static "
+                             "address=%2 mask=255.255.255.0 gateway=192.168.0.1");
+
+    for (int i = 0; i < ifaceList.size(); i++) {
+
+        QNetworkInterface iface = ifaceList[i];
+
+        if (!iface.isValid())
+            continue;
+
+        QNetworkInterface::InterfaceFlags flags = iface.flags();
+
+        // 网络接口处于活动状态 && 不是本地回环地址
+        if (flags.testFlag(QNetworkInterface::IsRunning)
+        && !flags.testFlag(QNetworkInterface::IsLoopBack)) {
+            qDebug() << QString("设备 %1").arg(i);
+            qDebug() << "接口名称: " << iface.humanReadableName();
+            qDebug() << "设备名称: " << iface.name();
+            qDebug() << "硬件地址: " << iface.hardwareAddress();
+
+            qDebug() << "IP地址列表: ";
+
+            // 读取IP地址的信息列表
+            QList<QNetworkAddressEntry> entryList = iface.addressEntries();
+
+            for (int j = 0; j < entryList.size(); j++) {
+                QNetworkAddressEntry entry = entryList[j];
+
+                // 判断是否为IPV4地址
+                if (entry.ip().protocol() != QAbstractSocket::IPv4Protocol) {
+                    continue ;
+                }
+
+                qDebug() << QString("地址 %1").arg(j);
+                qDebug() << "IP地址: " << entry.ip().toString();
+                qDebug() << "子网掩码: " << entry.netmask().toString();
+                qDebug() << "广播地址: " << entry.broadcast().toString();
+
+                // 修改本机IP地址
+                if (entry.ip().toString() != m_ifaceIp.arg(i + 1)) {
+                    cmd.start(cmdStr.arg(iface.name()).arg(m_ifaceIp.arg(i + 1)));
+                    cmd.waitForFinished();
+                }
+            }
+        }
+
+
+    }
+
+    return 1;
 }
 
 QImage ImgArea::matToQim(Mat &mat)
