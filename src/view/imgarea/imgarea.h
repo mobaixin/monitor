@@ -269,10 +269,15 @@ private:
     CaptureThread *m_thread;
 
     // 本机IP地址
-    QString m_ifaceIp  = QString("192.168.0.10%1");
+//    QString m_ifaceIp  = QString("192.168.0.10%1");
+    QString m_ifaceIp  = QString("192.168.%1.10%2");
 
     // 相机IP地址
-    QString m_cameraIp = QString("192.168.0.11%1");
+//    QString m_cameraIp = QString("192.168.0.11%1");
+    QString m_cameraIp = QString("192.168.%1.11%2");
+
+    // 网关地址
+    QString m_gateway  = QString("192.168.%1.1");
 
     // 检测图片线程
     QThread *m_detectThread;

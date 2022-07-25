@@ -215,10 +215,24 @@ void ImgArea::setData()
         if(initRes == -1){
             status =0;
             setRunState(CameraState::OffLine);
-        } else if (initRes == 2) {
+
+        // 相机IP配置失败
+        } else if (initRes == -2) {
             QThread::msleep(2000);
+
+            if (i == 2) {
+                status =0;
+                setRunState(CameraState::OffLine);
+            }
+
             continue ;
-        } else {
+
+        // 相机IP配置成功 需要再次初始化
+        } else if (initRes == 2) {
+            i = i - 1;
+            continue ;
+        }
+        else {
             qDebug() << "before initParameter";
             initParameter(g_hCamera,&g_tCapability);
 //            CameraSetOnceWB(g_hCamera);
@@ -462,7 +476,7 @@ QImage ImgArea::getImageItem()
 
     ImageMoldData imgData;
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
-    imgData.sceneId  = SideBar::getInstance()->getIsDetectMold() ? 1 : 2;
+    imgData.sceneId  = SideBar::getInstance()->getCurSceneID();
     imgData.moldId   = SideBar::getInstance()->getCurMoldNum();
     imgData.imgPath  = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
     imgData.time     = timeStr;
@@ -487,7 +501,7 @@ QList<ShapeItemData> ImgArea::getShapeItems()
 
             ShapeItemData itemData;
             itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
-            itemData.sceneId  = SideBar::getInstance()->getIsDetectMold() ? 1 : 2;
+            itemData.sceneId  = SideBar::getInstance()->getCurSceneID();
             itemData.moldId   = SideBar::getInstance()->getCurrentIdx();
             itemData.type     = item->getType();
             itemData.center   = QString("%1,%2").arg(center.x()).arg(center.y());
@@ -578,6 +592,12 @@ QList<ShapeItemData> ImgArea::getShapeItems()
             }
         }
     }
+
+    // 更新模板
+    int cameraId = TitleBar::getInstance()->getCurCameraId();
+    int sceneId  = SideBar::getInstance()->getCurSceneID();
+    updateShapeImgMold(cameraId, sceneId);
+
     return shapeList;
 }
 
@@ -845,24 +865,51 @@ int ImgArea::initSDK()
 
     CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
 
+    // 设置相机IP
+    QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1)).arg(QString(ipInfo[3]).right(1));
+    qDebug() << "cameraIP: " << cameraIp;
+
+    // 数据库交互
+    CameraIPData cameraIPData;
+    cameraIPData.cameraId = 1;
+    cameraIPData.serialId = QString(tCameraEnumList[0].acSn);
+    cameraIPData.nickName = QString(tCameraEnumList[0].acFriendlyName);
+    cameraIPData.portIp   = QString(ipInfo[3]);
+    cameraIPData.state    = "可用";
+    cameraIPData.cameraIp = cameraIp;
+    cameraIPData.cameraMask    = QString(ipInfo[4]);
+    cameraIPData.cameraGateway = QString(ipInfo[5]);
+
     // 判断本机IP和相机IP
-    QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1));
     if (QString(ipInfo[0]) != cameraIp) {
         int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (QString(ipInfo[4]).toLatin1()).data(),
                                  (QString(ipInfo[5]).toLatin1()).data(), true);
-        return 2;
+        if (res == CAMERA_STATUS_SUCCESS) {
+            qDebug() << "相机IP设置成功";
+            cameraIPData.state = "可用";
+        } else {
+            qDebug() << "相机IP设置失败";
+            cameraIPData.state = "不可用";
+        }
+
+        // 数据库交互
+        if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
+            MyDataBase::getInstance()->addCameraIPData(cameraIPData);
+        } else {
+            MyDataBase::getInstance()->altCameraIPData(cameraIPData);
+        }
+
+        // 根据情况返回不同的值
+        if (res == CAMERA_STATUS_SUCCESS) {
+            return 2;
+        } else {
+            return -2;
+        }
+
     }
 
     for (int i = 0; i < 6; i++) {
         qDebug() << QString(ipInfo[i]);
-    }
-
-    //相机初始化。初始化成功后，才能调用任何其他相机相关的操作接口
-    iStatus = CameraInit(&tCameraEnumList[0],-1,-1,&g_hCamera);
-
-    //初始化失败
-    if(iStatus!=CAMERA_STATUS_SUCCESS){
-        return -1;
     }
 
     // 获取相机序列号信息
@@ -873,20 +920,19 @@ int ImgArea::initSDK()
     qDebug() << tCameraEnumList[0].acSn;
     qDebug() << "1";
 
-    // 数据库交互
-    CameraIPData cameraIPData;
-    cameraIPData.cameraId = 1;
-    cameraIPData.serialId = tCameraEnumList[0].acSn;
-    cameraIPData.nickName = tCameraEnumList[0].acFriendlyName;
-    cameraIPData.portIp   = QString(ipInfo[3]);
-    cameraIPData.state    = "可用";
-    cameraIPData.cameraIp = cameraIp;
-    cameraIPData.cameraMask    = QString(ipInfo[1]);
-    cameraIPData.cameraGateway = QString(ipInfo[2]);
+    //相机初始化。初始化成功后，才能调用任何其他相机相关的操作接口
+    iStatus = CameraInit(&tCameraEnumList[0],-1,-1,&g_hCamera);
 
-    if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
-        MyDataBase::getInstance()->addCameraIPData(cameraIPData);
+    //初始化失败
+    if(iStatus!=CAMERA_STATUS_SUCCESS){
+        return -1;
     }
+
+
+
+
+
+
     qDebug() << "2";
 
     //获得相机的特性描述结构体。该结构体中包含了相机可设置的各种参数的范围信息。决定了相关函数的参数
@@ -1627,8 +1673,10 @@ int ImgArea::initLocalNetwork()
                 qDebug() << "广播地址: " << entry.broadcast().toString();
 
                 // 修改本机IP地址
-                if (entry.ip().toString() != m_ifaceIp.arg(i + 1)) {
-                    cmd.start(cmdStr.arg(iface.name()).arg(m_ifaceIp.arg(i + 1)));
+                QString localFaceIp = m_ifaceIp.arg(i + 1).arg(i + 1);
+//                QString localFaceIp = m_ifaceIp.arg(2).arg(2);
+                if (entry.ip().toString() != localFaceIp) {
+                    cmd.start(cmdStr.arg(iface.name()).arg(localFaceIp));
                     cmd.waitForFinished();
                 }
             }
