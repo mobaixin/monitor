@@ -209,7 +209,8 @@ void ImgArea::setData()
     // 初始化本机IP地址
     initLocalNetwork();
 
-    for (int i = 0; i < 3; i++) {
+    int maxInitTimes = 3;
+    for (int i = 0; i < maxInitTimes; i++) {
         int initRes = initSDK();
 
         if(initRes == -1){
@@ -229,7 +230,13 @@ void ImgArea::setData()
 
         // 相机IP配置成功 需要再次初始化
         } else if (initRes == 2) {
-            i = i - 1;
+            if (maxInitTimes == 3 ) {
+                maxInitTimes = 4;
+            } else {
+                status =0;
+                setRunState(CameraState::OffLine);
+            }
+
             continue ;
         }
         else {
@@ -494,10 +501,10 @@ QList<ShapeItemData> ImgArea::getShapeItems()
     for (QGraphicsItem *temp : m_pScene->items()) {
         if (temp != m_pImageItem && temp != nullptr && temp->scene() != nullptr) {
 
-            qDebug() << "1";
+//            qDebug() << "1";
             MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
             QPoint center = item->getRealCenter().toPoint();
-            qDebug() << "2";
+//            qDebug() << "2";
 
             ShapeItemData itemData;
             itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
@@ -507,8 +514,8 @@ QList<ShapeItemData> ImgArea::getShapeItems()
             itemData.center   = QString("%1,%2").arg(center.x()).arg(center.y());
             itemData.accuracy = item->getAccuracy();
             itemData.pixel    = item->getPixel();
-            qDebug() << "3";
-            qDebug() << "item->getType(): " << item->getType();
+//            qDebug() << "3";
+//            qDebug() << "item->getType(): " << item->getType();
 
             switch (item->getType()) {
             case MyGraphicsItem::ItemType::Rectangle:{
@@ -908,6 +915,13 @@ int ImgArea::initSDK()
 
     }
 
+    // 数据库交互
+    if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
+        MyDataBase::getInstance()->addCameraIPData(cameraIPData);
+    } else {
+        MyDataBase::getInstance()->altCameraIPData(cameraIPData);
+    }
+
     for (int i = 0; i < 6; i++) {
         qDebug() << QString(ipInfo[i]);
     }
@@ -927,11 +941,6 @@ int ImgArea::initSDK()
     if(iStatus!=CAMERA_STATUS_SUCCESS){
         return -1;
     }
-
-
-
-
-
 
     qDebug() << "2";
 
@@ -1038,7 +1047,7 @@ Ptr<BackgroundSubtractorMOG2> ImgArea::getMOG2Data(ShapeItemData itemData)
 
 void ImgArea::updateShapeImgMold(int cameraId, int sceneId)
 {
-    qDebug() << "in updateShapeImgMold";
+    qDebug() << "in ImgArea::updateShapeImgMold";
     if (sceneId != 1 && sceneId != 2) {
         return ;
     }
@@ -1635,7 +1644,7 @@ int ImgArea::initLocalNetwork()
 
     QProcess cmd(this);
     QString cmdStr = QString("netsh interface ipv4 set address name=\"%1\" source=static "
-                             "address=%2 mask=255.255.255.0 gateway=192.168.0.1");
+                             "address=%2 mask=255.255.255.0 gateway=%3");
 
     for (int i = 0; i < ifaceList.size(); i++) {
 
@@ -1673,10 +1682,12 @@ int ImgArea::initLocalNetwork()
                 qDebug() << "广播地址: " << entry.broadcast().toString();
 
                 // 修改本机IP地址
-                QString localFaceIp = m_ifaceIp.arg(i + 1).arg(i + 1);
-//                QString localFaceIp = m_ifaceIp.arg(2).arg(2);
+                int ifaceId = i + 1;
+                ifaceId = 2;
+                QString localFaceIp = m_ifaceIp.arg(ifaceId).arg(ifaceId);
+                QString gateway     = m_gateway.arg(ifaceId);
                 if (entry.ip().toString() != localFaceIp) {
-                    cmd.start(cmdStr.arg(iface.name()).arg(localFaceIp));
+                    cmd.start(cmdStr.arg(iface.name()).arg(localFaceIp).arg(gateway));
                     cmd.waitForFinished();
                 }
             }

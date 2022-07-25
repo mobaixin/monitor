@@ -778,11 +778,14 @@ void SideBar::updateSceneItemMold()
     itemData.cameraId = cameraId;
     itemData.sceneId  = sceneId;
 
+    // 清理数据库的图形模板
     MyDataBase::getInstance()->delSceneShapeItemData(itemData);
+
+    // 更新数据库的图形模板
     ImgArea::getInstance()->getShapeItems();
 
     // 更新模板
-    emit updateShapeImgMoldSig(cameraId, sceneId);
+//    emit updateShapeImgMoldSig(cameraId, sceneId);
 }
 
 void SideBar::loadCurMold()

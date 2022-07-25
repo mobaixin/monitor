@@ -643,7 +643,7 @@ int MyDataBase::altNGRecordData(NGRecordData recordData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("UPDATE ng_record SET time=:time, result=:result"
+            query.prepare("UPDATE ng_record SET time=:time, result=:result "
                           "WHERE camera_id=:camera_id and scene_id=:scene_id");
 
             query.bindValue(":time",      recordData.time);
@@ -884,7 +884,7 @@ int MyDataBase::altCameraIPData(CameraIPData cameraIPData)
             QSqlQuery query;
 
             query.prepare("UPDATE camera_ip_deploy SET serial_id=:serial_id, nick_name=:nick_name, port_ip=:port_ip, state=:state, "
-                          "camera_ip=:camera_ip, camera_mask=:camera_mask, camera_gateway=:camera_gateway"
+                          "camera_ip=:camera_ip, camera_mask=:camera_mask, camera_gateway=:camera_gateway "
                           "WHERE camera_id=:camera_id");
 
             query.bindValue(":serial_id", cameraIPData.serialId);
@@ -894,6 +894,7 @@ int MyDataBase::altCameraIPData(CameraIPData cameraIPData)
             query.bindValue(":camera_ip", cameraIPData.cameraIp);
             query.bindValue(":camera_mask",    cameraIPData.cameraMask);
             query.bindValue(":camera_gateway", cameraIPData.cameraGateway);
+            query.bindValue(":camera_id",      cameraIPData.cameraId);
 
             queryRes = query.exec();
 
