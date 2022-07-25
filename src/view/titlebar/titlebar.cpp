@@ -249,6 +249,16 @@ void TitleBar::monitorSetBtnClick()
         m_pTestBtn->setDisabled(false);
         ImgArea::getInstance()->setShapeNoMove(true);
 
+        // 清除数据库中的图形模板
+        ShapeItemData itemData;
+        itemData.cameraId = m_cameraId;
+        itemData.sceneId  = SideBar::getInstance()->getCurSceneID();
+
+        MyDataBase::getInstance()->delSceneShapeItemData(itemData);
+
+        // 将图形模板保存至数据库
+        ImgArea::getInstance()->getShapeItems();
+
         OptRecord::addOptRecord("点击关闭设定");
 
     } else {
@@ -259,6 +269,7 @@ void TitleBar::monitorSetBtnClick()
         m_pTestBtn->setDisabled(true);
         ImgArea::getInstance()->setShapeNoMove(false);
 
+        MainWindow::getInstance()->setDetectObject();
         OptRecord::addOptRecord("点击监视设定");
     }
 }

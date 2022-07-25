@@ -178,11 +178,11 @@ void MainWindow::setDetectObject()
 
 void MainWindow::saveMold()
 {
-    QImage imageItem;
-    QList<ShapeItemData> shapeItemList;
+//    QImage imageItem;
+//    QList<ShapeItemData> shapeItemList;
 
-    imageItem = m_pImgArea->getImageItem();
-    shapeItemList = m_pImgArea->getShapeItems();
+//    imageItem = m_pImgArea->getImageItem();
+//    shapeItemList = m_pImgArea->getShapeItems();
 
 //    m_pSideBar->saveImageMold(imageItem);
 //    m_pSideBar->saveShapeMold(shapeItemList);

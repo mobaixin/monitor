@@ -12,6 +12,11 @@
 
 #include "src/view/imgarea/mygraphicsitem.h"
 
+enum DetectScene {
+    DetectMold = 1,
+    DetectProd = 2
+};
+
 enum RadioBtnState {
     NoState = 0,
     Correct = 1,
@@ -93,6 +98,9 @@ private:
     void clearMoldBtnClick();
 
     void updateOrderLab();
+
+    // 切换场景时更新图形模板
+    void updateSceneItemMold();
 
     void loadCurMold();
     void loadCurImage();

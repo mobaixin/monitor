@@ -272,11 +272,11 @@ int SideBar::getCurrentIdx()
 int SideBar::getCurMoldNum()
 {
     int curNum = 1;
-    if (m_isDetectMold) {
-        curNum = m_deteMoldNum;
-    } else {
-        curNum = m_prodMoldNum;
-    }
+//    if (m_isDetectMold) {
+//        curNum = m_deteMoldNum;
+//    } else {
+//        curNum = m_prodMoldNum;
+//    }
 
     return curNum;
 }
@@ -417,8 +417,21 @@ void SideBar::positionBtnClick()
 
 void SideBar::checkMoldBtnClick()
 {
+    bool isNeedUpdate = false;
+
+    if (m_sceneId == 2) {
+        isNeedUpdate = true;
+    } else {
+        return ;
+    }
+
     // 清除检测结果
     ImgArea::getInstance()->clearDetectResult();
+
+    // 切换场景时更新图形模板
+    if (TitleBar::getInstance()->getMonitorSetState()) {
+        updateSceneItemMold();
+    }
 
     m_isDetectMold = true;
     m_sceneId = 1;
@@ -427,6 +440,7 @@ void SideBar::checkMoldBtnClick()
     updateOrderLab();
 
     if (TitleBar::getInstance()->getMonitorSetState()) {
+        // 加载当前场景的模板
         loadCurMold();
     } else {
         ShapeItemData itemData;
@@ -442,8 +456,21 @@ void SideBar::checkMoldBtnClick()
 
 void SideBar::productBtnClick()
 {
+    bool isNeedUpdate = false;
+
+    if (m_sceneId == 1) {
+        isNeedUpdate = true;
+    } else {
+        return ;
+    }
+
     // 清除检测结果
     ImgArea::getInstance()->clearDetectResult();
+
+    // 切换场景时更新图形模板
+    if (TitleBar::getInstance()->getMonitorSetState()) {
+        updateSceneItemMold();
+    }
 
     m_isDetectMold = false;
     m_sceneId = 2;
@@ -452,6 +479,7 @@ void SideBar::productBtnClick()
     updateOrderLab();
 
     if (TitleBar::getInstance()->getMonitorSetState()) {
+        // 加载当前场景的模板
         loadCurMold();
     } else {
         ShapeItemData itemData;
@@ -469,17 +497,39 @@ void SideBar::saveMoldBtnClick()
 {
     OptRecord::addOptRecord("点击保存模板");
 
-//    if (ImgArea::getInstance()->getShapeItemNum() == 0) {
-//        return ;
-//    }
+    if (ImgArea::getInstance()->getCameraStatus() == 0) {
+        return ;
+    }
 
-    ShapeItemData itemData;
-    itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
-    itemData.sceneId  = m_sceneId;
+    if (getCurrentIdx() == 0) {
+        return ;
+    }
 
-    MyDataBase::getInstance()->delSceneShapeItemData(itemData);
+    QDateTime time   = QDateTime::currentDateTime();
+    QString fileName = time.toString("yyyy-MM-dd-HH-mm-ss");
+    QString timeStr  = time.toString("yyyy-MM-dd HH:mm:ss");
 
-    qDebug() << "after delSceneShapeItemData";
+    ImageMoldData imgData;
+    imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
+    imgData.sceneId  = SideBar::getInstance()->getCurSceneID();
+    imgData.moldId   = SideBar::getInstance()->getCurMoldNum();
+    imgData.imgPath  = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
+    imgData.time     = timeStr;
+
+    MyDataBase::getInstance()->addImgMoldData(imgData);
+
+    QImage curImage = ImgArea::getInstance()->getCurImage();
+    curImage.save(imgData.imgPath);
+
+    ImgArea::getInstance()->loadImage(imgData.imgPath);
+
+//    ShapeItemData itemData;
+//    itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+//    itemData.sceneId  = m_sceneId;
+
+//    MyDataBase::getInstance()->delSceneShapeItemData(itemData);
+
+//    qDebug() << "after delSceneShapeItemData";
 //    if (m_isDetectMold) {
 //        if (m_deteMoldNum == 0) {
 //            m_curDeteMoldIdx = 1;
@@ -494,12 +544,12 @@ void SideBar::saveMoldBtnClick()
 
 //    updateOrderLab();
 
-    ImgArea::getInstance()->getShapeItems();
-    qDebug() << "after getShapeItems";
+//    ImgArea::getInstance()->getShapeItems();
+//    qDebug() << "after getShapeItems";
 
     // 更新模板
-    int cameraId = TitleBar::getInstance()->getCurCameraId();
-    emit updateShapeImgMoldSig(cameraId, m_sceneId);
+//    int cameraId = TitleBar::getInstance()->getCurCameraId();
+//    emit updateShapeImgMoldSig(cameraId, m_sceneId);
 
 }
 
@@ -510,6 +560,7 @@ void SideBar::addMoldBtnClick()
     if (ImgArea::getInstance()->getCameraStatus() == 0) {
         return ;
     }
+
     bool isFirstAdd = false;
     if (m_isDetectMold) {
         if (m_deteMoldNum == 0) {
@@ -716,6 +767,22 @@ void SideBar::updateOrderLab()
         text = QString(" %1/%2").arg(m_curProdMoldIdx).arg(m_prodMoldNum);
     }
     m_orderLab->setText(text);
+}
+
+void SideBar::updateSceneItemMold()
+{
+    int cameraId = TitleBar::getInstance()->getCurCameraId();
+    int sceneId  = m_sceneId;
+
+    ShapeItemData itemData;
+    itemData.cameraId = cameraId;
+    itemData.sceneId  = sceneId;
+
+    MyDataBase::getInstance()->delSceneShapeItemData(itemData);
+    ImgArea::getInstance()->getShapeItems();
+
+    // 更新模板
+    emit updateShapeImgMoldSig(cameraId, sceneId);
 }
 
 void SideBar::loadCurMold()
