@@ -237,7 +237,7 @@ int MainWindow::autoDetectImage(int cameraId, int sceneId)
         m_pImgArea->setShapeNoMove(true);
         m_pImgArea->clearDetectResult();
 
-        if (m_pImgArea->getCameraStatus() == 1) {
+        if (m_pImgArea->getCameraStatus(cameraId) == 1) {
             detectRes = m_pImgArea->detectCurImage(cameraId, sceneId, reDetectTimes);
 
 //            for (int i = 0; i < reDetectTimes; i++) {
@@ -251,9 +251,12 @@ int MainWindow::autoDetectImage(int cameraId, int sceneId)
 //            }
         }
     });
-    myDelayTimer->start(int(delayTime * 1000));
 
+    qDebug() << delayTime << " " << reDetectTimes;
 
+    m_pImgArea->autoDetectImage(cameraId, sceneId, delayTime * 1000, reDetectTimes);
+//    m_pImgArea->setSceneDelayTime(sceneId, delayTime * 1000);
+//    myDelayTimer->start(int(delayTime * 1000));
 
     return 0;
 }

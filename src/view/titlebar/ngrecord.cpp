@@ -146,6 +146,7 @@ void NGRecord::addNgRecord(NGRecordData ngData)
 
 void NGRecord::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event);
 
 }
 

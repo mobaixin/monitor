@@ -413,7 +413,7 @@ void drawRect(Mat MOG2, Mat frame)
     Mat imageContours = Mat::zeros(MOG2.size(), CV_8UC1);
     Mat Contours = Mat::zeros(MOG2.size(), CV_8UC1);
     vector<vector<Point>> approxPoint(contours.size());
-    for (int i = 0; i < contours.size(); i++)
+    for (int i = 0; i < int(contours.size()); i++)
     {
 
         if (contourArea(contours[i]) > MINAREA)

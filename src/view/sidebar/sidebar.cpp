@@ -272,11 +272,11 @@ int SideBar::getCurrentIdx()
 int SideBar::getCurMoldNum()
 {
     int curNum = 1;
-//    if (m_isDetectMold) {
-//        curNum = m_deteMoldNum;
-//    } else {
-//        curNum = m_prodMoldNum;
-//    }
+    if (m_isDetectMold) {
+        curNum = m_deteMoldNum;
+    } else {
+        curNum = m_prodMoldNum;
+    }
 
     return curNum;
 }
@@ -339,7 +339,10 @@ QList<QGraphicsItem *> SideBar::getShapeMold()
 
 void SideBar::addAlarmImageMold(QString imgPath, QString timeStr)
 {
-    if (m_sceneId == 1) {
+    int cameraId = ImgArea::getInstance()->getCurDetectCameraId();
+    int sceneId  = ImgArea::getInstance()->getCurDetectSceneId();
+
+    if (sceneId == DetectMold) {
         m_deteMoldNum += 1;
     } else {
         m_prodMoldNum += 1;
@@ -348,13 +351,15 @@ void SideBar::addAlarmImageMold(QString imgPath, QString timeStr)
     updateOrderLab();
 
     ImageMoldData imgData;
-    imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
-    imgData.sceneId  = m_sceneId;
+    imgData.cameraId = cameraId;
+    imgData.sceneId  = sceneId;
     imgData.moldId   = getCurMoldNum();
     imgData.imgPath  = imgPath;
     imgData.time     = timeStr;
 
     MyDataBase::getInstance()->addImgMoldData(imgData);
+
+    emit updateShapeImgMoldSig(cameraId, sceneId);
 }
 
 void SideBar::setThimbleState(int state)
@@ -497,7 +502,7 @@ void SideBar::saveMoldBtnClick()
 {
     OptRecord::addOptRecord("点击保存模板");
 
-    if (ImgArea::getInstance()->getCameraStatus() == 0) {
+    if (ImgArea::getInstance()->getCameraStatus(TitleBar::getInstance()->getCurCameraId()) == 0) {
         return ;
     }
 
@@ -557,7 +562,7 @@ void SideBar::addMoldBtnClick()
 {
     OptRecord::addOptRecord("点击添加模板");
 
-    if (ImgArea::getInstance()->getCameraStatus() == 0) {
+    if (ImgArea::getInstance()->getCameraStatus(TitleBar::getInstance()->getCurCameraId()) == 0) {
         return ;
     }
 
@@ -815,7 +820,7 @@ void SideBar::loadCurImage()
     imgData.sceneId  = m_sceneId;
     imgData.moldId   = getCurrentIdx();
 
-    qDebug() << "load img";
+    qDebug() << "load img idx: " << imgData.moldId;
     ImgArea::getInstance()->loadImageItem(imgData);
 }
 

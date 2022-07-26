@@ -170,6 +170,9 @@ public:
     // 检测当前的图片 手动检测时sceneId为-1 检测次数默认为1
     int detectCurImage(int cameraId, int sceneId = -1, int detectTimes = 1);
 
+    // 自动检测当前图片
+    int autoDetectImage(int cameraId, int sceneId, double delayTime, int reDetectTimes);
+
     // 图片检测
     int detectImage(QImage imgFg, int cameraId, int sceneId);
 
@@ -178,6 +181,12 @@ public:
 
     // 获取当前检测图片
     QImage getCurDetectImage();
+
+    // 获取当前检测相机id
+    int getCurDetectCameraId();
+
+    // 获取当前检测场景id
+    int getCurDetectSceneId();
 
     // 获取item数
     int getShapeItemNum();
@@ -198,7 +207,7 @@ public:
     int getCameraCounts();
 
     // 获取相机状态
-    int getCameraStatus();
+    int getCameraStatus(int cameraId);
 
     // 描绘检测结果
     void drawDetectResult(QVector<QVector<QPointF>> resPointList);
@@ -211,6 +220,9 @@ public:
 
     // 获取当前检测场景id
     int getDetectSceneId();
+
+    // 设置当前检测场景及延时
+    void setSceneDelayTime(int sceneId, double delayTime);
 
 public:
     int status;
@@ -238,12 +250,20 @@ private:
     static QImage matToQim(Mat & mat);
     static Mat qimToMat(QImage & qim);
 
+    // 设置倒计时显示
+    void setSigDelayTimeLab();
+
 private slots:
     void imageProcess(QImage img);
 
 private:
+    // 相机状态
     QLabel *m_pTipLab;
+    // 信号倒计时
+    QLabel *m_pSigTimeLab;
+    // 图片模板序号
     QLabel *m_pSampleLab;
+    // 检测结果
     QLabel *m_pResultLab;
 
     QImage *m_pMainImg;
@@ -257,6 +277,9 @@ private:
 
     QSize m_sceneSize;
 
+    // 当前检测相机id
+    int m_detectCameraId;
+
     // 当前检测场景id
     int m_detectSceneId;
 
@@ -267,6 +290,11 @@ private:
     int m_cameraCounts;
     QTimer *m_resTimer;
     CaptureThread *m_thread;
+
+    // 信号倒计时
+    QTimer *m_sigDelayTimer;
+    double m_delayTime;
+    int m_reDetectTimes;
 
     // 本机IP地址
 //    QString m_ifaceIp  = QString("192.168.0.10%1");

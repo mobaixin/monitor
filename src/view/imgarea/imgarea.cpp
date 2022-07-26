@@ -111,6 +111,8 @@ void ImgArea::setWidgetUi()
     m_resTimer = new QTimer(this);
     m_thread   = new CaptureThread(this);
 
+    m_sigDelayTimer = new QTimer(this);
+
     // 图片检测线程
     m_detectThread = new QThread(this);
     m_detectImageWork = new DetectImageWork();
@@ -134,19 +136,21 @@ void ImgArea::setWidgetUi()
 
     this->setLayout(m_pImgAreaLayout);
 
-    m_pTipLab = new QLabel(this);
-    m_pSampleLab = new QLabel(this);
-    m_pResultLab = new QLabel(this);
+    m_pTipLab     = new QLabel(this);
+    m_pSigTimeLab = new QLabel(this);
+    m_pSampleLab  = new QLabel(this);
+    m_pResultLab  = new QLabel(this);
 
+    m_pSigTimeLab->hide();
     m_pSampleLab->hide();
     m_pResultLab->hide();
-
-
 
     connect(m_resTimer, &QTimer::timeout, [=](){
         m_resTimer->stop();
         m_pResultLab->hide();
     });
+
+    connect(m_sigDelayTimer, &QTimer::timeout, this, &ImgArea::setSigDelayTimeLab);
 
     connect(m_thread, SIGNAL(captured(QImage)),
             this, SLOT(imageProcess(QImage)), Qt::BlockingQueuedConnection);
@@ -176,11 +180,16 @@ void ImgArea::setWidgetStyle()
     m_pTipLab->setFixedSize(200, 30);
     m_pTipLab->setGeometry(10, 0, m_pTipLab->width(), m_pTipLab->height());
 
+    m_pSigTimeLab->setFixedSize(200, 30);
+    m_pSigTimeLab->setGeometry(10, 25, m_pSigTimeLab->width(), m_pSigTimeLab->height());
+
     m_pSampleLab->setFixedSize(500, 30);
     m_pSampleLab->setGeometry(700, 20, m_pTipLab->width(), m_pTipLab->height());
 
     m_pResultLab->setFixedSize(200, 30);
     m_pResultLab->setGeometry(1000, 20, m_pResultLab->width(), m_pResultLab->height());
+
+    m_pSigTimeLab->setStyleSheet("font-family:Microsoft YaHei;font-size:16px;color:green;");
 
 //    m_pSampleLab->setText("检模取样图像:第1张");
     QPalette pe;
@@ -1184,11 +1193,21 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
     QFile tmpFile;
     int detectRes;
 
+    // 获取当前检测相机id
+    m_detectCameraId = cameraId;
+
+    // 获取当前检测场景id
+    if (sceneId == -1) {
+        m_detectSceneId = SideBar::getInstance()->getCurSceneID();
+    } else {
+        m_detectSceneId = sceneId;
+    }
+
     // 检测次数
     for (int t = 0; t < detectTimes; t++) {
         detectTime = QDateTime::currentDateTime();
         fileName   = detectTime.toString("yyyy-MM-dd-HH-mm-ss");
-        filePath   = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
+        filePath   = QString("%1/%2.png").arg(MyDataBase::dbFilePath).arg(fileName);
         m_curDetectImage = getCurImage();
         m_curDetectImage.save(filePath);
 
@@ -1202,15 +1221,8 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
         tmpFile.setFileName(fileName);
         tmpFile.remove();
 
-        // 手动检测时获取当前场景id
-        if (sceneId == -1) {
-            m_detectSceneId = SideBar::getInstance()->getCurSceneID();
-        } else {
-            m_detectSceneId = sceneId;
-        }
-
         // 获得检测结果
-        detectRes = detectImage(targetImg, cameraId, m_detectSceneId);
+        detectRes = detectImage(targetImg, m_detectCameraId, m_detectSceneId);
 
         // 检测到NG
         if (detectRes == DetectRes::NG) {
@@ -1239,7 +1251,7 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
             setDetectRes(true, m_detectSceneId);
 
             // 指示灯变化
-            if (sceneId == 1) {
+            if (m_detectSceneId == 1) {
                 SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
             } else {
                 SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
@@ -1259,6 +1271,21 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
     }
 
     return detectRes;
+}
+
+int ImgArea::autoDetectImage(int cameraId, int sceneId, double delayTime, int reDetectTimes)
+{
+    // 设置场景和延时
+    m_detectCameraId = cameraId;
+    m_detectSceneId  = sceneId;
+    m_delayTime      = delayTime;
+    m_reDetectTimes  = reDetectTimes;
+
+    // 显示倒计时
+    m_pSigTimeLab->show();
+    m_sigDelayTimer->start(100);
+
+    return 1;
 }
 
 int ImgArea::detectImage(QImage imgFg, int cameraId, int sceneId)
@@ -1435,6 +1462,16 @@ QImage ImgArea::getCurDetectImage()
     return m_curDetectImage;
 }
 
+int ImgArea::getCurDetectCameraId()
+{
+    return m_detectCameraId;
+}
+
+int ImgArea::getCurDetectSceneId()
+{
+    return m_detectSceneId;
+}
+
 int ImgArea::getShapeItemNum()
 {
     int count = 0;
@@ -1584,8 +1621,10 @@ int ImgArea::getCameraCounts()
     return m_cameraCounts;
 }
 
-int ImgArea::getCameraStatus()
+int ImgArea::getCameraStatus(int cameraId)
 {
+    Q_UNUSED(cameraId);
+
     return status;
 }
 
@@ -1637,6 +1676,17 @@ int ImgArea::getDetectSceneId()
     return m_detectSceneId;
 }
 
+void ImgArea::setSceneDelayTime(int sceneId, double delayTime)
+{
+    // 设置场景和延时
+    m_detectSceneId = sceneId;
+    m_delayTime = delayTime;
+
+    // 显示倒计时
+    m_pSigTimeLab->show();
+    m_sigDelayTimer->start(100);
+}
+
 int ImgArea::initLocalNetwork()
 {
     QList<QNetworkInterface> ifaceList = QNetworkInterface::allInterfaces();
@@ -1683,7 +1733,10 @@ int ImgArea::initLocalNetwork()
 
                 // 修改本机IP地址
                 int ifaceId = i + 1;
-                ifaceId = 2;
+
+                // 测试
+//                ifaceId = 2;
+
                 QString localFaceIp = m_ifaceIp.arg(ifaceId).arg(ifaceId);
                 QString gateway     = m_gateway.arg(ifaceId);
                 if (entry.ip().toString() != localFaceIp) {
@@ -1692,8 +1745,6 @@ int ImgArea::initLocalNetwork()
                 }
             }
         }
-
-
     }
 
     return 1;
@@ -1712,6 +1763,29 @@ Mat ImgArea::qimToMat(QImage &qim)
     Mat mat = Mat(qim.height(), qim.width(),
                   CV_8UC4,(void*)qim.constBits(),qim.bytesPerLine());
     return mat;
+}
+
+void ImgArea::setSigDelayTimeLab()
+{
+    m_delayTime = m_delayTime - 100;
+
+    QString sceneName = m_detectSceneId == 1 ? "检模" : "产品";
+    QString delayText = QString("%1信号: %2").arg(sceneName).arg(m_delayTime / 1000);
+
+    m_pSigTimeLab->clear();
+    m_pSigTimeLab->setText(delayText);
+
+    if (m_delayTime <= 110) {
+        m_pSigTimeLab->clear();
+        m_pSigTimeLab->hide();
+    }
+    if (m_delayTime <= 10) {
+        m_sigDelayTimer->stop();
+
+        setShapeNoMove(true);
+        clearDetectResult();
+        detectCurImage(m_detectCameraId, m_detectSceneId, m_reDetectTimes);
+    }
 }
 
 void ImgArea::imageProcess(QImage img)
@@ -2063,7 +2137,6 @@ void DetectImageWork::detectImage(QImage imgFg, int cameraId, int sceneId, int &
             MyMOG2Data myMOG2Data;
             if (sceneId == 1) {
                 myMOG2Data = m_moldMOG2DataList[i * shapeMaskSize + j];
-                qDebug() << "i * shapeMaskSize + j" << i * shapeMaskSize + j;
             } else {
                 myMOG2Data = m_prodMOG2DataList[i * shapeMaskSize + j];
             }

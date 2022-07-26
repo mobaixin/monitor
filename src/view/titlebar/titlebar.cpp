@@ -284,11 +284,14 @@ void TitleBar::sysSettingBtnClick()
 
 void TitleBar::testBtnClick()
 {
+    m_detectTime = QDateTime::currentDateTime();
+//    MainWindow::getInstance()->autoDetectImage(m_cameraId, SideBar::getInstance()->getCurSceneID());
+
     setAlarmBtnState(false);
     ImgArea::getInstance()->setShapeNoMove(true);
     ImgArea::getInstance()->clearDetectResult();
 
-    if (ImgArea::getInstance()->getCameraStatus() == 1) {
+    if (ImgArea::getInstance()->getCameraStatus(m_cameraId) == 1) {
         m_detectTime = QDateTime::currentDateTime();
         ImgArea::getInstance()->detectCurImage(m_cameraId);
     }
@@ -298,6 +301,8 @@ void TitleBar::testBtnClick()
 
 void TitleBar::addMoldBtnClick()
 {
+    m_detectTime = QDateTime::currentDateTime();
+
     QString fileName = m_detectTime.toString("yyyy-MM-dd-HH-mm-ss");
     QString timeStr  = m_detectTime.toString("yyyy-MM-dd HH:mm:ss");
     QString moldFilePath = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
@@ -308,6 +313,7 @@ void TitleBar::addMoldBtnClick()
 
     SideBar::getInstance()->addAlarmImageMold(moldFilePath, timeStr);
     SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
+    SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
 
     setAlarmBtnState(false);
     ImgArea::getInstance()->saveAsImage(ngFilePath);
@@ -317,8 +323,8 @@ void TitleBar::addMoldBtnClick()
 
     NGRecordData ngData;
     ngData.time = timeStr;
-    ngData.cameraId = m_cameraId;
-    ngData.sceneId  = SideBar::getInstance()->getCurSceneID();
+    ngData.cameraId = ImgArea::getInstance()->getCurDetectCameraId();
+    ngData.sceneId  = ImgArea::getInstance()->getCurDetectSceneId();
     ngData.result   = "异常";
     ngData.imgPath  = ngFilePath;
 
@@ -331,7 +337,7 @@ void TitleBar::reDetectBtnClick()
 {
     ImgArea::getInstance()->clearDetectResult();
 
-    if (ImgArea::getInstance()->getCameraStatus() == 1) {
+    if (ImgArea::getInstance()->getCameraStatus(m_cameraId) == 1) {
         m_detectTime = QDateTime::currentDateTime();
         ImgArea::getInstance()->detectCurImage(m_cameraId);
     }
