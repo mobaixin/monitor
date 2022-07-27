@@ -14,6 +14,14 @@ void MyGraphicsScene::setData()
 //    m_ploygonList = [];
 //    m_curveList = [];
 
+    if (m_isCreatePolygon) {
+        BottomBar::getInstance()->updateCreatePolygon();
+    }
+
+    if (m_isCreateCurve) {
+        BottomBar::getInstance()->updateCreateCurve();
+    }
+
     m_isCreatePolygon = false;
 
     m_isCreateCurve = false;

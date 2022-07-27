@@ -224,6 +224,9 @@ public:
     // 设置当前检测场景及延时
     void setSceneDelayTime(int sceneId, double delayTime);
 
+    // 添加图形item到list
+    void addShapeItemToList(QGraphicsItem *newItem);
+
 public:
     int status;
 
@@ -302,7 +305,8 @@ private:
 
     // 相机IP地址
 //    QString m_cameraIp = QString("192.168.0.11%1");
-    QString m_cameraIp = QString("192.168.%1.11%2");
+    QString m_cameraIp   = QString("192.168.%1.11%2");
+    QString m_cameraMask = QString("255.255.255.0");
 
     // 网关地址
     QString m_gateway  = QString("192.168.%1.1");
@@ -346,6 +350,9 @@ private:
 
     QList<QGraphicsPolygonItem *> m_detectResItemList;
     QList<QGraphicsTextItem *> m_detectResTxtItemList;
+
+    // 存放所有的图形item
+    QList<QGraphicsItem *> m_allShapeItemList;
 };
 
 

@@ -58,6 +58,12 @@ public:
     // 获取创建的圆环
     MyConcentricCircle *getNewMyConCircle();
 
+    // 更新曲线图形状态
+    void updateCreateCurve();
+
+    // 更新多边形图形状态
+    void updateCreatePolygon();
+
 private:
     // 按钮响应事件
 //    void accAddBtnClick();

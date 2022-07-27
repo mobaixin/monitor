@@ -314,6 +314,14 @@ void ImgArea::eraseShape()
             return ;
         }
 
+        // 从列表中清除
+        for (int i = 0; i < m_allShapeItemList.size(); i++) {
+            if (m_allShapeItemList[i] == temp) {
+                m_allShapeItemList.removeAt(i);
+                break;
+            }
+        }
+
         // 清除图形 回收内存
         m_pScene->removeItem(temp);
 
@@ -361,6 +369,9 @@ void ImgArea::clearShapes()
             clearItemIdxList.append(i);
         }
     }
+
+    // 从列表中清除
+    m_allShapeItemList.clear();
 
     // 清除图形 回收内存
     for (int i = clearItemIdxList.size() - 1; i >= 0; i--) {
@@ -505,9 +516,10 @@ QImage ImgArea::getImageItem()
 
 QList<ShapeItemData> ImgArea::getShapeItems()
 {
-    qDebug() << "getShapeItems: " << m_pScene->items().size();
+    qDebug() << "getShapeItems: " << m_allShapeItemList.size();
     QList<ShapeItemData> shapeList;
-    for (QGraphicsItem *temp : m_pScene->items()) {
+//    for (QGraphicsItem *temp : m_pScene->items()) {
+    for (QGraphicsItem *temp : m_allShapeItemList) {
         if (temp != m_pImageItem && temp != nullptr && temp->scene() != nullptr) {
 
 //            qDebug() << "1";
@@ -663,6 +675,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             myRect->setAccuracy(itemDataList[i].accuracy);
             myRect->setPixel(itemDataList[i].pixel);
             m_pScene->addItem(myRect);
+            addShapeItemToList(myRect);
         }
             break;
         case MyGraphicsItem::ItemType::Polygon:
@@ -691,6 +704,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
                 myPolygon->setAccuracy(itemDataList[i].accuracy);
                 myPolygon->setPixel(itemDataList[i].pixel);
                 m_pScene->addItem(myPolygon);
+                addShapeItemToList(myPolygon);
                 connect(m_pScene, &MyGraphicsScene::updatePolyPoint, myPolygon, &MyPolygon::pushPoint);
             }
         }
@@ -714,6 +728,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
                 myCurve->setAccuracy(itemDataList[i].accuracy);
                 myCurve->setPixel(itemDataList[i].pixel);
                 m_pScene->addItem(myCurve);
+                addShapeItemToList(myCurve);
             }
         }
             break;
@@ -728,6 +743,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             myCircle->setAccuracy(itemDataList[i].accuracy);
             myCircle->setPixel(itemDataList[i].pixel);
             m_pScene->addItem(myCircle);
+            addShapeItemToList(myCircle);
         }
             break;
         case MyGraphicsItem::ItemType::Concentric_Circle: {
@@ -741,6 +757,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             myConCircle->setAccuracy(itemDataList[i].accuracy);
             myConCircle->setPixel(itemDataList[i].pixel);
             m_pScene->addItem(myConCircle);
+            addShapeItemToList(myConCircle);
         }
             break;
         default:
@@ -883,6 +900,8 @@ int ImgArea::initSDK()
 
     // 设置相机IP
     QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1)).arg(QString(ipInfo[3]).right(1));
+    QString cameraMask  = m_cameraMask;
+    QString cameraGtway = m_gateway.arg(QString(ipInfo[3]).right(1));
     qDebug() << "cameraIP: " << cameraIp;
 
     // 数据库交互
@@ -893,13 +912,15 @@ int ImgArea::initSDK()
     cameraIPData.portIp   = QString(ipInfo[3]);
     cameraIPData.state    = "可用";
     cameraIPData.cameraIp = cameraIp;
-    cameraIPData.cameraMask    = QString(ipInfo[4]);
-    cameraIPData.cameraGateway = QString(ipInfo[5]);
+    cameraIPData.cameraMask    = cameraMask;
+    cameraIPData.cameraGateway = cameraGtway;
 
     // 判断本机IP和相机IP
     if (QString(ipInfo[0]) != cameraIp) {
-        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (QString(ipInfo[4]).toLatin1()).data(),
-                                 (QString(ipInfo[5]).toLatin1()).data(), true);
+//        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (QString(ipInfo[4]).toLatin1()).data(),
+//                                 (QString(ipInfo[5]).toLatin1()).data(), true);
+        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (cameraMask.toLatin1()).data(),
+                                 (cameraGtway.toLatin1()).data(), true);
         if (res == CAMERA_STATUS_SUCCESS) {
             qDebug() << "相机IP设置成功";
             cameraIPData.state = "可用";
@@ -1687,6 +1708,11 @@ void ImgArea::setSceneDelayTime(int sceneId, double delayTime)
     m_sigDelayTimer->start(100);
 }
 
+void ImgArea::addShapeItemToList(QGraphicsItem *newItem)
+{
+    m_allShapeItemList.append(newItem);
+}
+
 int ImgArea::initLocalNetwork()
 {
     QList<QNetworkInterface> ifaceList = QNetworkInterface::allInterfaces();
@@ -2180,7 +2206,7 @@ void DetectImageWork::detectImage(QImage imgFg, int cameraId, int sceneId, int &
                 }
             }
 
-//            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
+            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
             imshow(QString("fgMaskMat_%1_%2").arg(i).arg(j).toStdString(), myMOG2Data.fgMaskMat);
 //            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), srcFg);
 
