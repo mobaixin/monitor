@@ -1,4 +1,4 @@
-#ifndef SIDE_BAR
+﻿#ifndef SIDE_BAR
 #define SIDE_BAR
 
 #include <QWidget>
@@ -11,6 +11,17 @@
 #include <QList>
 
 #include "src/view/imgarea/mygraphicsitem.h"
+
+enum DetectScene {
+    DetectMold = 1,
+    DetectProd = 2
+};
+
+enum RadioBtnState {
+    NoState = 0,
+    Correct = 1,
+    Wrong = 2
+};
 
 class SideBar : public QWidget
 {
@@ -36,8 +47,14 @@ public:
     // 获取检测对象
     bool getIsDetectMold();
 
+    // 获取场景ID
+    int getCurSceneID();
+
     // 获取当前索引
     int getCurrentIdx();
+
+    // 获取当前模板数
+    int getCurMoldNum();
 
     // 保存模板
     void saveImageMold(QGraphicsPixmapItem *imgItem);
@@ -47,11 +64,33 @@ public:
     QGraphicsPixmapItem *  getImageMold();
     QList<QGraphicsItem *> getShapeMold();
 
+    // 添加报警模板
+    void addAlarmImageMold(QString imgPath, QString timeStr);
+
+    // 设置顶针状态
+    void setThimbleState(int state);
+
+    // 设置开模状态
+    void setOpenMoldState(int state);
+
+    // 设置可顶针状态
+    void setCanThimbleState(int state);
+
+    // 设置可合模状态
+    void setCanClampMoldState(int state);
+
+    // 设置检测场景
+    void setDetectScene();
+
+signals:
+    void updateShapeImgMoldSig(int cameraId, int sceneId);
+
 private:
     void positionBtnClick();
     void checkMoldBtnClick();
     void productBtnClick();
     void saveMoldBtnClick();
+    void addMoldBtnClick();
     void homePageBtnClick();
     void prevPageBtnClick();
     void nextPageBtnClick();
@@ -60,9 +99,18 @@ private:
 
     void updateOrderLab();
 
+    // 切换场景时更新图形模板
+    void updateSceneItemMold();
 
+    void loadCurMold();
+    void loadCurImage();
+
+    void setRadioBtnState(QRadioButton *btn, int state);
 private:
     bool m_isDetectMold;
+    bool m_isShowMold;
+
+    int m_sceneId;
 
     int m_deteMoldNum;
     int m_prodMoldNum;
@@ -82,6 +130,7 @@ private:
     QLabel *m_orderLab;
 
     QPushButton *m_saveMoldBtn;
+    QPushButton *m_addMoldBtn;
     QPushButton *m_homePageBtn;
     QPushButton *m_prevPageBtn;
     QPushButton *m_nextPageBtn;

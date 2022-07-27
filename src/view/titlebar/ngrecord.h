@@ -1,4 +1,4 @@
-#ifndef NGRECORD_H
+﻿#ifndef NGRECORD_H
 #define NGRECORD_H
 
 #include <QObject>
@@ -11,6 +11,9 @@
 #include <QHeaderView>
 #include <QStandardItemModel>
 #include <QTextEdit>
+
+#include "src/database/mydatabase.h"
+#include "src/view/titlebar/optrecord.h"
 
 class NGRecord : public QDialog
 {
@@ -27,6 +30,11 @@ public:
     // 设置初始数据
     void setData();
 
+    // 添加NG记录
+    void addNgRecord(NGRecordData ngData);
+
+    void closeEvent(QCloseEvent *event);
+
 private:
     void resetBtnClick();
     void optRecordBtnClick();
@@ -34,6 +42,9 @@ private:
 
     // 获取模型数据
     void getModelData();
+
+    // 显示NG记录图片
+    void showNgRecordImg(const QModelIndex &index);
 
 private:
     QTableView *m_ngTableView;
@@ -50,6 +61,14 @@ private:
     QHBoxLayout *m_mainLayout;
     QVBoxLayout *m_rightLayout;
 
+    QList<NGRecordData> m_recordDataList;
+
+    int m_okTotalNum;
+    int m_ngTotalNum;
+
+    OptRecord *m_optRecord;
+
+    bool m_imgAreaShowState;
 };
 
 #endif // NGRECORD_H

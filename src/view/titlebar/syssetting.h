@@ -1,4 +1,4 @@
-#ifndef SYSSETTING_H
+﻿#ifndef SYSSETTING_H
 #define SYSSETTING_H
 
 #include <QObject>
@@ -33,6 +33,14 @@ private:
     void cameraParaBtnClick();
     void closeSetBtnClick();
 
+    void updateMoldDelay(int value);
+    void updateMoldTimes(int value);
+    void updateProdDelay(int value);
+    void updateProdTimes(int value);
+    void updateProdDetect(bool checked);
+
+    void updateDisPlay(bool isShowProd);
+
 private:
     QLabel *m_moldDelayLab;
     QLabel *m_moldTimesLab;
@@ -53,6 +61,8 @@ private:
     QPushButton *m_closeSetBtn;
 
     QGridLayout *m_sysSetLayout;
+    QHBoxLayout *m_btnLayout;
+    QVBoxLayout *m_mainLayout;
 
     CameraPara *m_cameraPara;
     IOSetting *m_ioSetting;

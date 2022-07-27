@@ -1,7 +1,11 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "iosetting.h"
 #include "src/view/mainwindow.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 IOSetting::IOSetting(QWidget *parent)
     : QDialog(parent)
@@ -30,65 +34,66 @@ void IOSetting::setWidgetUi()
     MySelectFrame *myFrame;
     MySlider *mySlider;
     QLabel *myLabel;
+    int frameId = 0;
 
     for (int i = 0; i < 3; i++) {
-        myFrame = new MySelectFrame(this, 2);
+        myFrame = new MySelectFrame(this, frameId++, 2);
         m_frameList.append(myFrame);
         m_gridLayout1->addWidget(myFrame, i, 0, 1, 1);
 
-        myFrame = new MySelectFrame(this, 6);
+        myFrame = new MySelectFrame(this, frameId++, 6);
         m_frameList.append(myFrame);
         m_gridLayout1->addWidget(myFrame, i, 1, 1, 2);
 
-        myFrame = new MySelectFrame(this, 2);
+        myFrame = new MySelectFrame(this, frameId++, 2);
         m_frameList.append(myFrame);
         m_gridLayout1->addWidget(myFrame, i, 3, 1, 1);
     }
 
     for (int i = 0; i < 5; i++) {
-        myFrame = new MySelectFrame(this, 2);
+        myFrame = new MySelectFrame(this, frameId++, 2);
         m_frameList.append(myFrame);
         m_gridLayout2->addWidget(myFrame, 0, i, 1, 1);
     }
 
     for (int i = 0; i < 2; i++) {
-        myFrame = new MySelectFrame(this, 2);
+        myFrame = new MySelectFrame(this, frameId++, 2);
         m_frameList.append(myFrame);
         m_gridLayout2->addWidget(myFrame, 1, i, 1, 1);
     }
 
-    myFrame = new MySelectFrame(this, 3);
+    myFrame = new MySelectFrame(this, frameId++, 3);
     m_frameList.append(myFrame);
     m_gridLayout2->addWidget(myFrame, 1, 2, 1, 1);
 
     for (int i = 0; i < 2; i++) {
-        myFrame = new MySelectFrame(this, 2);
+        myFrame = new MySelectFrame(this, frameId++, 2);
         m_frameList.append(myFrame);
         m_gridLayout2->addWidget(myFrame, 1, 3 + i, 1, 1);
     }
 
     for (int i = 0; i < 3; i++) {
-        myFrame = new MySelectFrame(this, 2);
+        myFrame = new MySelectFrame(this, frameId++, 2);
         m_frameList.append(myFrame);
         m_gridLayout2->addWidget(myFrame, 2, i, 1, 1);
     }
 
-    myFrame = new MySelectFrame(this, 5);
+    myFrame = new MySelectFrame(this, frameId++, 5);
     m_frameList.append(myFrame);
     m_gridLayout2->addWidget(myFrame, 2, 3, 1, 2);
 
     for (int i = 0; i < 2; i++) {
-        myFrame = new MySelectFrame(this, 2);
+        myFrame = new MySelectFrame(this, frameId++, 2);
         m_frameList.append(myFrame);
         m_gridLayout2->addWidget(myFrame, 3, i, 1, 1);
     }
 
-    myFrame = new MySelectFrame(this, 4);
+    myFrame = new MySelectFrame(this, frameId++, 4);
     m_frameList.append(myFrame);
     m_gridLayout2->addWidget(myFrame, 3, 2, 1, 1);
 
     for (int i = 0; i < 2; i++) {
-        myFrame = new MySelectFrame(this, 2);
+        myFrame = new MySelectFrame(this, frameId++, 2);
         m_frameList.append(myFrame);
         m_gridLayout2->addWidget(myFrame, 3, 3 + i, 1, 1);
     }
@@ -148,14 +153,14 @@ void IOSetting::setWidgetUi()
 
     this->setLayout(m_mainLayout);
 
-    connect(m_restartBtn, &QPushButton::clicked, this, &IOSetting::restartBtnClick);
+
+
+    connect(m_restartBtn,  &QPushButton::clicked, this, &IOSetting::restartBtnClick);
     connect(m_passwordBtn, &QPushButton::clicked, this, &IOSetting::passwordBtnClick);
-    connect(m_ipsetBtn, &QPushButton::clicked, this, &IOSetting::ipsetBtnClick);
-    connect(m_resetBtn, &QPushButton::clicked, this, &IOSetting::resetBtnClick);
+    connect(m_ipsetBtn,    &QPushButton::clicked, this, &IOSetting::ipsetBtnClick);
+    connect(m_resetBtn,    &QPushButton::clicked, this, &IOSetting::resetBtnClick);
     connect(m_testModeBtn, &QPushButton::clicked, this, &IOSetting::testModeBtnClick);
-    connect(m_saveBtn, &QPushButton::clicked, this, &IOSetting::saveBtnClick);
-
-
+    connect(m_saveBtn,     &QPushButton::clicked, this, &IOSetting::saveBtnClick);
 }
 
 void IOSetting::setWidgetStyle()
@@ -229,37 +234,89 @@ void IOSetting::setWidgetStyle()
 
 void IOSetting::setData()
 {
+    MySettings *settings = MySettings::getInstance();
+    for (int i = 0; i < m_frameList.size(); i++) {
+        int num = settings->getValue(IOSetSection, QString("frameList%1").arg(i)).toInt();
+        m_frameList[i]->setSelectNum(num);
+    }
 
+    m_sliderList[0]->setValue(settings->getValue(IOSetSection, "periodSig").toInt());
+    m_sliderList[1]->setValue(settings->getValue(IOSetSection, "aseismicLevel").toInt());
+    m_sliderList[2]->setValue(settings->getValue(IOSetSection, "maxSimpleNum").toInt());
+    m_sliderList[3]->setValue(settings->getValue(IOSetSection, "maxReDeteNum").toInt());
+
+    for (int i = 0; i < m_frameList.size(); i++) {
+        connect(m_frameList[i], &MySelectFrame::valueChange, this, &IOSetting::frameValueChange);
+    }
+
+    connect(m_sliderList[0], &MySlider::valueChange, this, &IOSetting::updatePeriodSig);
+    connect(m_sliderList[1], &MySlider::valueChange, this, &IOSetting::updateAseismicLevel);
+    connect(m_sliderList[2], &MySlider::valueChange, this, &IOSetting::updateMaxSimpleNum);
+    connect(m_sliderList[3], &MySlider::valueChange, this, &IOSetting::updateMaxReDeteNum);
+}
+
+void IOSetting::frameValueChange(int frameId, int selectNum)
+{
+//    qDebug() << "frameValueChange: " << selectNum;
+    MySettings::getInstance()->setValue(IOSetSection, QString("frameList%1").arg(frameId), QString::number(selectNum));
+}
+
+void IOSetting::updatePeriodSig(int value)
+{
+    MySettings::getInstance()->setValue(IOSetSection, "periodSig", QString::number(value));
+}
+
+void IOSetting::updateAseismicLevel(int value)
+{
+    MySettings::getInstance()->setValue(IOSetSection, "aseismicLevel", QString::number(value));
+}
+
+void IOSetting::updateMaxSimpleNum(int value)
+{
+    MySettings::getInstance()->setValue(IOSetSection, "maxSimpleNum", QString::number(value));
+}
+
+void IOSetting::updateMaxReDeteNum(int value)
+{
+    MySettings::getInstance()->setValue(IOSetSection, "maxReDeteNum", QString::number(value));
 }
 
 void IOSetting::restartBtnClick()
 {
+    OptRecord::addOptRecord("点击重启");
 
 }
 
 void IOSetting::passwordBtnClick()
 {
+    OptRecord::addOptRecord("点击按钮子密码");
 
 }
 
 void IOSetting::ipsetBtnClick()
 {
+    OptRecord::addOptRecord("点击相机ip配置");
+
     m_cameraIpSet = new CameraIpSet();
     m_cameraIpSet->exec();
 }
 
 void IOSetting::resetBtnClick()
 {
+    OptRecord::addOptRecord("点击恢复默认");
 
+    MySettings::getInstance()->setIOInitValue();
 }
 
 void IOSetting::testModeBtnClick()
 {
+    OptRecord::addOptRecord("点击测试模式");
 
 }
 
 void IOSetting::saveBtnClick()
 {
+    OptRecord::addOptRecord("点击保存");
 
     this->close();
 }

@@ -1,4 +1,4 @@
-#ifndef MYGRAPHICSITEM_H
+﻿#ifndef MYGRAPHICSITEM_H
 #define MYGRAPHICSITEM_H
 
 #include <QObject>
@@ -12,7 +12,7 @@ class MyGraphicsItem : public QObject, public QAbstractGraphicsShapeItem
     Q_OBJECT
 public:
     enum ItemType {
-        Circle = 0,         // 圆
+        Circle = 11,         // 圆
         Ellipse,            // 椭圆
         Concentric_Circle,  // 同心圆
         Pie,                // 饼
@@ -27,6 +27,7 @@ public:
     };
 
     MyGraphicsItem(QPointF center, QPointF edge, ItemType type);
+    ~MyGraphicsItem();
 
     QPointF getCenter() { return m_center; }
     void setCenter(QPointF p) { m_center = p; }
@@ -39,11 +40,21 @@ public:
     QPointF getRealCenter() { return scenePos() + boundingRect().center(); }
     QList<QPointF> getMyPointList();
 
+    int getAccuracy() { return m_accuracy; }
+    void setAccuracy(int acc) { m_accuracy = acc; }
+
+    int getPixel() { return m_pixel; }
+    void setPixel(int pix) { m_pixel = pix; }
+
 protected:
     virtual void focusInEvent(QFocusEvent *event) override;
     virtual void focusOutEvent(QFocusEvent *event) override;
 
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+//    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+
+    virtual void paint(QPainter *painter,
+                       const QStyleOptionGraphicsItem *option,
+                       QWidget *widget) override;
 
     QPointF m_center;
     QPointF m_edge;
@@ -52,8 +63,12 @@ protected:
     ItemType m_type;
     MyPointItemList m_pointList;
 
+    int m_accuracy;
+    int m_pixel;
+
     QPen m_penIsSelected;
     QPen m_penNoSelected;
+    QPen m_penMaskArea;
 };
 
 // 椭圆
@@ -89,6 +104,8 @@ public:
 
     void updateRadius();
 
+    MyPointItem *getEdgeItem();
+
 protected:
     virtual QRectF boundingRect() const override;
     virtual void paint(QPainter *painter,
@@ -112,6 +129,8 @@ public:
     void updateOtherRadius();
     void setAnotherEdge(QPointF p);
 
+    MyPointItem *getAnotherEdgeItem();
+
 protected:
     virtual QRectF boundingRect() const override;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -134,6 +153,8 @@ public:
         return Type;
     }
 
+    MyPointItem *getEdgeItem();
+
 protected:
     virtual QRectF boundingRect() const override;
     virtual void paint(QPainter *painter,
@@ -152,6 +173,7 @@ class MyPolygon : public MyGraphicsItem
     Q_OBJECT
 public:
     MyPolygon(ItemType type);
+//    ~MyPolygon();
     enum { Type = 28 };
     int type() const {
         return Type;
@@ -175,13 +197,15 @@ protected:
                        const QStyleOptionGraphicsItem *option,
                        QWidget *widget) override;
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-//    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 protected:
     qreal m_radius;
     bool m_isCreateFinished;
     bool m_isMaskArea;
     bool m_isAddPoint;
+    bool m_isAddedPoint;
     int  m_addPoingIdx;
 
     MyPointItem *m_newPoint;
@@ -194,6 +218,8 @@ class MyCurve : public MyGraphicsItem
     Q_OBJECT
 public:
     MyCurve(ItemType type);
+    ~MyCurve();
+
     enum { Type = 29 };
     int type() const {
         return Type;

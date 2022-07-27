@@ -1,7 +1,15 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "src/view/titlebar/syssetting.h"
 #include "src/view/common/myselectframe.h"
+#include "src/view/common/mysettings.h"
+#include "src/view/titlebar/optrecord.h"
+#include "src/view/sidebar/sidebar.h"
+#include "src/view/imgarea/imgarea.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 SysSetting::SysSetting(QWidget *parent)
     : QDialog(parent)
@@ -42,7 +50,9 @@ void SysSetting::setWidgetUi()
     m_cameraParaBtn = new QPushButton(this);
     m_closeSetBtn = new QPushButton(this);
 
-    m_sysSetLayout = new QGridLayout(this);
+    m_sysSetLayout = new QGridLayout();
+    m_btnLayout    = new QHBoxLayout();
+    m_mainLayout   = new QVBoxLayout(this);
 
     // 组件布局
     m_sysSetLayout->addWidget(m_moldDelayLab, 0, 0, 1, 1);
@@ -57,21 +67,41 @@ void SysSetting::setWidgetUi()
     m_sysSetLayout->addWidget(m_prodTimesSlider, 3, 1, 1, 3);
     m_sysSetLayout->addWidget(m_prodDetectBtn, 4, 1, 1, 1);
 
-    m_sysSetLayout->addWidget(m_changeTimeBtn, 5, 0, 1, 1);
-    m_sysSetLayout->addWidget(m_ioSettingsBtn, 5, 1, 1, 1);
-    m_sysSetLayout->addWidget(m_cameraParaBtn, 5, 2, 1, 1);
-    m_sysSetLayout->addWidget(m_closeSetBtn, 5, 3, 1, 1);
+    m_sysSetLayout->setContentsMargins(5, 5, 5, 5);
+    m_sysSetLayout->setSpacing(20);
 
-    m_sysSetLayout->setContentsMargins(0, 0, 0, 0);
-    m_sysSetLayout->setSpacing(5);
+    m_btnLayout->addWidget(m_changeTimeBtn);
+    m_btnLayout->addWidget(m_ioSettingsBtn);
+    m_btnLayout->addWidget(m_cameraParaBtn);
+    m_btnLayout->addWidget(m_closeSetBtn);
 
-    this->setLayout(m_sysSetLayout);
+    m_btnLayout->setContentsMargins(0, 0, 0, 0);
+    m_btnLayout->setSpacing(5);
+
+    m_mainLayout->addLayout(m_sysSetLayout);
+    m_mainLayout->addStretch();
+    m_mainLayout->addLayout(m_btnLayout);
+
+    m_mainLayout->setContentsMargins(5, 5, 5, 5);
+    m_mainLayout->setSpacing(5);
+
+    this->setLayout(m_mainLayout);
+
+    if (ImgArea::getInstance()->getCameraCounts() == 0) {
+        m_cameraParaBtn->hide();
+    }
+
+    connect(m_moldDelaySlider, &MySlider::valueChange, this, &SysSetting::updateMoldDelay);
+    connect(m_moldTimesSlider, &MySlider::valueChange, this, &SysSetting::updateMoldTimes);
+    connect(m_prodDelaySlider, &MySlider::valueChange, this, &SysSetting::updateProdDelay);
+    connect(m_prodTimesSlider, &MySlider::valueChange, this, &SysSetting::updateProdTimes);
+
+    connect(m_prodDetectBtn, &QRadioButton::clicked, this, &SysSetting::updateProdDetect);
 
     connect(m_changeTimeBtn, &QPushButton::clicked, this, &SysSetting::changeTimeBtnClick);
     connect(m_ioSettingsBtn, &QPushButton::clicked, this, &SysSetting::ioSettingsBtnClick);
     connect(m_cameraParaBtn, &QPushButton::clicked, this, &SysSetting::cameraParaBtnClick);
-    connect(m_closeSetBtn, &QPushButton::clicked, this, &SysSetting::closeSetBtnClick);
-
+    connect(m_closeSetBtn,   &QPushButton::clicked, this, &SysSetting::closeSetBtnClick);
 }
 
 void SysSetting::setWidgetStyle()
@@ -96,10 +126,15 @@ void SysSetting::setWidgetStyle()
     m_prodDelaySlider->setValueRange(0, 20);
     m_prodTimesSlider->setValueRange(0, 40);
 
-    m_changeTimeBtn->setFixedSize(100, 30);
-    m_ioSettingsBtn->setFixedSize(100, 30);
-    m_cameraParaBtn->setFixedSize(100, 30);
-    m_closeSetBtn->setFixedSize(100, 30);
+//    m_moldDelaySlider->setValue(6);
+//    m_moldTimesSlider->setValue(4);
+//    m_prodDelaySlider->setValue(4);
+//    m_prodTimesSlider->setValue(2);
+
+    m_changeTimeBtn->setFixedHeight(30);
+    m_ioSettingsBtn->setFixedHeight(30);
+    m_cameraParaBtn->setFixedHeight(30);
+    m_closeSetBtn->setFixedHeight(30);
 
     m_moldDelayLab->setText("检模拍照延时(秒):");
     m_moldTimesLab->setText("检模重检次数:");
@@ -118,27 +153,92 @@ void SysSetting::setWidgetStyle()
 
 void SysSetting::setData()
 {
-//    m_moldDelaySlider->setStep(1);
+    int moldDelay  = MySettings::getInstance()->getValue(SysSection, "moldDelay").toInt();
+    int moldTimes  = MySettings::getInstance()->getValue(SysSection, "moldTimes").toInt();
+    int prodDelay  = MySettings::getInstance()->getValue(SysSection, "prodDelay").toInt();
+    int prodTimes  = MySettings::getInstance()->getValue(SysSection, "prodTimes").toInt();
+    int prodDetect = MySettings::getInstance()->getValue(SysSection, "prodDetect").toInt();
+
+    m_moldDelaySlider->setValue(moldDelay);
+    m_moldTimesSlider->setValue(moldTimes);
+    m_prodDelaySlider->setValue(prodDelay);
+    m_prodTimesSlider->setValue(prodTimes);
+
+    m_prodDetectBtn->setChecked(prodDetect);
+
+    updateDisPlay(prodDetect);
 }
 
 void SysSetting::changeTimeBtnClick()
 {
+    OptRecord::addOptRecord("点击修改时间");
 
 }
 
 void SysSetting::ioSettingsBtnClick()
 {
+    OptRecord::addOptRecord("点击IO设置");
+
     m_ioSetting = new IOSetting();
     m_ioSetting->exec();
 }
 
 void SysSetting::cameraParaBtnClick()
 {
+    OptRecord::addOptRecord("点击相机参数");
+
     m_cameraPara = new CameraPara();
     m_cameraPara->exec();
 }
 
 void SysSetting::closeSetBtnClick()
 {
+    OptRecord::addOptRecord("点击关闭");
+
     this->close();
+}
+
+void SysSetting::updateMoldDelay(int value)
+{
+    MySettings::getInstance()->setValue(SysSection, "moldDelay", QString::number(value));
+}
+
+void SysSetting::updateMoldTimes(int value)
+{
+    MySettings::getInstance()->setValue(SysSection, "moldTimes", QString::number(value));
+}
+
+void SysSetting::updateProdDelay(int value)
+{
+    MySettings::getInstance()->setValue(SysSection, "prodDelay", QString::number(value));
+}
+
+void SysSetting::updateProdTimes(int value)
+{
+    MySettings::getInstance()->setValue(SysSection, "prodTimes", QString::number(value));
+}
+
+void SysSetting::updateProdDetect(bool checked)
+{
+    int value = checked ? 1 : 0;
+    MySettings::getInstance()->setValue(SysSection, "prodDetect", QString::number(value));
+
+    SideBar::getInstance()->setDetectScene();
+
+    updateDisPlay(checked);
+}
+
+void SysSetting::updateDisPlay(bool isShowProd)
+{
+    if (isShowProd) {
+        m_prodDelayLab->show();
+        m_prodTimesLab->show();
+        m_prodDelaySlider->show();
+        m_prodTimesSlider->show();
+    } else {
+        m_prodDelayLab->hide();
+        m_prodTimesLab->hide();
+        m_prodDelaySlider->hide();
+        m_prodTimesSlider->hide();
+    }
 }

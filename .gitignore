@@ -1,0 +1,4 @@
+*.pro.user
+
+out/linecount.txt
+out/linecount.json
