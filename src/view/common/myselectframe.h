@@ -1,4 +1,4 @@
-#ifndef MYSELECTFRAME_H
+﻿#ifndef MYSELECTFRAME_H
 #define MYSELECTFRAME_H
 
 #include <QObject>
@@ -13,7 +13,7 @@ class MySelectFrame : public QWidget
 {
     Q_OBJECT
 public:
-    MySelectFrame(QWidget *parent = nullptr, int btnNum = 2);
+    MySelectFrame(QWidget *parent = nullptr, int frameId = -1, int btnNum = 2);
 
     // 初始化组件
     void setWidgetUi();
@@ -30,11 +30,17 @@ public:
     // 设置选项文字
     void setOptionText(QStringList btnNameList);
 
+    // 设置选择项
+    void setSelectNum(int num);
+
     // 获取选择项
     int getSelectNum();
 
 private:
+    void radioButtonClick();
 
+signals:
+    void valueChange(int frameId, int selectNum);
 
 private:
     QLabel *m_frameNameLab;
@@ -43,6 +49,7 @@ private:
     QHBoxLayout *m_frameLayout;
     QHBoxLayout *m_mainLayout;
 
+    int m_frameId;
     int m_radioBtnNum;
     int m_selectNum;
 };

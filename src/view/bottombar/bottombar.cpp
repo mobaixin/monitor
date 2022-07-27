@@ -1,8 +1,13 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "src/view/bottombar/bottombar.h"
 #include "src/view/imgarea/imgarea.h"
 #include "src/view/mainwindow.h"
+#include "src/view/common/mysettings.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 BottomBar *BottomBar::getInstance(QWidget *parent)
 {
@@ -179,6 +184,8 @@ void BottomBar::setWidgetUi()
     connect(m_pEraseBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::eraseShape);
     connect(m_pClearBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::clearShapes);
 
+    connect(m_pAccMySlider, &MySlider::valueChange, this, &BottomBar::updateItemAcc);
+    connect(m_pPixMySlider, &MySlider::valueChange, this, &BottomBar::updateItemPix);
 }
 
 // 设置组件样式
@@ -214,8 +221,8 @@ void BottomBar::setWidgetStyle()
     m_pClearBtn->setFixedSize(60, 30);
     m_pPositionBtn->setFixedSize(60, 30);
 
-    m_pAccLab->setText("检测精度:");
-    m_pPixLab->setText("像素:");
+    m_pAccLab->setText(" 检测精度:");
+    m_pPixLab->setText(" 像素:");
 
 //    m_pAccLab->setAutoFillBackground(true);
 //    m_pAccLab->setBackgroundRole(QPalette::Window);
@@ -239,7 +246,29 @@ void BottomBar::setWidgetStyle()
     m_pClearBtn->setText("清除");
     m_pPositionBtn->setText("↑↓");
 
+    m_pCurvBtn->setCheckable(true);
+    m_pPolyBtn->setCheckable(true);
+    m_pMaskBtn->setCheckable(true);
 
+    QString spBtnStyleStr = "QPushButton{background:#00BFFF;color:#000000;border-radius:5px;font-size:14px;border: 1px groove #F3F781;}"
+                            "QPushButton:hover{background:#58D3F7;color:#000000;}"
+                            "QPushButton:pressed{background:#086A87;color:#FAFAFA;}"
+                            "QPushButton:checked{background:#086A87;color:#FAFAFA;}";
+
+    QString btnStyleStr = "QPushButton{background:#00BFFF;color:#000000;border-radius:5px;font-size:14px;border: 1px groove #F3F781;}"
+                          "QPushButton:hover{background:#58D3F7;color:#000000;}"
+                          "QPushButton:pressed{background:#00BFFF;color:#000000;}";
+
+    m_pCurvBtn->setStyleSheet(spBtnStyleStr);
+    m_pPolyBtn->setStyleSheet(spBtnStyleStr);
+    m_pRectBtn->setStyleSheet(btnStyleStr);
+    m_pCircleBtn->setStyleSheet(btnStyleStr);
+    m_pConCirBtn->setStyleSheet(btnStyleStr);
+    m_pMaskBtn->setStyleSheet(spBtnStyleStr);
+    m_pCopyBtn->setStyleSheet(btnStyleStr);
+    m_pEraseBtn->setStyleSheet(btnStyleStr);
+    m_pClearBtn->setStyleSheet(btnStyleStr);
+    m_pPositionBtn->setStyleSheet(btnStyleStr);
 }
 
 void BottomBar::setData()
@@ -247,11 +276,20 @@ void BottomBar::setData()
     m_isCreatePolygon = false;
     m_isCreateCurve   = false;
     m_isCreateMask = false;
+
+    m_isUpdateAcc = false;
+    m_isUpdatePix = false;
 }
 
 void BottomBar::setBtnEnabled(bool enable)
 {
     m_pClearBtn->setEnabled(enable);
+}
+
+void BottomBar::setAccuracy(int acc)
+{
+    m_isUpdateAcc = false;
+    m_pAccMySlider->setValue(acc);
 }
 
 int BottomBar::getAccuracy()
@@ -261,11 +299,72 @@ int BottomBar::getAccuracy()
     return acc;
 }
 
+void BottomBar::setPixel(int pix)
+{
+    m_isUpdatePix = false;
+    m_pPixMySlider->setValue(pix);
+}
+
 int BottomBar::getPixel()
 {
     int pix = m_pPixMySlider->getEditValue().toInt();
 
     return pix;
+}
+
+void BottomBar::createRect(QPointF point)
+{
+    m_newMyRect = new MyRectangle(point.x(), point.y(), 5, 5, MyGraphicsItem::ItemType::Rectangle);
+    m_pAreaScene->addItem(m_newMyRect);
+    ImgArea::getInstance()->addShapeItemToList(m_newMyRect);
+
+    m_newMyRect->setAccuracy(getAccuracy());
+    m_newMyRect->setPixel(getPixel());
+}
+
+MyRectangle *BottomBar::getNewMyRect()
+{
+    return m_newMyRect;
+}
+
+void BottomBar::createCircle(QPointF point)
+{
+    m_newMyCircle = new MyCircle(point.x(), point.y(), 5, MyGraphicsItem::ItemType::Circle);
+    m_pAreaScene->addItem(m_newMyCircle);
+    ImgArea::getInstance()->addShapeItemToList(m_newMyCircle);
+
+    m_newMyCircle->setAccuracy(getAccuracy());
+    m_newMyCircle->setPixel(getPixel());
+}
+
+MyCircle *BottomBar::getNewMyCircle()
+{
+    return m_newMyCircle;
+}
+
+void BottomBar::createConCircle(QPointF point)
+{
+    m_newMyConCircle = new MyConcentricCircle(point.x(), point.y(), 10, 30, MyGraphicsItem::ItemType::Concentric_Circle);
+    m_pAreaScene->addItem(m_newMyConCircle);
+    ImgArea::getInstance()->addShapeItemToList(m_newMyConCircle);
+
+    m_newMyConCircle->setAccuracy(getAccuracy());
+    m_newMyConCircle->setPixel(getPixel());
+}
+
+MyConcentricCircle *BottomBar::getNewMyConCircle()
+{
+    return m_newMyConCircle;
+}
+
+void BottomBar::updateCreateCurve()
+{
+    m_pCurvBtn->click();
+}
+
+void BottomBar::updateCreatePolygon()
+{
+    m_pPolyBtn->click();
 }
 
 //void BottomBar::accAddBtnClick()
@@ -312,28 +411,50 @@ int BottomBar::getPixel()
 
 void BottomBar::circleBtnClick()
 {
-    MyCircle *circle = new MyCircle(500, 300, 50, MyGraphicsItem::Circle);
-    m_pAreaScene->addItem(circle);
+//    MyCircle *circle = new MyCircle(500, 300, 50, MyGraphicsItem::Circle);
+//    m_pAreaScene->addItem(circle);
+
+//    circle->setAccuracy(getAccuracy());
+//    circle->setPixel(getPixel());
+
+    m_pAreaScene->startCreateCircle();
+
+    OptRecord::addOptRecord("点击圆形");
 }
 
 void BottomBar::ellipseBtnClick()
 {
     MyEllipse *ellipse = new MyEllipse(0, 0, 120, 80, MyGraphicsItem::ItemType::Ellipse);
     m_pAreaScene->addItem(ellipse);
+
+    ellipse->setAccuracy(getAccuracy());
+    ellipse->setPixel(getPixel());
 }
 
 void BottomBar::conCircleBtnClick()
 {
-    MyConcentricCircle *conCircle = new MyConcentricCircle(500, 300, 50, 80, MyGraphicsItem::ItemType::Concentric_Circle);
-    m_pAreaScene->addItem(conCircle);
+//    MyConcentricCircle *conCircle = new MyConcentricCircle(500, 300, 50, 80, MyGraphicsItem::ItemType::Concentric_Circle);
+//    m_pAreaScene->addItem(conCircle);
+
+//    conCircle->setAccuracy(getAccuracy());
+//    conCircle->setPixel(getPixel());
+
+    m_pAreaScene->startCreateConCircle();
+
+    OptRecord::addOptRecord("点击环形");
 }
 
 void BottomBar::rectBtnClick()
 {
-    MyRectangle *rectangle = new MyRectangle(500, 300, 100, 50, MyGraphicsItem::ItemType::Rectangle);
-//    rectangle->setPos(500, 300);
-//    rectangle->setCenter(QPointF(500, 300));
-    m_pAreaScene->addItem(rectangle);
+//    MyRectangle *rectangle = new MyRectangle(500, 300, 100, 50, MyGraphicsItem::ItemType::Rectangle);
+//    m_pAreaScene->addItem(rectangle);
+
+//    rectangle->setAccuracy(getAccuracy());
+//    rectangle->setPixel(getPixel());
+
+    m_pAreaScene->startCreateRect();
+
+    OptRecord::addOptRecord("点击矩形");
 }
 
 void BottomBar::polygonBtnClick()
@@ -346,14 +467,22 @@ void BottomBar::polygonBtnClick()
 
         MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
         m_pAreaScene->addItem(polygon);
+        ImgArea::getInstance()->addShapeItemToList(polygon);
+
+        polygon->setAccuracy(getAccuracy());
+        polygon->setPixel(getPixel());
 
         connect(m_pAreaScene, &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
+
+        OptRecord::addOptRecord("点击多边形");
     } else {
         m_pPolyBtn->setText("多边形");
         m_isCreatePolygon = false;
 
         m_pAreaScene->finishCreatePloygon();
+
+        OptRecord::addOptRecord("点击完成绘制");
     }
 }
 
@@ -367,15 +496,23 @@ void BottomBar::curveBtnClick()
 
         MyCurve *curve = new MyCurve(MyGraphicsItem::ItemType::Curve);
         m_pAreaScene->addItem(curve);
+        ImgArea::getInstance()->addShapeItemToList(curve);
+
+        curve->setAccuracy(getAccuracy());
+        curve->setPixel(getPixel());
 
         connect(m_pAreaScene, &MyGraphicsScene::updateCurvePoint, curve, &MyCurve::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
+
+        OptRecord::addOptRecord("点击曲线");
 
     } else {
         m_pCurvBtn->setText("曲线");
         m_isCreateCurve = false;
 
         m_pAreaScene->finishCreateCurve();
+
+        OptRecord::addOptRecord("点击完成绘制");
     }
 }
 
@@ -387,23 +524,32 @@ void BottomBar::maskBtnClick()
 
         m_pMaskBtn->setText("完成绘制");
 
-        MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
+        MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon_Mask);
         polygon->setMask(true);
         m_pAreaScene->addItem(polygon);
+        ImgArea::getInstance()->addShapeItemToList(polygon);
 
+        polygon->setAccuracy(-1);
+        polygon->setPixel(-1);
         connect(m_pAreaScene, &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
+
+        OptRecord::addOptRecord("点击屏蔽区");
     } else {
         m_pMaskBtn->setText("屏蔽区");
         m_isCreateMask = false;
 
         m_pAreaScene->finishCreatePloygon();
+
+        OptRecord::addOptRecord("点击完成绘制");
     }
 }
 
 void BottomBar::CopyBtnClick()
 {
 
+
+    OptRecord::addOptRecord("点击复制");
 }
 
 void BottomBar::positionBtnClick()
@@ -414,5 +560,45 @@ void BottomBar::positionBtnClick()
     } else {
         this->setGeometry(0, MainWindow::getInstance()->height() - this->height(), this->width(), this->height());
     }
+}
+
+void BottomBar::updateItemAcc(int acc)
+{
+    if (!m_isUpdateAcc) {
+        m_isUpdateAcc = true;
+        return ;
+    }
+
+    if (!m_pAreaScene->selectedItems().isEmpty()) {
+        QGraphicsItem *temp = m_pAreaScene->selectedItems().first();
+        MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
+
+        if (item->getAccuracy() != -1) {
+            item->setAccuracy(acc);
+            item->update();
+        }
+    }
+
+    MySettings::getInstance()->setValue(ShapeSection, "accuracy", QString::number(acc));
+}
+
+void BottomBar::updateItemPix(int pix)
+{
+    if (!m_isUpdatePix) {
+        m_isUpdatePix = true;
+        return ;
+    }
+
+    if (!m_pAreaScene->selectedItems().isEmpty()) {
+        QGraphicsItem *temp = m_pAreaScene->selectedItems().first();
+        MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
+
+        if (item->getPixel() != -1) {
+            item->setPixel(pix);
+            item->update();
+        }
+    }
+
+    MySettings::getInstance()->setValue(ShapeSection, "pixel", QString::number(pix));
 }
 

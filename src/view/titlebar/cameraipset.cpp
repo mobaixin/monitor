@@ -1,6 +1,11 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "cameraipset.h"
+#include "src/view/titlebar/optrecord.h"
+
+#if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
+#pragma execution_character_set("utf-8")
+#endif
 
 CameraIpSet::CameraIpSet(QWidget *parent)
     : QDialog(parent)
@@ -70,9 +75,9 @@ void CameraIpSet::setWidgetStyle()
     m_ipTableView->setFont(viewFont);
     m_ipTableView->setAlternatingRowColors(true);
 
-    m_ipModel->setHorizontalHeaderLabels({"系列号", "自定义名称", "接口", "状态", "IP地址"});
+    m_ipModel->setHorizontalHeaderLabels({"系列号", "自定义名称", "接口", "状态", "IP地址", "子网掩码", "默认网关"});
     m_ipTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    m_ipTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_ipTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     m_ipTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_ipTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_ipTableView->setModel(m_ipModel);
@@ -91,7 +96,7 @@ void CameraIpSet::setWidgetStyle()
 
     m_freshBtn->setText("刷新");
     m_changeIpBtn->setText("修改IP");
-    m_autoGetIpBtn->setText("自定义分配IP");
+    m_autoGetIpBtn->setText("自动分配IP");
     m_confirmBtn->setText("确认");
     m_cancelBtn->setText("取消");
 
@@ -101,41 +106,149 @@ void CameraIpSet::setData()
 {
     getModelData();
     m_ipTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-
+    m_ipTableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
 void CameraIpSet::freshBtnClick()
 {
+    OptRecord::addOptRecord("点击刷新IP");
 
 }
 
 void CameraIpSet::changeIpBtnClick()
 {
+    OptRecord::addOptRecord("点击修改IP");
 
+    m_myIpInputDialog = new MyIpInputDialog();
+    m_myIpInputDialog->exec();
 }
 
 void CameraIpSet::autoGetIpBtnClick()
 {
+    OptRecord::addOptRecord("点击自动分配IP");
 
 }
 
 void CameraIpSet::confirmBtnClick()
 {
+    OptRecord::addOptRecord("点击确认");
 
 }
 
 void CameraIpSet::cancelBtnClick()
 {
+    OptRecord::addOptRecord("点击取消");
     this->close();
 }
 
 void CameraIpSet::getModelData()
 {
-    for (int i = 0; i < 10; i++) {
-        m_ipModel->setItem(i, 0, new QStandardItem(QString(" DSGP20603090%1 ").arg(i)));
-        m_ipModel->setItem(i, 1, new QStandardItem(QString(" GP20603090%1 ").arg(i)));
-        m_ipModel->setItem(i, 2, new QStandardItem(QString(" 192.168.1.9%1 ").arg(i)));
-        m_ipModel->setItem(i, 3, new QStandardItem(QString(" 可用  ")));
-        m_ipModel->setItem(i, 4, new QStandardItem(QString(" 192.168.1.4%1 ").arg(i)));
+//    for (int i = 0; i < 10; i++) {
+//        m_ipModel->setItem(i, 0, new QStandardItem(QString(" DSGP20603090%1 ").arg(i)));
+//        m_ipModel->setItem(i, 1, new QStandardItem(QString(" GP20603090%1 ").arg(i)));
+//        m_ipModel->setItem(i, 2, new QStandardItem(QString(" 192.168.1.9%1 ").arg(i)));
+//        m_ipModel->setItem(i, 3, new QStandardItem(QString(" 可用  ")));
+//        m_ipModel->setItem(i, 4, new QStandardItem(QString(" 192.168.1.4%1 ").arg(i)));
+//    }
+
+    m_cameraIPDataList = MyDataBase::getInstance()->queAllCameraIPData();
+
+    for (int i = 0; i < m_cameraIPDataList.size(); i++) {
+        m_ipModel->setItem(i, 0, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].serialId)));
+        m_ipModel->setItem(i, 1, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].nickName)));
+        m_ipModel->setItem(i, 2, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].portIp)));
+        m_ipModel->setItem(i, 3, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].state)));
+        m_ipModel->setItem(i, 4, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].cameraIp)));
+        m_ipModel->setItem(i, 5, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].cameraMask)));
+        m_ipModel->setItem(i, 6, new QStandardItem(QString(" %1 ").arg(m_cameraIPDataList[i].cameraGateway)));
     }
+}
+
+MyIpInputDialog::MyIpInputDialog(QWidget *parent)
+    : QDialog(parent)
+{
+    // 初始化组件
+    setWidgetUi();
+
+    // 设置组件样式
+    setWidgetStyle();
+
+    // 设置初始数据
+    setData();
+}
+
+void MyIpInputDialog::setWidgetUi()
+{
+    // 初始化组件
+    m_captionLab  = new QLabel(this);
+    m_ipInputEdit = new QLineEdit(this);
+    m_cancelBtn   = new QPushButton(this);
+    m_confirmBtn  = new QPushButton(this);
+
+    m_btnLayout  = new QHBoxLayout();
+    m_mainLayout = new QVBoxLayout(this);
+
+    // 组件布局
+    m_btnLayout->addWidget(m_cancelBtn);
+    m_btnLayout->addWidget(m_confirmBtn);
+    m_btnLayout->setContentsMargins(0, 0, 0, 0);
+    m_btnLayout->setSpacing(5);
+
+    m_mainLayout->addWidget(m_captionLab);
+    m_mainLayout->addWidget(m_ipInputEdit);
+    m_mainLayout->addLayout(m_btnLayout);
+    m_mainLayout->setContentsMargins(5, 5, 5, 5);
+    m_mainLayout->setSpacing(10);
+
+    this->setLayout(m_mainLayout);
+
+    connect(m_cancelBtn,  &QPushButton::clicked, this, &MyIpInputDialog::cancelBtnClick);
+    connect(m_confirmBtn, &QPushButton::clicked, this, &MyIpInputDialog::confirmBtnClick);
+
+}
+
+void MyIpInputDialog::setWidgetStyle()
+{
+    this->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
+    this->setModal(true);
+    this->setFixedSize(300, 110);
+    this->setWindowTitle("修改IP");
+
+    m_captionLab->setFixedHeight(20);
+    m_ipInputEdit->setFixedHeight(30);
+    m_cancelBtn->setFixedHeight(30);
+    m_confirmBtn->setFixedHeight(30);
+
+    m_captionLab->setText("请输入IP地址:");
+    m_cancelBtn->setText("取消");
+    m_confirmBtn->setText("确定");
+
+    QFont viewFont = this->font();
+    viewFont.setPixelSize(15);
+
+    m_captionLab->setFont(viewFont);
+    m_ipInputEdit->setFont(viewFont);
+    m_cancelBtn->setFont(viewFont);
+    m_confirmBtn->setFont(viewFont);
+
+    m_cancelBtn->setFocusPolicy(Qt::NoFocus);
+//    m_confirmBtn->setFocusPolicy(Qt::NoFocus);
+
+}
+
+void MyIpInputDialog::setData()
+{
+
+}
+
+void MyIpInputDialog::cancelBtnClick()
+{
+    this->close();
+}
+
+void MyIpInputDialog::confirmBtnClick()
+{
+    emit getValues(m_ipInputEdit->text());
+
+    this->close();
 }

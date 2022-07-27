@@ -1,4 +1,4 @@
-#ifndef MYSLIDER_H
+﻿#ifndef MYSLIDER_H
 #define MYSLIDER_H
 
 #include <QWidget>

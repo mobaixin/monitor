@@ -1,4 +1,4 @@
-#ifndef TITLE_BAR
+﻿#ifndef TITLE_BAR
 #define TITLE_BAR
 
 #include <QWidget>
@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QButtonGroup>
 #include <QHBoxLayout>
+#include <QDateTime>
 
 #include "src/view/titlebar/syssetting.h"
 #include "src/view/titlebar/ngrecord.h"
@@ -31,13 +32,28 @@ public:
     // 设置左上方标识
     void setTitleLab(QString label);
 
+    // 获得当前相机ID
+    int getCurCameraId();
+
+    // 设置报警相关按钮的显示状态
+    void setAlarmBtnState(bool isShow);
+
+    // 获取当前监视状态
+    bool getMonitorSetState();
+
+//    // 检测当前的图片 手动检测时sceneId为-1
+//    int detectCurImage(int sceneId = -1, bool isShowNGRes = true);
+
 private:
     void startBtnClick();
     void stopBtnClick();
     void monitorSetBtnClick();
     void sysSettingBtnClick();
     void testBtnClick();
+    void addMoldBtnClick();
+    void reDetectBtnClick();
     void NGRecordBtnClick();
+    void delAlarmBtnClick();
     void closeBtnClick();
 
 private:
@@ -50,7 +66,10 @@ private:
     QPushButton *m_pMonitorSetBtn;
     QPushButton *m_pSysSettingBtn;
     QPushButton *m_pTestBtn;
+    QPushButton *m_pAddMoldBtn;
+    QPushButton *m_pReDetectBtn;
     QPushButton *m_pNGRecordBtn;
+    QPushButton *m_pDelAlarmBtn;
     QPushButton *m_pCloseBtn;
 
     // 界面布局
@@ -66,6 +85,12 @@ private:
 
     // NG记录
     NGRecord *m_pNGRecord;
+
+    // 相机ID
+    int m_cameraId;
+
+    // 检测时间
+    QDateTime m_detectTime;
 };
 
 

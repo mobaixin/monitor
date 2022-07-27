@@ -1,4 +1,4 @@
-#ifndef MYPOINTITEM_H
+﻿#ifndef MYPOINTITEM_H
 #define MYPOINTITEM_H
 
 #include <QObject>
@@ -18,17 +18,19 @@ class MyPointItem : public QObject, public QAbstractGraphicsShapeItem
     Q_OBJECT
 public:
     enum PointType {
-        Center = 0, // 中心点
+        Center = 1, // 中心点
         Edge,       // 边缘点（可拖动改变图形的形状、大小）
         Special,    // 特殊功能点
         Other       // 普通点
     };
 
     MyPointItem(QAbstractGraphicsShapeItem* parent, QPointF p, PointType type);
-//    ~MyPointItem();
+    ~MyPointItem();
 
     QPointF getPoint();
     void setPoint(QPointF p);
+
+    PointType getPointType();
 
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 
@@ -42,7 +44,7 @@ protected:
 
 private:
     QPointF m_point;
-    PointType m_type;
+    PointType m_type = PointType::Other;
 };
 
 

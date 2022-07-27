@@ -1,4 +1,6 @@
-#include "myslider.h"
+﻿#include "myslider.h"
+
+#include <QDebug>
 
 MySlider::MySlider(QWidget *parent)
     : QWidget(parent)
@@ -80,6 +82,11 @@ void MySlider::setWidgetStyle()
     QFont btnFont = this->font();
     btnFont.setPixelSize(20);
     m_addBtn->setFont(btnFont);
+
+    m_lineEdit->setFocusPolicy(Qt::NoFocus);
+    m_slider->setFocusPolicy(Qt::NoFocus);
+    m_addBtn->setFocusPolicy(Qt::NoFocus);
+    m_subBtn->setFocusPolicy(Qt::NoFocus);
 }
 
 // 设置初始数据
@@ -132,15 +139,18 @@ void MySlider::setAutoSetEditValue(bool isAuto)
 
 void MySlider::setValue(int value, bool isSetEdit)
 {
+    value = value > 0 ? value : 0;
     m_slider->setValue(value);
 
     if (isSetEdit) {
-        m_lineEdit->setText(QString::number(value));
+//        qDebug() << m_slider->value();
+        m_lineEdit->setText(QString::number(m_slider->value()));
     }
 }
 
 void MySlider::setEditValue(QString value)
 {
+    value = value > 0 ? value : 0;
     m_lineEdit->setText(value);
 }
 
@@ -156,6 +166,7 @@ void MySlider::subBtnClick()
 
 void MySlider::setLineValue(int value)
 {
+    value = value > 0 ? value : 0;
     if (m_isAutoSetEditValue) {
         m_lineEdit->setText(QString::number(value));
     }
