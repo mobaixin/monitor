@@ -26,6 +26,9 @@ public:
     // 设置初始数据
     void setData();
 
+    // 清除按钮绑定
+    void setClearBtnConnect();
+
     void setBtnEnabled(bool enable);
 
     // 设置精确度值

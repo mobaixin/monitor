@@ -918,15 +918,17 @@ int ImgArea::initSDK()
     // 获取相机IP信息
     char* ipInfo[6];
     for (int i = 0; i < 6; i++) {
-        ipInfo[i] = QString("0").toUtf8().data();
+        ipInfo[i] = (QString("000000000000").toLatin1()).data();
     }
 
     CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
 
     // 设置相机IP
-    QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1)).arg(QString(ipInfo[3]).right(1));
+//    QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1)).arg(QString(ipInfo[3]).right(1));
+    QString cameraIp = m_cameraIp.arg(1).arg(1);
     QString cameraMask  = m_cameraMask;
-    QString cameraGtway = m_gateway.arg(QString(ipInfo[3]).right(1));
+//    QString cameraGtway = m_gateway.arg(QString(ipInfo[3]).right(1));
+    QString cameraGtway = m_gateway.arg(1);
     qDebug() << "cameraIP: " << cameraIp;
 
     // 数据库交互

@@ -181,11 +181,6 @@ void BottomBar::setWidgetUi()
     connect(m_pMaskBtn, &QPushButton::clicked, this, &BottomBar::maskBtnClick);
     connect(m_pPositionBtn, &QPushButton::clicked, this, &BottomBar::positionBtnClick);
 
-    connect(m_pEraseBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::eraseShape);
-    connect(m_pClearBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::clearShapes);
-
-    connect(m_pAccMySlider, &MySlider::valueChange, this, &BottomBar::updateItemAcc);
-    connect(m_pPixMySlider, &MySlider::valueChange, this, &BottomBar::updateItemPix);
 }
 
 // 设置组件样式
@@ -269,6 +264,9 @@ void BottomBar::setWidgetStyle()
     m_pEraseBtn->setStyleSheet(btnStyleStr);
     m_pClearBtn->setStyleSheet(btnStyleStr);
     m_pPositionBtn->setStyleSheet(btnStyleStr);
+
+    connect(m_pAccMySlider, &MySlider::valueChange, this, &BottomBar::updateItemAcc);
+    connect(m_pPixMySlider, &MySlider::valueChange, this, &BottomBar::updateItemPix);
 }
 
 void BottomBar::setData()
@@ -279,6 +277,12 @@ void BottomBar::setData()
 
     m_isUpdateAcc = false;
     m_isUpdatePix = false;
+}
+
+void BottomBar::setClearBtnConnect()
+{
+    connect(m_pEraseBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::eraseShape);
+    connect(m_pClearBtn, &QPushButton::clicked, ImgArea::getInstance(), &ImgArea::clearShapes);
 }
 
 void BottomBar::setBtnEnabled(bool enable)
