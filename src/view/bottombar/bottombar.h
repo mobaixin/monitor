@@ -91,7 +91,7 @@ private:
     void updateItemPix(int pix);
 
 private:
-    MyGraphicsScene *m_pAreaScene;
+//    MyGraphicsScene *m_pAreaScene;
 
     MyRectangle *m_newMyRect;
     MyCircle *m_newMyCircle;

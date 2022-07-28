@@ -91,6 +91,7 @@ ImgArea::~ImgArea()
 
     m_detectThread->quit();
     m_detectThread->wait();
+    m_detectThread->deleteLater();
 }
 
 void ImgArea::setWidgetUi()
@@ -117,6 +118,12 @@ void ImgArea::setWidgetUi()
     m_detectThread = new QThread(this);
     m_detectImageWork = new DetectImageWork();
     m_detectImageWork->moveToThread(m_detectThread);
+
+    // 预设场景尺寸
+    m_pScene->setSceneRect(0, 0, 1350, 720);
+
+    // 禁用快速索引
+    m_pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
     m_pView->setScene(m_pScene);
     m_pView->setRenderHint(QPainter::Antialiasing);
@@ -293,26 +300,27 @@ void ImgArea::loadImage(QString filePath)
 
 void ImgArea::eraseShape()
 {
-    if (!m_pScene->selectedItems().isEmpty()) {
-        QGraphicsItem *temp = m_pScene->selectedItems().first();
+    QList<QGraphicsItem *> selectItemList = getSelectItemList();
+    if (!selectItemList.isEmpty()) {
+        QGraphicsItem *temp = selectItemList.first();
 
-        bool isPoint = false;
-        MyPointItem *item = static_cast<MyPointItem *>(temp);
+//        bool isPoint = false;
+//        MyPointItem *item = static_cast<MyPointItem *>(temp);
 
-        switch (item->getPointType()) {
-        case MyPointItem::Center:
-        case MyPointItem::Edge:
-        case MyPointItem::Special:
-        case MyPointItem::Other:
-            isPoint = true;
-            break;
-        default:
-            break;
-        }
+//        switch (item->getPointType()) {
+//        case MyPointItem::Center:
+//        case MyPointItem::Edge:
+//        case MyPointItem::Special:
+//        case MyPointItem::Other:
+//            isPoint = true;
+//            break;
+//        default:
+//            break;
+//        }
 
-        if (isPoint) {
-            return ;
-        }
+//        if (isPoint) {
+//            return ;
+//        }
 
         // 从列表中清除
         for (int i = 0; i < m_allShapeItemList.size(); i++) {
@@ -334,53 +342,61 @@ void ImgArea::eraseShape()
 void ImgArea::clearShapes()
 {
     qDebug() << "in clearShapes";
-    QList<QGraphicsItem *> itemList = m_pScene->items();
-    qDebug() << "itemList.size: " << itemList.size();
+//    QList<QGraphicsItem *> itemList = m_pScene->items();
+//    qDebug() << "itemList.size: " << itemList.size();
 
-    if (itemList.size() == 1) {
-        return ;
+//    if (itemList.size() == 1) {
+//        return ;
+//    }
+
+//    QList<int> clearItemIdxList;
+//    for (int i = itemList.size() - 1; i >= 0; i--) {
+////        if (itemList[i] != m_pImageItem && itemList[i] != nullptr && itemList[i]->scene() != nullptr && itemList[i]->parentItem() == nullptr) {
+//        if (itemList[i] != m_pImageItem && itemList[i] != nullptr) {
+
+//            // todo
+//            bool isPoint = false;
+//            MyPointItem *item = static_cast<MyPointItem *>(itemList[i]);
+
+//            switch (item->getPointType()) {
+//            case MyPointItem::Center:
+//            case MyPointItem::Edge:
+//            case MyPointItem::Special:
+//            case MyPointItem::Other:
+//                isPoint = true;
+//                break;
+//            default:
+//                break;
+//            }
+
+//            if (isPoint) {
+//                continue ;
+//            }
+
+////            qDebug() << "item->getPointType(): " << item->getPointType();
+//            clearItemIdxList.append(i);
+//        }
+//    }
+
+//    // 从列表中清除
+//    m_allShapeItemList.clear();
+
+//    // 清除图形 回收内存
+//    for (int i = clearItemIdxList.size() - 1; i >= 0; i--) {
+//        m_pScene->removeItem(itemList[clearItemIdxList[i]]);
+
+//        MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(itemList[i]);
+//        shapeItem->deleteLater();
+////        delete itemList[clearItemIdxList[i]];
+//    }
+
+    for (int i = 0; i < m_allShapeItemList.size(); i++) {
+        m_pScene->removeItem(m_allShapeItemList[i]);
+
+        delete m_allShapeItemList[i];
     }
 
-    QList<int> clearItemIdxList;
-    for (int i = itemList.size() - 1; i >= 0; i--) {
-//        if (itemList[i] != m_pImageItem && itemList[i] != nullptr && itemList[i]->scene() != nullptr && itemList[i]->parentItem() == nullptr) {
-        if (itemList[i] != m_pImageItem && itemList[i] != nullptr) {
-
-            // todo
-            bool isPoint = false;
-            MyPointItem *item = static_cast<MyPointItem *>(itemList[i]);
-
-            switch (item->getPointType()) {
-            case MyPointItem::Center:
-            case MyPointItem::Edge:
-            case MyPointItem::Special:
-            case MyPointItem::Other:
-                isPoint = true;
-                break;
-            default:
-                break;
-            }
-
-            if (isPoint) {
-                continue ;
-            }
-
-//            qDebug() << "item->getPointType(): " << item->getPointType();
-            clearItemIdxList.append(i);
-        }
-    }
-
-    // 从列表中清除
     m_allShapeItemList.clear();
-
-    // 清除图形 回收内存
-    for (int i = clearItemIdxList.size() - 1; i >= 0; i--) {
-        m_pScene->removeItem(itemList[clearItemIdxList[i]]);
-
-        MyGraphicsItem *shapeItem = static_cast<MyGraphicsItem *>(itemList[i]);
-        shapeItem->deleteLater();
-//        delete itemList[clearItemIdxList[i]];
-    }
 
     qDebug() << "out clearShapes";
 }
@@ -567,7 +583,8 @@ QList<ShapeItemData> ImgArea::getShapeItems()
                 qDebug() << "myList.size: " << myList.size();
                 myList.removeLast();
 
-                itemData.edge      = QString("");
+//                itemData.edge      = QString("");
+                itemData.edge      = itemData.center;
                 itemData.pointList = pointListToStr(myList);
 
                 MyDataBase::getInstance()->addShapeItemData(itemData);
@@ -674,7 +691,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             MyRectangle *myRect = new MyRectangle(center.x(), center.y(), edge.x(), edge.y(), MyGraphicsItem::ItemType::Rectangle);
             myRect->setAccuracy(itemDataList[i].accuracy);
             myRect->setPixel(itemDataList[i].pixel);
-            m_pScene->addItem(myRect);
+//            m_pScene->addItem(myRect);
             addShapeItemToList(myRect);
         }
             break;
@@ -703,7 +720,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
                 myPolygon->pushPoint(myEdgePoint, myEdgePointList, true);
                 myPolygon->setAccuracy(itemDataList[i].accuracy);
                 myPolygon->setPixel(itemDataList[i].pixel);
-                m_pScene->addItem(myPolygon);
+//                m_pScene->addItem(myPolygon);
                 addShapeItemToList(myPolygon);
                 connect(m_pScene, &MyGraphicsScene::updatePolyPoint, myPolygon, &MyPolygon::pushPoint);
             }
@@ -727,7 +744,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
                 myCurve->pushPoint(myEdgePoint, myEdgePointList, true);
                 myCurve->setAccuracy(itemDataList[i].accuracy);
                 myCurve->setPixel(itemDataList[i].pixel);
-                m_pScene->addItem(myCurve);
+//                m_pScene->addItem(myCurve);
                 addShapeItemToList(myCurve);
             }
         }
@@ -742,7 +759,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             MyCircle *myCircle = new MyCircle(center.x(), center.y(), edge.x(), MyGraphicsItem::ItemType::Circle);
             myCircle->setAccuracy(itemDataList[i].accuracy);
             myCircle->setPixel(itemDataList[i].pixel);
-            m_pScene->addItem(myCircle);
+//            m_pScene->addItem(myCircle);
             addShapeItemToList(myCircle);
         }
             break;
@@ -756,7 +773,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             MyConcentricCircle *myConCircle = new MyConcentricCircle(center.x(), center.y(), edge.x(), edge.y(), MyGraphicsItem::ItemType::Concentric_Circle);
             myConCircle->setAccuracy(itemDataList[i].accuracy);
             myConCircle->setPixel(itemDataList[i].pixel);
-            m_pScene->addItem(myConCircle);
+//            m_pScene->addItem(myConCircle);
             addShapeItemToList(myConCircle);
         }
             break;
@@ -1495,13 +1512,7 @@ int ImgArea::getCurDetectSceneId()
 
 int ImgArea::getShapeItemNum()
 {
-    int count = 0;
-    for (auto &temp : m_pScene->items()) {
-        if (temp != m_pImageItem) {
-            count++;
-        }
-    }
-    return count;
+    return m_allShapeItemList.size();
 }
 
 Mat ImgArea::getShapeMask(ShapeItemData itemData, QImage img, QList<ShapeItemData> maskItemDataList)
@@ -1711,6 +1722,20 @@ void ImgArea::setSceneDelayTime(int sceneId, double delayTime)
 void ImgArea::addShapeItemToList(QGraphicsItem *newItem)
 {
     m_allShapeItemList.append(newItem);
+    m_pScene->addItem(newItem);
+}
+
+QList<QGraphicsItem *> ImgArea::getSelectItemList()
+{
+    QList<QGraphicsItem *> selectItemList;
+
+    for (int i = 0; i < m_allShapeItemList.size(); i++) {
+        if (m_allShapeItemList[i]->isSelected()) {
+            selectItemList.append(m_allShapeItemList[i]);
+        }
+    }
+
+    return selectItemList;
 }
 
 int ImgArea::initLocalNetwork()
@@ -1766,8 +1791,8 @@ int ImgArea::initLocalNetwork()
                 QString localFaceIp = m_ifaceIp.arg(ifaceId).arg(ifaceId);
                 QString gateway     = m_gateway.arg(ifaceId);
                 if (entry.ip().toString() != localFaceIp) {
-                    cmd.start(cmdStr.arg(iface.name()).arg(localFaceIp).arg(gateway));
-                    cmd.waitForFinished();
+//                    cmd.start(cmdStr.arg(iface.name()).arg(localFaceIp).arg(gateway));
+//                    cmd.waitForFinished();
                 }
             }
         }

@@ -77,7 +77,7 @@ void BottomBar::setWidgetUi()
     m_pRighBtnLayout = new QHBoxLayout();
 
     // 获取场景
-    m_pAreaScene = ImgArea::getInstance()->getScene();
+//    m_pAreaScene = ImgArea::getInstance()->getScene();
 
     // 对组件进行布局
     // 左部区域
@@ -315,7 +315,7 @@ int BottomBar::getPixel()
 void BottomBar::createRect(QPointF point)
 {
     m_newMyRect = new MyRectangle(point.x(), point.y(), 5, 5, MyGraphicsItem::ItemType::Rectangle);
-    m_pAreaScene->addItem(m_newMyRect);
+//    m_pAreaScene->addItem(m_newMyRect);
     ImgArea::getInstance()->addShapeItemToList(m_newMyRect);
 
     m_newMyRect->setAccuracy(getAccuracy());
@@ -330,7 +330,7 @@ MyRectangle *BottomBar::getNewMyRect()
 void BottomBar::createCircle(QPointF point)
 {
     m_newMyCircle = new MyCircle(point.x(), point.y(), 5, MyGraphicsItem::ItemType::Circle);
-    m_pAreaScene->addItem(m_newMyCircle);
+//    m_pAreaScene->addItem(m_newMyCircle);
     ImgArea::getInstance()->addShapeItemToList(m_newMyCircle);
 
     m_newMyCircle->setAccuracy(getAccuracy());
@@ -345,7 +345,7 @@ MyCircle *BottomBar::getNewMyCircle()
 void BottomBar::createConCircle(QPointF point)
 {
     m_newMyConCircle = new MyConcentricCircle(point.x(), point.y(), 10, 30, MyGraphicsItem::ItemType::Concentric_Circle);
-    m_pAreaScene->addItem(m_newMyConCircle);
+//    m_pAreaScene->addItem(m_newMyConCircle);
     ImgArea::getInstance()->addShapeItemToList(m_newMyConCircle);
 
     m_newMyConCircle->setAccuracy(getAccuracy());
@@ -417,7 +417,7 @@ void BottomBar::circleBtnClick()
 //    circle->setAccuracy(getAccuracy());
 //    circle->setPixel(getPixel());
 
-    m_pAreaScene->startCreateCircle();
+    ImgArea::getInstance()->getScene()->startCreateCircle();
 
     OptRecord::addOptRecord("点击圆形");
 }
@@ -425,7 +425,7 @@ void BottomBar::circleBtnClick()
 void BottomBar::ellipseBtnClick()
 {
     MyEllipse *ellipse = new MyEllipse(0, 0, 120, 80, MyGraphicsItem::ItemType::Ellipse);
-    m_pAreaScene->addItem(ellipse);
+//    m_pAreaScene->addItem(ellipse);
 
     ellipse->setAccuracy(getAccuracy());
     ellipse->setPixel(getPixel());
@@ -439,7 +439,7 @@ void BottomBar::conCircleBtnClick()
 //    conCircle->setAccuracy(getAccuracy());
 //    conCircle->setPixel(getPixel());
 
-    m_pAreaScene->startCreateConCircle();
+    ImgArea::getInstance()->getScene()->startCreateConCircle();
 
     OptRecord::addOptRecord("点击环形");
 }
@@ -452,7 +452,7 @@ void BottomBar::rectBtnClick()
 //    rectangle->setAccuracy(getAccuracy());
 //    rectangle->setPixel(getPixel());
 
-    m_pAreaScene->startCreateRect();
+    ImgArea::getInstance()->getScene()->startCreateRect();
 
     OptRecord::addOptRecord("点击矩形");
 }
@@ -460,19 +460,19 @@ void BottomBar::rectBtnClick()
 void BottomBar::polygonBtnClick()
 {
     if (!m_isCreatePolygon) {
-        m_pAreaScene->startCreatePolygon();
+        ImgArea::getInstance()->getScene()->startCreatePolygon();
         m_isCreatePolygon = true;
 
         m_pPolyBtn->setText("完成绘制");
 
         MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
-        m_pAreaScene->addItem(polygon);
+//        m_pAreaScene->addItem(polygon);
         ImgArea::getInstance()->addShapeItemToList(polygon);
 
         polygon->setAccuracy(getAccuracy());
         polygon->setPixel(getPixel());
 
-        connect(m_pAreaScene, &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
+        connect(ImgArea::getInstance()->getScene(), &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
 
         OptRecord::addOptRecord("点击多边形");
@@ -480,7 +480,7 @@ void BottomBar::polygonBtnClick()
         m_pPolyBtn->setText("多边形");
         m_isCreatePolygon = false;
 
-        m_pAreaScene->finishCreatePloygon();
+        ImgArea::getInstance()->getScene()->finishCreatePloygon();
 
         OptRecord::addOptRecord("点击完成绘制");
     }
@@ -489,19 +489,19 @@ void BottomBar::polygonBtnClick()
 void BottomBar::curveBtnClick()
 {
     if (!m_isCreateCurve) {
-        m_pAreaScene->startCreateCurve();
+        ImgArea::getInstance()->getScene()->startCreateCurve();
         m_isCreateCurve = true;
 
         m_pCurvBtn->setText("完成绘制");
 
         MyCurve *curve = new MyCurve(MyGraphicsItem::ItemType::Curve);
-        m_pAreaScene->addItem(curve);
+//        m_pAreaScene->addItem(curve);
         ImgArea::getInstance()->addShapeItemToList(curve);
 
         curve->setAccuracy(getAccuracy());
         curve->setPixel(getPixel());
 
-        connect(m_pAreaScene, &MyGraphicsScene::updateCurvePoint, curve, &MyCurve::pushPoint);
+        connect(ImgArea::getInstance()->getScene(), &MyGraphicsScene::updateCurvePoint, curve, &MyCurve::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
 
         OptRecord::addOptRecord("点击曲线");
@@ -510,7 +510,7 @@ void BottomBar::curveBtnClick()
         m_pCurvBtn->setText("曲线");
         m_isCreateCurve = false;
 
-        m_pAreaScene->finishCreateCurve();
+        ImgArea::getInstance()->getScene()->finishCreateCurve();
 
         OptRecord::addOptRecord("点击完成绘制");
     }
@@ -519,19 +519,19 @@ void BottomBar::curveBtnClick()
 void BottomBar::maskBtnClick()
 {
     if (!m_isCreateMask) {
-        m_pAreaScene->startCreatePolygon();
+        ImgArea::getInstance()->getScene()->startCreatePolygon();
         m_isCreateMask = true;
 
         m_pMaskBtn->setText("完成绘制");
 
         MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon_Mask);
         polygon->setMask(true);
-        m_pAreaScene->addItem(polygon);
+//        m_pAreaScene->addItem(polygon);
         ImgArea::getInstance()->addShapeItemToList(polygon);
 
         polygon->setAccuracy(-1);
         polygon->setPixel(-1);
-        connect(m_pAreaScene, &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
+        connect(ImgArea::getInstance()->getScene(), &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
 
         OptRecord::addOptRecord("点击屏蔽区");
@@ -539,7 +539,7 @@ void BottomBar::maskBtnClick()
         m_pMaskBtn->setText("屏蔽区");
         m_isCreateMask = false;
 
-        m_pAreaScene->finishCreatePloygon();
+        ImgArea::getInstance()->getScene()->finishCreatePloygon();
 
         OptRecord::addOptRecord("点击完成绘制");
     }
@@ -569,8 +569,9 @@ void BottomBar::updateItemAcc(int acc)
         return ;
     }
 
-    if (!m_pAreaScene->selectedItems().isEmpty()) {
-        QGraphicsItem *temp = m_pAreaScene->selectedItems().first();
+    QList<QGraphicsItem *> selectItemList = ImgArea::getInstance()->getSelectItemList();
+    if (!selectItemList.isEmpty()) {
+        QGraphicsItem *temp = selectItemList.first();
         MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
 
         if (item->getAccuracy() != -1) {
@@ -589,8 +590,9 @@ void BottomBar::updateItemPix(int pix)
         return ;
     }
 
-    if (!m_pAreaScene->selectedItems().isEmpty()) {
-        QGraphicsItem *temp = m_pAreaScene->selectedItems().first();
+    QList<QGraphicsItem *> selectItemList = ImgArea::getInstance()->getSelectItemList();
+    if (!selectItemList.isEmpty()) {
+        QGraphicsItem *temp = selectItemList.first();
         MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
 
         if (item->getPixel() != -1) {

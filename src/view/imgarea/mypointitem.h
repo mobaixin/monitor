@@ -25,7 +25,7 @@ public:
     };
 
     MyPointItem(QAbstractGraphicsShapeItem* parent, QPointF p, PointType type);
-    ~MyPointItem();
+    virtual ~MyPointItem();
 
     QPointF getPoint();
     void setPoint(QPointF p);

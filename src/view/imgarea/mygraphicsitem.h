@@ -46,16 +46,6 @@ public:
     int getPixel() { return m_pixel; }
     void setPixel(int pix) { m_pixel = pix; }
 
-protected:
-    virtual void focusInEvent(QFocusEvent *event) override;
-    virtual void focusOutEvent(QFocusEvent *event) override;
-
-//    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-
-    virtual void paint(QPainter *painter,
-                       const QStyleOptionGraphicsItem *option,
-                       QWidget *widget) override;
-
     QPointF m_center;
     QPointF m_edge;
     QList<QPointF> m_myPointList;
@@ -69,6 +59,16 @@ protected:
     QPen m_penIsSelected;
     QPen m_penNoSelected;
     QPen m_penMaskArea;
+
+protected:
+    virtual void focusInEvent(QFocusEvent *event) override;
+    virtual void focusOutEvent(QFocusEvent *event) override;
+
+//    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+
+    virtual void paint(QPainter *painter,
+                       const QStyleOptionGraphicsItem *option,
+                       QWidget *widget) override;
 };
 
 // 椭圆

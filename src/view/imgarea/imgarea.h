@@ -227,6 +227,9 @@ public:
     // 添加图形item到list
     void addShapeItemToList(QGraphicsItem *newItem);
 
+    // 获取选中的图形item
+    QList<QGraphicsItem *> getSelectItemList();
+
 public:
     int status;
 
