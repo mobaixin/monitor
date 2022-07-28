@@ -364,7 +364,12 @@ void BottomBar::updateCreateCurve()
 
 void BottomBar::updateCreatePolygon()
 {
-    m_pPolyBtn->click();
+    if (m_isCreatePolygon) {
+        m_pPolyBtn->click();
+    } else if (m_isCreateMask) {
+        m_pMaskBtn->click();
+    }
+
 }
 
 //void BottomBar::accAddBtnClick()
@@ -465,14 +470,14 @@ void BottomBar::polygonBtnClick()
 
         m_pPolyBtn->setText("完成绘制");
 
-        MyPolygon *polygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
+        m_newPolygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
 //        m_pAreaScene->addItem(polygon);
-        ImgArea::getInstance()->addShapeItemToList(polygon);
+        ImgArea::getInstance()->addShapeItemToList(m_newPolygon);
 
-        polygon->setAccuracy(getAccuracy());
-        polygon->setPixel(getPixel());
+        m_newPolygon->setAccuracy(getAccuracy());
+        m_newPolygon->setPixel(getPixel());
 
-        connect(ImgArea::getInstance()->getScene(), &MyGraphicsScene::updatePolyPoint, polygon, &MyPolygon::pushPoint);
+        connect(ImgArea::getInstance()->getScene(), &MyGraphicsScene::updatePolyPoint, m_newPolygon, &MyPolygon::pushPoint);
 //        connect(m_pAreaScene, &MyGraphicsScene::createFinished, polygon, )
 
         OptRecord::addOptRecord("点击多边形");
@@ -480,6 +485,7 @@ void BottomBar::polygonBtnClick()
         m_pPolyBtn->setText("多边形");
         m_isCreatePolygon = false;
 
+        bool state = ImgArea::getInstance()->judgePolygonState(m_newPolygon);
         ImgArea::getInstance()->getScene()->finishCreatePloygon();
 
         OptRecord::addOptRecord("点击完成绘制");

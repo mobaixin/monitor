@@ -96,6 +96,7 @@ private:
     MyRectangle *m_newMyRect;
     MyCircle *m_newMyCircle;
     MyConcentricCircle *m_newMyConCircle;
+    MyPolygon *m_newPolygon;
 
     bool m_isCreatePolygon;
     bool m_isCreateCurve;

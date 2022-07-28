@@ -390,12 +390,17 @@ void ImgArea::clearShapes()
 ////        delete itemList[clearItemIdxList[i]];
 //    }
 
+    // 恢复初始状态
+    m_pScene->setData();
+
+    // 清除图形 回收内存
     for (int i = 0; i < m_allShapeItemList.size(); i++) {
         m_pScene->removeItem(m_allShapeItemList[i]);
 
         delete m_allShapeItemList[i];
     }
 
+    // 从列表中清除
     m_allShapeItemList.clear();
 
     qDebug() << "out clearShapes";
@@ -532,6 +537,9 @@ QImage ImgArea::getImageItem()
 
 QList<ShapeItemData> ImgArea::getShapeItems()
 {
+    // 恢复初始状态
+    m_pScene->setData();
+
     qDebug() << "getShapeItems: " << m_allShapeItemList.size();
     QList<ShapeItemData> shapeList;
 //    for (QGraphicsItem *temp : m_pScene->items()) {
@@ -701,7 +709,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
             QPointF myEdgePoint;
             QList<QPointF> myEdgePointList;
 
-            if (myStrList.size() > 2) {
+            if (myStrList.size() > 6) {
                 MyPolygon *myPolygon;
 
                 if (itemDataList[i].type == MyGraphicsItem::ItemType::Polygon) {
@@ -1629,6 +1637,14 @@ Mat ImgArea::getShapeMask(ShapeItemData itemData, QImage img, QList<ShapeItemDat
 
 void ImgArea::setShowState(bool isShow)
 {
+    // 相机断线时不显示图片item
+    if (isShow && getCameraStatus(1) == 0) {
+        m_isShowImage = false;
+        m_pImageItem->hide();
+
+        return ;
+    }
+
     m_isShowImage = isShow;
 
     if (m_isShowImage == false) {
@@ -1736,6 +1752,26 @@ QList<QGraphicsItem *> ImgArea::getSelectItemList()
     }
 
     return selectItemList;
+}
+
+bool ImgArea::judgePolygonState(MyGraphicsItem *newPolygon)
+{
+    if (newPolygon->getMyPointList().size() >= 3) {
+        return true;
+    }
+
+    // 多边形顶点数不足
+    int idx = m_allShapeItemList.size() - 1;
+//    for (idx = 0; idx < m_allShapeItemList.size(); idx++) {
+//        if (m_allShapeItemList[idx] == newPolygon) {
+//            break;
+//        }
+//    }
+
+    m_pScene->removeItem(m_allShapeItemList[idx]);
+    m_allShapeItemList.removeAt(idx);
+
+    return false;
 }
 
 int ImgArea::initLocalNetwork()
