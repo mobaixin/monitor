@@ -1,4 +1,5 @@
-﻿#include <QDateTime>
+﻿#include <QScrollBar>
+#include <QDateTime>
 #include <QDebug>
 
 #include "optrecord.h"
@@ -115,12 +116,22 @@ void OptRecord::addOptRecord(QString optLog)
 
 void OptRecord::prevPageBtnClick()
 {
+    int maxValue = m_optTableView->verticalScrollBar()->maximum();
+    int curValue = m_optTableView->verticalScrollBar()->value();
 
+    if (curValue > 0) {
+        m_optTableView->verticalScrollBar()->setSliderPosition(curValue - m_pageValue);
+    }
 }
 
 void OptRecord::nextPageBtnClick()
 {
+    int maxValue = m_optTableView->verticalScrollBar()->maximum();
+    int curValue = m_optTableView->verticalScrollBar()->value();
 
+    if (curValue < maxValue) {
+        m_optTableView->verticalScrollBar()->setSliderPosition(curValue + m_pageValue);
+    }
 }
 
 void OptRecord::closeBtnClick()

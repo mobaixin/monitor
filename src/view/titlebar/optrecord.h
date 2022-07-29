@@ -26,6 +26,7 @@ public:
     // 设置初始数据
     void setData();
 
+    // 添加操作记录
     static void addOptRecord(QString optLog = "");
 
 private:
@@ -46,6 +47,8 @@ private:
 
     QHBoxLayout *m_btnLayout;
     QVBoxLayout *m_mainLayout;
+
+    int m_pageValue = 17;
 };
 
 #endif // OPTRECORD_H

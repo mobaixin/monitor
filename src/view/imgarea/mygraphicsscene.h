@@ -1,4 +1,4 @@
-#ifndef MYGRAPHICSSCENE_H
+﻿#ifndef MYGRAPHICSSCENE_H
 #define MYGRAPHICSSCENE_H
 
 #include <QGraphicsScene>
@@ -45,9 +45,9 @@ protected:
     QList<QPointF> m_ploygonList;
     QList<QPointF> m_curveList;
 
-    bool m_isCreatePolygon;
-    bool m_isCreateCurve;
-    bool m_isPauseCurve;
+    bool m_isCreatePolygon = false;
+    bool m_isCreateCurve   = false;
+    bool m_isPauseCurve    = false;
 
     bool m_isCreateRect;
     bool m_isCreatingRect;
