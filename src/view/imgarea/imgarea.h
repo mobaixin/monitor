@@ -113,7 +113,7 @@ public:
     void clearShapes();
 
     // 设置运行状态
-    void setRunState(int state);
+    void setRunState(int state, int cameraId = -1);
 
     // 设置监视状态
     void setMonitorState(bool isMonitor);
@@ -298,6 +298,10 @@ private:
 
     // 相机数
     int m_cameraCounts;
+
+    // 相机监视状态
+    QList<int> m_cameraStateList;
+
     QTimer *m_resTimer;
     CaptureThread *m_thread;
 

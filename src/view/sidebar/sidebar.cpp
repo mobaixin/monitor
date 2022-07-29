@@ -522,7 +522,7 @@ void SideBar::saveMoldBtnClick()
     }
 
     QDateTime time   = QDateTime::currentDateTime();
-    QString fileName = time.toString("yyyy-MM-dd-HH-mm-ss");
+    QString fileName = time.toString("yyyy-MM-dd-HH-mm-ss-zzz");
     QString timeStr  = time.toString("yyyy-MM-dd HH:mm:ss");
 
     ImageMoldData imgData;

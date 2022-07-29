@@ -274,6 +274,8 @@ void ImgArea::setData()
     int count = MySettings::getInstance()->getValue(SysSection, CameraCountsKey).toInt();
     emit setCameraCountsSig(count);
 
+    m_cameraStateList.append(status);
+
     CameraDetectData cameraData;
     m_cameraDetectDataList.append(cameraData);
 //    updateShapeImgMold(1, 1);
@@ -406,8 +408,15 @@ void ImgArea::clearShapes()
     qDebug() << "out clearShapes";
 }
 
-void ImgArea::setRunState(int state)
+void ImgArea::setRunState(int state, int cameraId)
 {
+    // 设置相机状态
+    if (cameraId == -1) {
+        cameraId = TitleBar::getInstance()->getCurCameraId();
+    }
+
+    m_cameraStateList[cameraId - 1] = state;
+
     if (state == CameraState::Running && status == 0) {
         state = CameraState::OffLine;
     }
@@ -519,7 +528,7 @@ void ImgArea::setSampleLab(bool isDetectMold, int curIdx)
 QImage ImgArea::getImageItem()
 {
     QDateTime time   = QDateTime::currentDateTime();
-    QString fileName = time.toString("yyyy-MM-dd-HH-mm-ss");
+    QString fileName = time.toString("yyyy-MM-dd-HH-mm-ss-zzz");
     QString timeStr  = time.toString("yyyy-MM-dd HH:mm:ss");
 
     ImageMoldData imgData;
@@ -918,10 +927,10 @@ int ImgArea::initSDK()
     // 获取相机IP信息
     char* ipInfo[6];
     for (int i = 0; i < 6; i++) {
-        ipInfo[i] = (QString("000000000000").toLatin1()).data();
+        ipInfo[i] = (QString("000000000000000").toLatin1()).data();
     }
 
-    CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
+    int res = CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
 
     // 设置相机IP
 //    QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1)).arg(QString(ipInfo[3]).right(1));
@@ -1254,7 +1263,7 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
     // 检测次数
     for (int t = 0; t < detectTimes; t++) {
         detectTime = QDateTime::currentDateTime();
-        fileName   = detectTime.toString("yyyy-MM-dd-HH-mm-ss");
+        fileName   = detectTime.toString("yyyy-MM-dd-HH-mm-ss-zzz");
         filePath   = QString("%1/%2.png").arg(MyDataBase::dbFilePath).arg(fileName);
         m_curDetectImage = getCurImage();
         m_curDetectImage.save(filePath);
@@ -1326,6 +1335,15 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
 
 int ImgArea::autoDetectImage(int cameraId, int sceneId, double delayTime, int reDetectTimes)
 {
+    if (cameraId <= 0) {
+        return 0;
+    }
+
+    // 判断相机监视状态
+    if (m_cameraStateList[cameraId - 1] != CameraState::Running) {
+        return 0;
+    }
+
     // 设置场景和延时
     m_detectCameraId = cameraId;
     m_detectSceneId  = sceneId;
@@ -1876,7 +1894,7 @@ void ImgArea::setSigDelayTimeLab()
 
         setShapeNoMove(true);
         clearDetectResult();
-        detectCurImage(m_detectCameraId, m_detectSceneId, m_reDetectTimes);
+        detectCurImage(m_detectCameraId, m_detectSceneId, m_reDetectTimes + 1);
     }
 }
 

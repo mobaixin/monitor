@@ -305,7 +305,7 @@ void TitleBar::addMoldBtnClick()
 {
     m_detectTime = QDateTime::currentDateTime();
 
-    QString fileName = m_detectTime.toString("yyyy-MM-dd-HH-mm-ss");
+    QString fileName = m_detectTime.toString("yyyy-MM-dd-HH-mm-ss-zzz");
     QString timeStr  = m_detectTime.toString("yyyy-MM-dd HH:mm:ss");
     QString moldFilePath = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
     QString ngFilePath   = QString("%1/%2.png").arg(MyDataBase::imgNgFilePath).arg(fileName);
