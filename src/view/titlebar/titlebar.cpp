@@ -247,6 +247,7 @@ void TitleBar::monitorSetBtnClick()
 
         m_pMonitorSetBtn->setText("监视设定");
         m_pTestBtn->setDisabled(false);
+        m_pNGRecordBtn->setDisabled(false);
         ImgArea::getInstance()->setShapeNoMove(true);
 
         // 清除数据库中的图形模板
@@ -267,6 +268,7 @@ void TitleBar::monitorSetBtnClick()
 
         m_pMonitorSetBtn->setText("关闭设定");
         m_pTestBtn->setDisabled(true);
+        m_pNGRecordBtn->setDisabled(true);
         ImgArea::getInstance()->setShapeNoMove(false);
 
         MainWindow::getInstance()->setDetectObject();

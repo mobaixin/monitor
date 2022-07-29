@@ -26,6 +26,9 @@ public:
     // 设置初始数据
     void setData();
 
+    // 清除按钮绑定
+    void setClearBtnConnect();
+
     void setBtnEnabled(bool enable);
 
     // 设置精确度值
@@ -91,11 +94,12 @@ private:
     void updateItemPix(int pix);
 
 private:
-    MyGraphicsScene *m_pAreaScene;
+//    MyGraphicsScene *m_pAreaScene;
 
     MyRectangle *m_newMyRect;
     MyCircle *m_newMyCircle;
     MyConcentricCircle *m_newMyConCircle;
+    MyPolygon *m_newPolygon;
 
     bool m_isCreatePolygon;
     bool m_isCreateCurve;

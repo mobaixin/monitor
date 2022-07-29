@@ -453,6 +453,7 @@ void MyPolygon::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
                 return;
             }
             MyPointItem *point = new MyPointItem(this, m_center, MyPointItem::Center);
+            point->setParentItem(this);
             m_pointList.append(point);
             m_pointList.setRandColor();
             m_isCreateFinished = true;
@@ -490,15 +491,29 @@ void MyPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     painter->setBrush(this->brush());
 
     if (m_isCreateFinished) {
+//        qDebug() << "finish create";
         for (int i = 1; i < m_pointList.size() - 1; i++) {
+//            qDebug() << m_pointList.at(i)->getPoint().x() << ", " << m_pointList.at(i)->getPoint().y();
+            if (m_pointList.at(i)->getPoint().x() < 1 || m_pointList.at(i)->getPoint().y() < 1) {
+                return ;
+            }
+
             painter->drawLine(m_pointList.at(i - 1)->getPoint(), m_pointList.at(i)->getPoint());
+//            qDebug() << m_pointList.at(i - 1)->getPoint().x() << ", " << m_pointList.at(i - 1)->getPoint().y();
         }
+//        qDebug() << m_pointList.at(m_pointList.size() - 2)->getPoint().x() << ", " << m_pointList.at(m_pointList.size() - 2)->getPoint().y();
 
         painter->drawLine(m_pointList.at(m_pointList.size()-2)->getPoint(), m_pointList.at(0)->getPoint());
     } else {
+//        qDebug() << "is creating";
         for (int i = 1; i < m_pointList.size(); i++) {
             painter->drawLine(m_pointList.at(i - 1)->getPoint(), m_pointList.at(i)->getPoint());
+//            qDebug() << m_pointList.at(i - 1)->getPoint().x() << ", " << m_pointList.at(i - 1)->getPoint().y();
         }
+//        if (m_pointList.size() > 0) {
+//            qDebug() << m_pointList.at(m_pointList.size() - 1)->getPoint().x() << ", " << m_pointList.at(m_pointList.size() - 1)->getPoint().y();
+//        }
+
     }
 
     if (m_isCreateFinished) {

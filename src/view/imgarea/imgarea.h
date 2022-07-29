@@ -227,6 +227,12 @@ public:
     // 添加图形item到list
     void addShapeItemToList(QGraphicsItem *newItem);
 
+    // 获取选中的图形item
+    QList<QGraphicsItem *> getSelectItemList();
+
+    // 完成绘制多边形时判断状态
+    bool judgePolygonState(MyGraphicsItem *newPolygon);
+
 public:
     int status;
 
