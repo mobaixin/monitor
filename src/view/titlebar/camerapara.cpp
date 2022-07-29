@@ -167,7 +167,7 @@ void CameraPara::updateExposeTime(int value)
     double time = (value * timeList.at(3)) / 1000;
     m_exposeTimeSlider->setEditValue(QString::number(time, 'f', 2));
 
-    MySettings::getInstance()->setValue(CameraSection, "exposeTime", QString::number(value));
+    MySettings::getInstance()->setValue(CameraSection, ExposeTimeKey, QString::number(value));
 }
 
 void CameraPara::updateCameraGain(int value)
@@ -175,5 +175,5 @@ void CameraPara::updateCameraGain(int value)
     value = value > 0 ? value : 0;
     ImgArea::getInstance()->setCameraGain(value);
 
-    MySettings::getInstance()->setValue(CameraSection, "cameraGain", QString::number(value));
+    MySettings::getInstance()->setValue(CameraSection, CameraGainKey, QString::number(value));
 }

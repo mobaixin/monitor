@@ -271,7 +271,7 @@ void ImgArea::setData()
     qDebug() << "status: " << status;
 
     // 获取设置的相机数
-    int count = MySettings::getInstance()->getValue(SysSection, "cameraCounts").toInt();
+    int count = MySettings::getInstance()->getValue(SysSection, CameraCountsKey).toInt();
     emit setCameraCountsSig(count);
 
     CameraDetectData cameraData;
@@ -1266,8 +1266,11 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
 //        targetImg = getCurImage();
 
         // 删除临时文件
-        tmpFile.setFileName(fileName);
-        tmpFile.remove();
+        tmpFile.setFileName(filePath);
+        tmpFile.setPermissions(filePath, QFile::ReadOther | QFile::WriteOther);
+        if (tmpFile.exists()) {
+            tmpFile.remove();
+        }
 
         // 获得检测结果
         detectRes = detectImage(targetImg, m_detectCameraId, m_detectSceneId);

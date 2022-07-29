@@ -1,11 +1,13 @@
 ﻿#include <QFile>
 #include <QDebug>
+#include <QMessageBox>
 
 #include "src/view/sidebar/sidebar.h"
 #include "src/view/mainwindow.h"
 #include "src/view/imgarea/imgarea.h"
 #include "src/view/titlebar/titlebar.h"
 #include "src/serialport/myserialport.h"
+#include "src/view/common/mysettings.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -342,6 +344,15 @@ void SideBar::addAlarmImageMold(QString imgPath, QString timeStr)
     int cameraId = ImgArea::getInstance()->getCurDetectCameraId();
     int sceneId  = ImgArea::getInstance()->getCurDetectSceneId();
 
+    // 获取最大样本数
+    int maxSampleNum = MySettings::getInstance()->getValue(IOSetSection, MaxSampleNumKey).toInt();
+
+    int curMoldNum = sceneId == 1 ? m_deteMoldNum : m_prodMoldNum;
+    if (curMoldNum >= maxSampleNum) {
+        QMessageBox::information(this, "提示", "已达到最大样本数");
+        return ;
+    }
+
     if (sceneId == DetectMold) {
         m_deteMoldNum += 1;
     } else {
@@ -396,7 +407,7 @@ void SideBar::setCanClampMoldState(int state)
 
 void SideBar::setDetectScene()
 {
-    int sceneValue = MySettings::getInstance()->getValue(SysSection, "prodDetect").toInt();
+    int sceneValue = MySettings::getInstance()->getValue(SysSection, ProdDetectKey).toInt();
 
     if (sceneValue == 0) {
         if (m_sceneId == 2) {
@@ -563,6 +574,17 @@ void SideBar::addMoldBtnClick()
     OptRecord::addOptRecord("点击添加模板");
 
     if (ImgArea::getInstance()->getCameraStatus(TitleBar::getInstance()->getCurCameraId()) == 0) {
+        return ;
+    }
+
+    // 获取最大样本数
+    int maxSampleNum = MySettings::getInstance()->getValue(IOSetSection, MaxSampleNumKey).toInt();
+
+    qDebug() << "maxSampleNum: " << maxSampleNum;
+    qDebug() << "getCurMoldNum: " << getCurMoldNum();
+
+    if (getCurMoldNum() >= maxSampleNum) {
+        QMessageBox::information(this, "提示", "已达到最大样本数");
         return ;
     }
 

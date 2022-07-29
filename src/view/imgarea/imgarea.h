@@ -60,6 +60,7 @@ typedef struct MyMOG2Data {
 // 相机检测数据
 typedef struct CameraDetectData {
     int cameraId;
+    int cameraRunState;
     QList<Mat> moldShapeMaskList;
     QList<Mat> prodShapeMaskList;
     QList<MyMOG2Data> moldMOG2DataList;

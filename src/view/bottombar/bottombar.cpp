@@ -590,7 +590,7 @@ void BottomBar::updateItemAcc(int acc)
         }
     }
 
-    MySettings::getInstance()->setValue(ShapeSection, "accuracy", QString::number(acc));
+    MySettings::getInstance()->setValue(ShapeSection, AccuracyKey, QString::number(acc));
 }
 
 void BottomBar::updateItemPix(int pix)
@@ -611,6 +611,6 @@ void BottomBar::updateItemPix(int pix)
         }
     }
 
-    MySettings::getInstance()->setValue(ShapeSection, "pixel", QString::number(pix));
+    MySettings::getInstance()->setValue(ShapeSection, PixelKey, QString::number(pix));
 }
 

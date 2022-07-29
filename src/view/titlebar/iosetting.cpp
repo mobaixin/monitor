@@ -236,14 +236,14 @@ void IOSetting::setData()
 {
     MySettings *settings = MySettings::getInstance();
     for (int i = 0; i < m_frameList.size(); i++) {
-        int num = settings->getValue(IOSetSection, QString("frameList%1").arg(i)).toInt();
+        int num = settings->getValue(IOSetSection, FrameListKey.arg(i)).toInt();
         m_frameList[i]->setSelectNum(num);
     }
 
-    m_sliderList[0]->setValue(settings->getValue(IOSetSection, "periodSig").toInt());
-    m_sliderList[1]->setValue(settings->getValue(IOSetSection, "aseismicLevel").toInt());
-    m_sliderList[2]->setValue(settings->getValue(IOSetSection, "maxSimpleNum").toInt());
-    m_sliderList[3]->setValue(settings->getValue(IOSetSection, "maxReDeteNum").toInt());
+    m_sliderList[0]->setValue(settings->getValue(IOSetSection, PeriodSigKey).toInt());
+    m_sliderList[1]->setValue(settings->getValue(IOSetSection, AseismicLevelKey).toInt());
+    m_sliderList[2]->setValue(settings->getValue(IOSetSection, MaxSampleNumKey).toInt());
+    m_sliderList[3]->setValue(settings->getValue(IOSetSection, MaxReDeteNumKey).toInt());
 
     for (int i = 0; i < m_frameList.size(); i++) {
         connect(m_frameList[i], &MySelectFrame::valueChange, this, &IOSetting::frameValueChange);
@@ -251,34 +251,34 @@ void IOSetting::setData()
 
     connect(m_sliderList[0], &MySlider::valueChange, this, &IOSetting::updatePeriodSig);
     connect(m_sliderList[1], &MySlider::valueChange, this, &IOSetting::updateAseismicLevel);
-    connect(m_sliderList[2], &MySlider::valueChange, this, &IOSetting::updateMaxSimpleNum);
+    connect(m_sliderList[2], &MySlider::valueChange, this, &IOSetting::updateMaxSampleNum);
     connect(m_sliderList[3], &MySlider::valueChange, this, &IOSetting::updateMaxReDeteNum);
 }
 
 void IOSetting::frameValueChange(int frameId, int selectNum)
 {
 //    qDebug() << "frameValueChange: " << selectNum;
-    MySettings::getInstance()->setValue(IOSetSection, QString("frameList%1").arg(frameId), QString::number(selectNum));
+    MySettings::getInstance()->setValue(IOSetSection, FrameListKey.arg(frameId), QString::number(selectNum));
 }
 
 void IOSetting::updatePeriodSig(int value)
 {
-    MySettings::getInstance()->setValue(IOSetSection, "periodSig", QString::number(value));
+    MySettings::getInstance()->setValue(IOSetSection, PeriodSigKey, QString::number(value));
 }
 
 void IOSetting::updateAseismicLevel(int value)
 {
-    MySettings::getInstance()->setValue(IOSetSection, "aseismicLevel", QString::number(value));
+    MySettings::getInstance()->setValue(IOSetSection, AseismicLevelKey, QString::number(value));
 }
 
-void IOSetting::updateMaxSimpleNum(int value)
+void IOSetting::updateMaxSampleNum(int value)
 {
-    MySettings::getInstance()->setValue(IOSetSection, "maxSimpleNum", QString::number(value));
+    MySettings::getInstance()->setValue(IOSetSection, MaxSampleNumKey, QString::number(value));
 }
 
 void IOSetting::updateMaxReDeteNum(int value)
 {
-    MySettings::getInstance()->setValue(IOSetSection, "maxReDeteNum", QString::number(value));
+    MySettings::getInstance()->setValue(IOSetSection, MaxReDeteNumKey, QString::number(value));
 }
 
 void IOSetting::restartBtnClick()

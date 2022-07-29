@@ -222,44 +222,16 @@ int MainWindow::autoDetectImage(int cameraId, int sceneId)
     int reDetectTimes = 0;
 
     if (sceneId == 1) {
-        delayTime = MySettings::getInstance()->getValue(SysSection, "moldDelay").toDouble();
-        reDetectTimes = MySettings::getInstance()->getValue(SysSection, "moldTimes").toInt();
+        delayTime = MySettings::getInstance()->getValue(SysSection, MoldDelayKey).toDouble();
+        reDetectTimes = MySettings::getInstance()->getValue(SysSection, MoldTimesKey).toInt();
     } else {
-        delayTime = MySettings::getInstance()->getValue(SysSection, "prodDelay").toDouble();
-        reDetectTimes = MySettings::getInstance()->getValue(SysSection, "prodTimes").toInt();
+        delayTime = MySettings::getInstance()->getValue(SysSection, ProdDelayKey).toDouble();
+        reDetectTimes = MySettings::getInstance()->getValue(SysSection, ProdTimesKey).toInt();
     }
-
-    QTimer *myDelayTimer = new QTimer(this);
-
-    connect(myDelayTimer, &QTimer::timeout, [=](){
-        myDelayTimer->stop();
-        myDelayTimer->deleteLater();
-
-        int detectRes = 0;
-
-        m_pImgArea->setShapeNoMove(true);
-        m_pImgArea->clearDetectResult();
-
-        if (m_pImgArea->getCameraStatus(cameraId) == 1) {
-            detectRes = m_pImgArea->detectCurImage(cameraId, sceneId, reDetectTimes);
-
-//            for (int i = 0; i < reDetectTimes; i++) {
-//                bool isShowNGRes = (i == reDetectTimes - 1);
-
-//                detectRes = m_pTitleBar->detectCurImage(sceneId, isShowNGRes);
-
-//                if (detectRes == DetectRes::OK) {
-//                    break;
-//                }
-//            }
-        }
-    });
 
     qDebug() << delayTime << " " << reDetectTimes;
 
     m_pImgArea->autoDetectImage(cameraId, sceneId, delayTime * 1000, reDetectTimes);
-//    m_pImgArea->setSceneDelayTime(sceneId, delayTime * 1000);
-//    myDelayTimer->start(int(delayTime * 1000));
 
     return 0;
 }

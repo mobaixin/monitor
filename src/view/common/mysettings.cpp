@@ -46,20 +46,20 @@ void MySettings::delValue(QString section, QString key)
 void MySettings::setInitValue()
 {
     // 图形设置
-    m_settings->setValue(QString("%1/%2").arg(ShapeSection).arg("accuracy"), "30");
-    m_settings->setValue(QString("%1/%2").arg(ShapeSection).arg("pixel"),    "300");
+    m_settings->setValue(QString("%1/%2").arg(ShapeSection).arg(AccuracyKey), "30");
+    m_settings->setValue(QString("%1/%2").arg(ShapeSection).arg(PixelKey),    "300");
 
     // 系统设置
-    m_settings->setValue(QString("%1/%2").arg(SysSection).arg("moldDelay"),  "6");
-    m_settings->setValue(QString("%1/%2").arg(SysSection).arg("moldTimes"),  "4");
-    m_settings->setValue(QString("%1/%2").arg(SysSection).arg("prodDelay"),  "4");
-    m_settings->setValue(QString("%1/%2").arg(SysSection).arg("prodTimes"),  "2");
-    m_settings->setValue(QString("%1/%2").arg(SysSection).arg("prodDetect"), "1");
-    m_settings->setValue(QString("%1/%2").arg(SysSection).arg("cameraCounts"), "1");
+    m_settings->setValue(QString("%1/%2").arg(SysSection).arg(MoldDelayKey),  "6");
+    m_settings->setValue(QString("%1/%2").arg(SysSection).arg(MoldTimesKey),  "4");
+    m_settings->setValue(QString("%1/%2").arg(SysSection).arg(ProdDelayKey),  "4");
+    m_settings->setValue(QString("%1/%2").arg(SysSection).arg(ProdTimesKey),  "2");
+    m_settings->setValue(QString("%1/%2").arg(SysSection).arg(ProdDetectKey), "1");
+    m_settings->setValue(QString("%1/%2").arg(SysSection).arg(CameraCountsKey), "1");
 
     // 相机参数
-    m_settings->setValue(QString("%1/%2").arg(CameraSection).arg("exposeTime"), "1000");
-    m_settings->setValue(QString("%1/%2").arg(CameraSection).arg("cameraGain"), "24");
+    m_settings->setValue(QString("%1/%2").arg(CameraSection).arg(ExposeTimeKey), "1000");
+    m_settings->setValue(QString("%1/%2").arg(CameraSection).arg(CameraGainKey), "24");
 
     // IO设置
     setIOInitValue();
@@ -72,14 +72,14 @@ void MySettings::setIOInitValue()
     ioFrameValueList << "1" << "0" << "0" << "0" << "0";
     ioFrameValueList << "0" << "0" << "0" << "0" << "1";
     ioFrameValueList << "0" << "0" << "1" << "0";
-    ioFrameValueList << "0" << "0" << "0" << "0" << "0";
+    ioFrameValueList << "0" << "1" << "0" << "0" << "0";
 
     for (int i = 0; i < 28; i++) {
-        m_settings->setValue(QString("%1/frameList%2").arg(IOSetSection).arg(i), ioFrameValueList[i]);
+        m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(FrameListKey.arg(i)), ioFrameValueList[i]);
     }
 
-    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg("periodSig"),     "0");
-    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg("aseismicLevel"), "3");
-    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg("maxSimpleNum"),  "20");
-    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg("maxReDeteNum"),  "10");
+    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(PeriodSigKey),     "0");
+    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(AseismicLevelKey), "3");
+    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(MaxSampleNumKey),  "20");
+    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(MaxReDeteNumKey),  "10");
 }
