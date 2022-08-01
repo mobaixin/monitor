@@ -35,7 +35,7 @@ void MySettings::setValue(QString section, QString key, QString value)
 
 QString MySettings::getValue(QString section, QString key)
 {
-    return m_settings->value(QString("%1/%2").arg(section).arg(key)).toString();
+    return m_settings->value(QString("%1/%2").arg(section).arg(key), 0).toString();
 }
 
 void MySettings::delValue(QString section, QString key)
@@ -60,6 +60,10 @@ void MySettings::setInitValue()
     // 相机参数
     m_settings->setValue(QString("%1/%2").arg(CameraSection).arg(ExposeTimeKey), "1000");
     m_settings->setValue(QString("%1/%2").arg(CameraSection).arg(CameraGainKey), "24");
+
+    // NG记录
+    m_settings->setValue(QString("%1/%2").arg(DetectSection).arg(DetectNGTimes), "0");
+    m_settings->setValue(QString("%1/%2").arg(DetectSection).arg(DetectOKTimes), "0");
 
     // IO设置
     setIOInitValue();

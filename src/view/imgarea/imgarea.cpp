@@ -1306,6 +1306,10 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
             // 顶栏变化
             TitleBar::getInstance()->setAlarmBtnState(true);
 
+            // 记录NG次数
+            int NGTimes = MySettings::getInstance()->getValue(DetectSection, DetectNGTimes).toInt();
+            MySettings::getInstance()->setValue(DetectSection, DetectNGTimes, QString::number(NGTimes + 1));
+
         // 检测到OK
         } else if (detectRes == DetectRes::OK) {
 
@@ -1321,6 +1325,10 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
 
             // 顶栏变化
             TitleBar::getInstance()->setAlarmBtnState(false);
+
+            // 记录OK次数
+            int OKTimes = MySettings::getInstance()->getValue(DetectSection, DetectOKTimes).toInt();
+            MySettings::getInstance()->setValue(DetectSection, DetectOKTimes, QString::number(OKTimes + 1));
 
             break;
         }
@@ -2294,7 +2302,7 @@ void DetectImageWork::detectImage(QImage imgFg, int cameraId, int sceneId, int &
                 }
             }
 
-            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
+//            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
             imshow(QString("fgMaskMat_%1_%2").arg(i).arg(j).toStdString(), myMOG2Data.fgMaskMat);
 //            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), srcFg);
 

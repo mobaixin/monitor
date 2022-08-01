@@ -12,6 +12,7 @@ const QString ShapeSection  = "ShapeSetting";
 const QString SysSection    = "SysSetting";
 const QString CameraSection = "CameraSetting";
 const QString IOSetSection  = "IOSetting";
+const QString DetectSection = "DetectSetting";
 
 // all keys
 const QString AccuracyKey   = "accuracy";
@@ -32,6 +33,9 @@ const QString PeriodSigKey     = "periodSig";
 const QString AseismicLevelKey = "aseismicLevel";
 const QString MaxSampleNumKey  = "maxSampleNum";
 const QString MaxReDeteNumKey  = "maxReDeteNum";
+
+const QString DetectNGTimes = "detectNGTimes";
+const QString DetectOKTimes = "detectOKTimes";
 
 class MySettings : public QObject
 {

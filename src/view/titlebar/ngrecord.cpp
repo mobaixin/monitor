@@ -5,6 +5,7 @@
 
 #include "ngrecord.h"
 #include "src/view/imgarea/imgarea.h"
+#include "src/view/common/mysettings.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -139,7 +140,11 @@ void NGRecord::setData()
 //                          "10:40:14\n相机1场景1 收到触发信号\n"
 //                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
 //                          );
-    m_resultLab->setText(QString("正常%1次，异常%2次").arg(m_okTotalNum).arg(m_ngTotalNum));
+
+    int ngTimes = MySettings::getInstance()->getValue(DetectSection, DetectNGTimes).toInt();
+    int okTimes = MySettings::getInstance()->getValue(DetectSection, DetectOKTimes).toInt();
+
+    m_resultLab->setText(QString("正常%1次，异常%2次").arg(okTimes).arg(ngTimes));
 }
 
 void NGRecord::addNgRecord(NGRecordData ngData)
@@ -177,6 +182,10 @@ void NGRecord::resetBtnClick()
 {
     OptRecord::addOptRecord("点击清零");
 
+    // 配置文件修改
+    MySettings::getInstance()->setValue(DetectSection, DetectNGTimes, "0");
+    MySettings::getInstance()->setValue(DetectSection, DetectOKTimes, "0");
+
     m_resultLab->setText("正常0次，异常0次");
 }
 
@@ -211,10 +220,6 @@ void NGRecord::getModelData()
         m_ngModel->setItem(i, 1, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].cameraId)));
         m_ngModel->setItem(i, 2, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].sceneId)));
         m_ngModel->setItem(i, 3, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].result)));
-
-        if (m_recordDataList[i].result == "异常") {
-            m_ngTotalNum++;
-        }
     }
 }
 
