@@ -234,6 +234,9 @@ public:
     // 完成绘制多边形时判断状态
     bool judgePolygonState(MyGraphicsItem *newPolygon);
 
+    // 复制当前选中的图形
+    void copySelectedShapeItem();
+
 public:
     int status;
 

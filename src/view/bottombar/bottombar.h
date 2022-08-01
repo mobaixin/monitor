@@ -87,7 +87,7 @@ private:
     void polygonBtnClick();
     void curveBtnClick();
     void maskBtnClick();
-    void CopyBtnClick();
+    void copyBtnClick();
     void positionBtnClick();
 
     void updateItemAcc(int acc);
