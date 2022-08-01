@@ -286,7 +286,11 @@ void TitleBar::sysSettingBtnClick()
 
 void TitleBar::testBtnClick()
 {
-    m_detectTime = QDateTime::currentDateTime();
+    OptRecord::addOptRecord("点击测试");
+    NGRecord::addNgTextRecord(QString("相机%1 场景%2 手动检测").arg(m_cameraId).arg(SideBar::getInstance()->getCurSceneID()));
+
+    // 测试延时自动检测
+//    m_detectTime = QDateTime::currentDateTime();
 //    MainWindow::getInstance()->autoDetectImage(m_cameraId, SideBar::getInstance()->getCurSceneID());
 
     setAlarmBtnState(false);
@@ -298,7 +302,6 @@ void TitleBar::testBtnClick()
         ImgArea::getInstance()->detectCurImage(m_cameraId);
     }
 
-    OptRecord::addOptRecord("点击测试");
 }
 
 void TitleBar::addMoldBtnClick()

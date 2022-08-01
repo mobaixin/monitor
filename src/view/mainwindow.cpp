@@ -136,6 +136,11 @@ void MainWindow::setData()
         dir.mkdir(imgNgFilePath);
     }
 
+    // 检查NG记录文件
+    QFile ngFile(MyDataBase::txtNgFilePath);
+    ngFile.open(QIODevice::WriteOnly | QIODevice::Append);
+    ngFile.close();
+
 //    autoDetectImage(1, 1);
 }
 

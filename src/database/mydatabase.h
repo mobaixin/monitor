@@ -155,6 +155,7 @@ public:
     static QString dbFilePath;
     static QString imgMoldFilePath;
     static QString imgNgFilePath;
+    static QString txtNgFilePath;
 
 private:
     bool checkShapeItemData(ShapeItemData itemData);

@@ -13,6 +13,7 @@
 #include "src/database/mydatabase.h"
 #include "src/view/sidebar/sidebar.h"
 #include "src/view/bottombar/bottombar.h"
+#include "src/view/titlebar/ngrecord.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -1154,6 +1155,7 @@ void ImgArea::updateShapeImgMold(int cameraId, int sceneId)
         return ;
     }
 
+//    NGRecord::addNgTextRecord(QString("相机%1 场景%2 收到学习信号").arg(cameraId).arg(sceneId));
     emit startUpdateMoldSig(cameraId, sceneId, itemDataList, imgDataList);
 
     return ;
@@ -1343,6 +1345,8 @@ int ImgArea::autoDetectImage(int cameraId, int sceneId, double delayTime, int re
     if (m_cameraStateList[cameraId - 1] != CameraState::Running) {
         return 0;
     }
+
+    NGRecord::addNgTextRecord(QString("相机%1 场景%2 收到触发信号").arg(cameraId).arg(sceneId));
 
     // 设置场景和延时
     m_detectCameraId = cameraId;
