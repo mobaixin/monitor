@@ -71,6 +71,7 @@ ImgArea::~ImgArea()
     {
         QApplication::processEvents();
     }
+    m_thread->deleteLater();
 
     if(g_readBuf!=NULL){
         free(g_readBuf);
@@ -601,6 +602,19 @@ QList<ShapeItemData> ImgArea::getShapeItems()
                 qDebug() << "myList.size: " << myList.size();
                 myList.removeLast();
 
+                if (myList.size() < 3) {
+                    break;
+                }
+
+                QPointF oldCenter = item->getCenter();
+                int difX = center.x() - oldCenter.x();
+                int difY = center.y() - oldCenter.y();
+
+                for (int k = 0; k < myList.size(); k++) {
+                    myList[k].setX(myList[k].x() + difX);
+                    myList[k].setY(myList[k].y() + difY);
+                }
+
 //                itemData.edge      = QString("");
                 itemData.edge      = itemData.center;
                 itemData.pointList = pointListToStr(myList);
@@ -637,11 +651,20 @@ QList<ShapeItemData> ImgArea::getShapeItems()
             case MyGraphicsItem::ItemType::Curve: {
                 QList<QPointF> myList = item->getMyPointList();
                 qDebug() << "Curve myList.size: " << myList.size();
-                if (myList.size() < 1) {
+                if (myList.size() < 3) {
                     break;
                 }
 
                 myList.removeLast();
+
+                QPointF oldCenter = item->getCenter();
+                int difX = center.x() - oldCenter.x();
+                int difY = center.y() - oldCenter.y();
+
+                for (int k = 0; k < myList.size(); k++) {
+                    myList[k].setX(myList[k].x() + difX);
+                    myList[k].setY(myList[k].y() + difY);
+                }
 
                 itemData.edge      = QString("");
                 itemData.pointList = pointListToStr(myList);
@@ -959,8 +982,8 @@ int ImgArea::initSDK()
     if (QString(ipInfo[0]) != cameraIp) {
 //        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (QString(ipInfo[4]).toLatin1()).data(),
 //                                 (QString(ipInfo[5]).toLatin1()).data(), true);
-        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (cameraMask.toLatin1()).data(),
-                                 (cameraGtway.toLatin1()).data(), true);
+//        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (cameraMask.toLatin1()).data(),
+//                                 (cameraGtway.toLatin1()).data(), true);
         if (res == CAMERA_STATUS_SUCCESS) {
             qDebug() << "相机IP设置成功";
             cameraIPData.state = "可用";
