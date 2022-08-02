@@ -439,6 +439,28 @@ bool MyPolygon::getMask()
     return m_isMaskArea;
 }
 
+void MyPolygon::setPointList(QList<QPointF> edgePointList)
+{
+    if (edgePointList.size() < 3) {
+        return ;
+    }
+
+    for (int i = 0; i < edgePointList.size(); i++) {
+        MyPointItem *point = new MyPointItem(this, edgePointList[i], MyPointItem::Edge);
+        point->setParentItem(this);
+        m_pointList.append(point);
+    }
+
+    m_center = getCentroid(edgePointList);
+    MyPointItem *point = new MyPointItem(this, m_center, MyPointItem::Center);
+    point->setParentItem(this);
+    m_pointList.append(point);
+    m_pointList.setRandColor();
+
+    m_isCreateFinished = true;
+    getMaxLength();
+}
+
 void MyPolygon::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
 {
     if (!m_isCreateFinished || m_isAddPoint) {
@@ -469,7 +491,8 @@ void MyPolygon::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
                 m_pointList.append(point);
             }
 
-            m_pointList.setColor(QColor(0, 255, 0));
+//            m_pointList.setColor(QColor(0, 255, 0));
+            m_pointList.setRandColor();
         }
 
         this->update();
@@ -613,6 +636,28 @@ void MyCurve::updateCurve(QPointF origin, QPointF end)
     getMaxLength();
 }
 
+void MyCurve::setPointList(QList<QPointF> edgePointList)
+{
+    if (edgePointList.size() < 3) {
+        return ;
+    }
+
+    for (int i = 0; i < edgePointList.size(); i++) {
+        MyPointItem *point = new MyPointItem(this, edgePointList[i], MyPointItem::Other);
+        point->setParentItem(this);
+        m_pointList.append(point);
+    }
+
+    m_center = getCentroid(edgePointList);
+    MyPointItem *point = new MyPointItem(this, m_center, MyPointItem::Center);
+    point->setParentItem(this);
+    m_pointList.append(point);
+    m_pointList.setRandColor();
+
+    m_isCreateFinished = true;
+    getMaxLength();
+}
+
 void MyCurve::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
 {
     if (!m_isCreateFinished) {
@@ -620,7 +665,9 @@ void MyCurve::pushPoint(QPointF p, QList<QPointF> list, bool isCenter)
         getMaxLength();
 
         if (isCenter) {
-            m_pointList.append(new MyPointItem(this, m_center, MyPointItem::Center));
+            MyPointItem *point = new MyPointItem(this, m_center, MyPointItem::Center);
+            point->setParentItem(this);
+            m_pointList.append(point);
             m_pointList.setRandColor();
             m_isCreateFinished = true;
         } else {

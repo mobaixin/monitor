@@ -732,10 +732,13 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
                     if (i + 1 < myStrList.size()) {
                         myEdgePoint = QPointF(myStrList[i].toInt(), myStrList[i+1].toInt());
                         myEdgePointList.append(myEdgePoint);
-                        myPolygon->pushPoint(myEdgePoint, myEdgePointList, false);
+//                        myPolygon->pushPoint(myEdgePoint, myEdgePointList, false);
                     }
                 }
-                myPolygon->pushPoint(myEdgePoint, myEdgePointList, true);
+//                myPolygon->pushPoint(myEdgePoint, myEdgePointList, true);
+
+                myPolygon->setPointList(myEdgePointList);
+
                 myPolygon->setAccuracy(itemDataList[i].accuracy);
                 myPolygon->setPixel(itemDataList[i].pixel);
 //                m_pScene->addItem(myPolygon);
@@ -1807,6 +1810,106 @@ bool ImgArea::judgePolygonState(MyGraphicsItem *newPolygon)
     m_allShapeItemList.removeAt(idx);
 
     return false;
+}
+
+void ImgArea::copySelectedShapeItem()
+{
+    int offset = 20;
+
+    QList<QGraphicsItem *> selectItemList = getSelectItemList();
+    if (!selectItemList.isEmpty()) {
+        QGraphicsItem *temp = selectItemList.first();
+        MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
+        QPointF center = item->getCenter();
+        QPointF edge   = item->getEdge();
+        QPointF realCenter = item->getRealCenter().toPoint();
+        realCenter.setX(center.x() + offset);
+        realCenter.setY(center.y() + offset);
+
+        int accuracy = item->getAccuracy();
+        int pixel = item->getPixel();
+
+        switch (item->getType()) {
+        case MyGraphicsItem::ItemType::Rectangle: {
+            int width  = abs(edge.x() - center.x()) * 2;
+            int height = abs(edge.y() - center.y()) * 2;
+
+            MyRectangle *myRect = new MyRectangle(realCenter.x(), realCenter.y(), width, height, MyGraphicsItem::ItemType::Rectangle);
+            myRect->setAccuracy(accuracy);
+            myRect->setPixel(pixel);
+            addShapeItemToList(myRect);
+        }
+            break;
+        case MyGraphicsItem::ItemType::Polygon:
+        case MyGraphicsItem::ItemType::Polygon_Mask: {
+
+            MyPolygon *myPolygon;
+
+            if (item->getType() == MyGraphicsItem::ItemType::Polygon) {
+                myPolygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
+            } else {
+                myPolygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon_Mask);
+            }
+
+            QList<QPointF> edgePointList = item->getMyPointList();
+            edgePointList.removeLast();
+
+            for (int i = 0; i < edgePointList.size(); i++) {
+                edgePointList[i].setX(edgePointList[i].x() + offset);
+                edgePointList[i].setY(edgePointList[i].y() + offset);
+            }
+
+            myPolygon->setPointList(edgePointList);
+            myPolygon->setAccuracy(accuracy);
+            myPolygon->setPixel(pixel);
+            addShapeItemToList(myPolygon);
+            connect(m_pScene, &MyGraphicsScene::updatePolyPoint, myPolygon, &MyPolygon::pushPoint);
+
+        }
+            break;
+        case MyGraphicsItem::ItemType::Curve: {
+            MyCurve *myCurve = new MyCurve(MyGraphicsItem::ItemType::Curve);
+
+            QList<QPointF> edgePointList = item->getMyPointList();
+            edgePointList.removeLast();
+
+            for (int i = 0; i < edgePointList.size(); i++) {
+                edgePointList[i].setX(edgePointList[i].x() + offset);
+                edgePointList[i].setY(edgePointList[i].y() + offset);
+            }
+
+            myCurve->setPointList(edgePointList);
+            myCurve->setAccuracy(accuracy);
+            myCurve->setPixel(pixel);
+            addShapeItemToList(myCurve);
+        }
+            break;
+        case MyGraphicsItem::ItemType::Circle: {
+            int radius = sqrt(pow(center.x() - edge.x(), 2) + pow(center.y() - edge.y(), 2));
+            MyCircle *myCircle = new MyCircle(realCenter.x(), realCenter.y(), radius, MyGraphicsItem::ItemType::Circle);
+            myCircle->setAccuracy(accuracy);
+            myCircle->setPixel(pixel);
+            addShapeItemToList(myCircle);
+        }
+            break;
+        case MyGraphicsItem::ItemType::Concentric_Circle: {
+            QList<QPointF> myList = item->getMyPointList();
+
+            // 记录内外圆的半径
+            int radius1 = sqrt(pow(myList[1].x() - myList[0].x(), 2) + pow(myList[1].y() - myList[0].y(), 2));
+            int radius2 = sqrt(pow(myList[1].x() - myList[2].x(), 2) + pow(myList[1].y() - myList[2].y(), 2));
+
+            MyConcentricCircle *myConCircle = new MyConcentricCircle(realCenter.x(), realCenter.y(), radius1, radius2, MyGraphicsItem::ItemType::Concentric_Circle);
+            myConCircle->setAccuracy(accuracy);
+            myConCircle->setPixel(pixel);
+            addShapeItemToList(myConCircle);
+        }
+            break;
+        default:
+            break;
+
+        }
+    }
 }
 
 int ImgArea::initLocalNetwork()
