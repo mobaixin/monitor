@@ -4,6 +4,7 @@
 #include "src/view/imgarea/imgarea.h"
 #include "src/view/common/mysettings.h"
 #include "src/view/titlebar/optrecord.h"
+#include "src/view/titlebar/titlebar.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -153,7 +154,7 @@ void CameraPara::confirmBtnClick()
 {
     OptRecord::addOptRecord("点击确定");
 
-    ImgArea::getInstance()->saveCameraPara();
+    ImgArea::getInstance()->saveCameraPara(TitleBar::getInstance()->getCurCameraId());
     this->close();
 }
 

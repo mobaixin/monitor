@@ -87,7 +87,7 @@ private:
     NGRecord *m_pNGRecord;
 
     // 相机ID
-    int m_cameraId;
+    int m_cameraId = 1;
 
     // 检测时间
     QDateTime m_detectTime;

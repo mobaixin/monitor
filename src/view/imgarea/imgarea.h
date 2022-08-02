@@ -20,7 +20,6 @@
 #include <QThread>
 #include <windows.h>
 #include <opencv2\opencv.hpp>
-#include <aruco.hpp>
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
@@ -145,10 +144,10 @@ public:
     void setResolution(int index);
 
     // 设置曝光时间
-    void setExposeTime(int value, int cameraIdx = 0);
+    void setExposeTime(int value, int cameraIdx = 1);
 
     // 设置相机增益
-    void setCameraGain(int gain, int cameraIdx = 0);
+    void setCameraGain(int gain, int cameraIdx = 1);
 
     // 获取曝光数据
     QList<double> getExposureTime();
@@ -157,13 +156,13 @@ public:
     QList<int> getCameraGain();
 
     // 保存相机参数
-    void saveCameraPara();
+    void saveCameraPara(int cameraIdx = 1);
 
     // 开始运行
-    void startCamera();
+    void startCamera(int cameraId = 1);
 
     // 停止运行
-    void pauseCamera();
+    void pauseCamera(int cameraId = 1);
 
     // 更新图形图片模板
     void updateShapeImgMold(int cameraId, int sceneId);
@@ -307,6 +306,7 @@ private:
 
     QTimer *m_resTimer;
     CaptureThread *m_thread;
+    QList<CaptureThread *>m_cameraThreadList;
 
     // 信号倒计时
     QTimer *m_sigDelayTimer;

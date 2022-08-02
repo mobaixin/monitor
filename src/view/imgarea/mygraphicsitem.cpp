@@ -550,7 +550,7 @@ void MyPolygon::mousePressEvent(QGraphicsSceneMouseEvent *event)
     QPointF point = event->pos();
     isPointOnLine(point);
 
-    return QAbstractGraphicsShapeItem::mousePressEvent(event);
+    return QGraphicsItem::mousePressEvent(event);
 }
 
 void MyPolygon::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
@@ -566,7 +566,7 @@ void MyPolygon::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         m_newPoint->setPos(m_newPoint->getPoint());
         m_newPoint->scene()->update();
     } else {
-        return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
+        return QGraphicsItem::mouseMoveEvent(event);
     }
 
 
@@ -575,7 +575,7 @@ void MyPolygon::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void MyPolygon::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     m_isAddedPoint = false;
-    return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
+    return QGraphicsItem::mouseReleaseEvent(event);
 }
 
 MyCurve::MyCurve(MyGraphicsItem::ItemType type)

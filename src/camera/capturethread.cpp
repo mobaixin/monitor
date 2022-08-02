@@ -1,4 +1,4 @@
-#include "capturethread.h"
+﻿#include "capturethread.h"
 #include "src/view/mainwindow.h"
 #include <QDebug>
 
@@ -6,7 +6,7 @@
 #include "CameraApi.h"
 
 //SDK使用
-extern int                  g_hCamera;          //设备句柄
+extern int                  g_hCamera[4];          //设备句柄
 extern unsigned char        * g_pRawBuffer;     //raw数据
 extern unsigned char        * g_pRgbBuffer;     //处理后数据缓存区
 extern tSdkFrameHead        g_tFrameHead;       //图像帧头信息
@@ -18,9 +18,10 @@ extern BYTE                 *g_readBuf;         //显示数据buffer
 extern int                  g_read_fps;         //统计帧率
 extern int                  g_SaveImage_type;   //保存图像格式
 
-CaptureThread::CaptureThread(QObject *parent) :
+CaptureThread::CaptureThread(QObject *parent, int cameraId) :
     QThread(parent)
 {
+    m_cameraId = cameraId;
     pause_status = true;
     quit = false;
 
@@ -37,10 +38,10 @@ void CaptureThread::run()
         if(!pause_status)
         {
 			if(quit) break;
-            if (CameraGetImageBuffer(g_hCamera,&g_tFrameHead,&g_pRawBuffer,2000) == CAMERA_STATUS_SUCCESS)
+            if (CameraGetImageBuffer(g_hCamera[m_cameraId - 1],&g_tFrameHead,&g_pRawBuffer,2000) == CAMERA_STATUS_SUCCESS)
             {
-                CameraImageProcess(g_hCamera,g_pRawBuffer,g_pRgbBuffer,&g_tFrameHead);
-				CameraReleaseImageBuffer(g_hCamera,g_pRawBuffer);
+                CameraImageProcess(g_hCamera[m_cameraId - 1],g_pRawBuffer,g_pRgbBuffer,&g_tFrameHead);
+                CameraReleaseImageBuffer(g_hCamera[m_cameraId - 1],g_pRawBuffer);
 
                 if(g_tFrameHead.uiMediaType==CAMERA_MEDIA_TYPE_MONO8){
 
