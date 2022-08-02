@@ -48,7 +48,7 @@ public:
     void setRunState(int state);
 
     // 设置显示状态
-    void showMonitorSet(bool isDisplay);
+    void showMonitorSet(bool isDisplay, int cameraId);
 
     // 获取检测对象
     void setDetectObject();

@@ -116,11 +116,18 @@ void ImgArea::setWidgetUi()
 
     m_pMainImg = new QImage;
 
-    m_pImgAreaLayout = new QHBoxLayout(this);
+    m_pImgAreaLayout = new QGridLayout(this);
 
     m_pView  = new QGraphicsView();
     m_pScene = new MyGraphicsScene();
     m_pImageItem = new QGraphicsPixmapItem();
+
+    for (int i = 0; i < 4; i++) {
+        m_viewList.append(new QGraphicsView());
+        m_sceneList.append(new MyGraphicsScene());
+        m_imageItemList.append(new QGraphicsPixmapItem());
+        m_curImageList.append(QImage());
+    }
 
     m_resTimer = new QTimer(this);
 //    m_thread   = new CaptureThread(this, 1);
@@ -147,10 +154,28 @@ void ImgArea::setWidgetUi()
     m_pView->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 //    m_pView->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
+    for (int i = 0; i < m_viewList.size(); i++) {
+        m_viewList[i]->setScene(m_sceneList[i]);
+        m_viewList[i]->setRenderHint(QPainter::Antialiasing);
+        m_viewList[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_viewList[i]->centerOn(0, 0);
+        m_viewList[i]->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+        m_sceneList[i]->addItem(m_pImageItem);
+        m_sceneList[i]->setBackgroundBrush(Qt::black);
+    }
+
+    for (int i = 1; i < m_viewList.size(); i++) {
+//        m_viewList[i]->hide();
+    }
+
     m_pScene->addItem(m_pImageItem);
     m_pScene->setBackgroundBrush(Qt::black);
 
-    m_pImgAreaLayout->addWidget(m_pView);
+    m_pImgAreaLayout->addWidget(m_pView, 0, 0, 1, 1);
+    m_pImgAreaLayout->addWidget(m_viewList[1], 0, 1, 1, 1);
+    m_pImgAreaLayout->addWidget(m_viewList[2], 1, 0, 1, 1);
+    m_pImgAreaLayout->addWidget(m_viewList[3], 1, 1, 1, 1);
     m_pImgAreaLayout->setContentsMargins(0, 0, 0, 0);
     m_pImgAreaLayout->setSpacing(0);
 
@@ -477,9 +502,17 @@ void ImgArea::setRunState(int state, int cameraId)
     }
 }
 
-void ImgArea::setMonitorState(bool isMonitor)
+void ImgArea::setMonitorState(bool isMonitor, int cameraId)
 {
     if (isMonitor) {
+        for (int i = 0; i < m_viewList.size(); i++) {
+            if (i != cameraId - 1) {
+                m_viewList[i]->hide();
+            } else {
+                m_viewList[i]->setSceneRect(0, 0, this->width(), this->height());
+            }
+        }
+
         m_pSampleLab->show();
     } else {
         m_pSampleLab->hide();
@@ -504,10 +537,11 @@ void ImgArea::setDetectState(bool isDetect)
 void ImgArea::setSceneSize()
 {
     qDebug() << "setSceneSize " << this->width() << " " << this->height();
-    m_sceneSize = QSize(this->width(), this->height());
-    m_pView->setSceneRect(0, 0, this->width() - 5, this->height() - 5);
+    m_sceneSize = QSize(this->width() / 2, this->height() / 2);
+    m_pScene->setSceneRect(0, 0, (this->width() - 5) / 2, (this->height() - 5) / 2);
+    m_pView->setSceneRect(0, 0, (this->width() - 5) / 2, (this->height() - 5) / 2);
 
-//    emit setSceneRectSizeSig(m_sceneSize);
+    emit setSceneRectSizeSig(this->size());
 
     // 加载图形模板
     ShapeItemData itemData;
@@ -1740,10 +1774,10 @@ Mat ImgArea::getShapeMask(ShapeItemData itemData, QImage img, QList<ShapeItemDat
     return mask;
 }
 
-void ImgArea::setShowState(bool isShow)
+void ImgArea::setShowState(bool isShow, int cameraId)
 {
     // 相机断线时不显示图片item
-    if (isShow && getCameraStatus(1) == 0) {
+    if (isShow && getCameraStatus(cameraId) == 0) {
         m_isShowImage = false;
         m_pImageItem->hide();
 
@@ -2106,7 +2140,7 @@ void ImgArea::imageProcess(QImage img)
 
     if (m_isShowImage) {
         QPixmap imgPix = (QPixmap::fromImage(img));
-        imgPix = imgPix.scaled(this->size());
+        imgPix = imgPix.scaled(m_sceneSize);
         m_pImageItem->setPixmap(imgPix);
     }
 

@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
-#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QLineEdit>
 #include <QProgressBar>
 #include <QImage>
@@ -115,7 +115,7 @@ public:
     void setRunState(int state, int cameraId = -1);
 
     // 设置监视状态
-    void setMonitorState(bool isMonitor);
+    void setMonitorState(bool isMonitor, int cameraId = 1);
 
     // 设置检测状态
     void setDetectState(bool isDetect);
@@ -195,7 +195,7 @@ public:
     Mat getShapeMask(ShapeItemData itemData, QImage img, QList<ShapeItemData> maskItemData);
 
     // 设置显示状态
-    void setShowState(bool isShow);
+    void setShowState(bool isShow, int cameraId = 1);
 
     // 获取显示状态
     bool getShowState();
@@ -280,13 +280,19 @@ private:
 
     QImage *m_pMainImg;
 
-    QHBoxLayout *m_pImgAreaLayout;
+    QGridLayout *m_pImgAreaLayout;
 
     QGraphicsView *m_pView;
     MyGraphicsScene *m_pScene;
     QGraphicsPixmapItem *m_pImageItem;
     QImage m_pCurImage;
 
+    QList<QGraphicsView *> m_viewList;
+    QList<MyGraphicsScene *> m_sceneList;
+    QList<QGraphicsPixmapItem *> m_imageItemList;
+    QList<QImage> m_curImageList;
+
+    // 单个scene的尺寸
     QSize m_sceneSize;
 
     // 当前检测相机id

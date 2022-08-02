@@ -242,7 +242,7 @@ void TitleBar::stopBtnClick()
 void TitleBar::monitorSetBtnClick()
 {
     if (m_pIsSetMonitor) {
-        MainWindow::getInstance()->showMonitorSet(false);
+        MainWindow::getInstance()->showMonitorSet(false, m_cameraId);
         m_pIsSetMonitor = false;
 
         m_pMonitorSetBtn->setText("监视设定");
@@ -263,7 +263,7 @@ void TitleBar::monitorSetBtnClick()
         OptRecord::addOptRecord("点击关闭设定");
 
     } else {
-        MainWindow::getInstance()->showMonitorSet(true);
+        MainWindow::getInstance()->showMonitorSet(true, m_cameraId);
         m_pIsSetMonitor = true;
 
         m_pMonitorSetBtn->setText("关闭设定");

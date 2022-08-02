@@ -102,7 +102,7 @@ void MainWindow::setWidgetStyle()
     m_pImgArea->setFixedSize(this->width(), this->height() - m_pTitleBar->height());
     m_pImgArea->setSceneSize();
 
-    showMonitorSet(false);
+    showMonitorSet(false, 1);
 }
 
 void MainWindow::setData()
@@ -154,17 +154,18 @@ void MainWindow::setRunState(int state)
     m_pImgArea->setRunState(state);
 }
 
-void MainWindow::showMonitorSet(bool isDisplay)
+void MainWindow::showMonitorSet(bool isDisplay, int cameraId)
 {
     if (isDisplay) {
         m_pBottomBar->show();
         m_pImgArea->setShowState(false);
+        m_pImgArea->setMonitorState(true, cameraId);
         setDetectObject();
     } else {
         m_pBottomBar->hide();
 //        ImgArea::getInstance()->clearShapes();
         m_pImgArea->setShowState(true);
-        m_pImgArea->setMonitorState(false);
+        m_pImgArea->setMonitorState(false, cameraId);
     }
     m_pSideBar->setDisplayState(isDisplay);
 }
