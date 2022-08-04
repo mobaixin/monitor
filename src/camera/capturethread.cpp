@@ -50,14 +50,14 @@ void CaptureThread::run()
 					if(quit) break;
                     QImage img(g_readBuf, g_W_H_INFO.sensor_width, g_W_H_INFO.sensor_height,QImage::Format_Indexed8);
                     img.setColorTable(grayColourTable);
-                    emit captured(img);
+                    emit captured(img, m_cameraId);
 
                 }else{
                     memcpy(g_readBuf,g_pRgbBuffer,g_W_H_INFO.buffer_size*3);
 					if(quit) break;
 					QImage img = QImage((const uchar*)g_readBuf, g_W_H_INFO.sensor_width,  g_W_H_INFO.sensor_height, QImage::Format_RGB888);
                     //QImage img(g_readBuf, g_W_H_INFO.sensor_width, g_W_H_INFO.sensor_height,QImage::Format_RGB888);
-                    emit captured(img);
+                    emit captured(img, m_cameraId);
                 }
 
                 g_read_fps++;//统计抓取帧率

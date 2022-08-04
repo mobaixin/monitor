@@ -56,6 +56,21 @@ typedef struct MyMOG2Data {
     int pixel;
 } MyMOG2Data;
 
+// 相机显示数据
+typedef struct CameraViewData {
+    int cameraId;
+    int camState;
+    QGraphicsView *camView;
+    MyGraphicsScene *camScene;
+    QGraphicsPixmapItem *imageItem;
+    QList<QGraphicsItem *> allShapeItemList;
+    CaptureThread *camThread;
+    QImage curImage;
+    QImage curDetectImage;
+    int curDetectSceneId;
+    double scaleValue;
+} CameraViewData;
+
 // 相机检测数据
 typedef struct CameraDetectData {
     int cameraId;
@@ -103,13 +118,13 @@ public:
     MyGraphicsScene *getScene();
 
     // 设置背景图片
-    void loadImage(QString filePath);
+    void loadImage(QString filePath, int cameraId = -1);
 
     // 擦除单个图形item
-    void eraseShape();
+    void eraseShape(int cameraId = -1);
 
     // 清除所有图形item
-    void clearShapes();
+    void clearShapes(int cameraId = -1);
 
     // 设置运行状态
     void setRunState(int state, int cameraId = -1);
@@ -130,12 +145,12 @@ public:
     void setSampleLab(bool isDetectMold, int curIdx = 1);
 
     // 获得图像图形模板
-    QImage getImageItem();
-    QList<ShapeItemData> getShapeItems();
+    QImage getImageItem(int cameraId = -1);
+    QList<ShapeItemData> getShapeItems(int cameraId = -1);
 
     // 加载图像图形模板
-    void loadImageItem(ImageMoldData imgData);
-    void loadShapeItem(ShapeItemData itemData);
+    void loadImageItem(ImageMoldData imgData, int cameraId = 1);
+    void loadShapeItem(ShapeItemData itemData, int cameraId = 1);
 
     // 保存为图片
     QImage saveAsImage(QString imgPath);
@@ -180,7 +195,7 @@ public:
     void getDetectResult(int result, QVector<QVector<QPointF>> resPointList, QList<int> resAreaSizeList);
 
     // 获取当前检测图片
-    QImage getCurDetectImage();
+    QImage getCurDetectImage(int cameraId);
 
     // 获取当前检测相机id
     int getCurDetectCameraId();
@@ -189,25 +204,25 @@ public:
     int getCurDetectSceneId();
 
     // 获取item数
-    int getShapeItemNum();
+    int getShapeItemNum(int cameraId);
 
     // 获取opencv mask
     Mat getShapeMask(ShapeItemData itemData, QImage img, QList<ShapeItemData> maskItemData);
 
     // 设置显示状态
-    void setShowState(bool isShow, int cameraId = 1);
+    void setShowState(bool isShow, int cameraId = -1);
 
     // 获取显示状态
     bool getShowState();
 
     // 获取当前图片
-    QImage getCurImage();
+    QImage getCurImage(int cameraId);
 
     // 获取相机数
     int getCameraCounts();
 
     // 获取相机状态
-    int getCameraStatus(int cameraId);
+    int getCameraState(int cameraId);
 
     // 描绘检测结果
     void drawDetectResult(QVector<QVector<QPointF>> resPointList);
@@ -225,7 +240,7 @@ public:
     void setSceneDelayTime(int sceneId, double delayTime);
 
     // 添加图形item到list
-    void addShapeItemToList(QGraphicsItem *newItem);
+    void addShapeItemToList(QGraphicsItem *newItem, int cameraId = -1);
 
     // 获取选中的图形item
     QList<QGraphicsItem *> getSelectItemList();
@@ -235,6 +250,12 @@ public:
 
     // 复制当前选中的图形
     void copySelectedShapeItem();
+
+    // 显示全部相机画面
+    void showAllCameraView();
+
+    // 显示单个相机画面
+    void showSingleCameraView(int cameraId);
 
 public:
     int status;
@@ -266,11 +287,12 @@ private:
     void setSigDelayTimeLab();
 
 private slots:
-    void imageProcess(QImage img);
+    void imageProcess(QImage img, int cameraId);
 
 private:
     // 相机状态
     QLabel *m_pTipLab;
+    QList<QLabel *> m_cameraStateLabList;
     // 信号倒计时
     QLabel *m_pSigTimeLab;
     // 图片模板序号
@@ -373,6 +395,9 @@ private:
 
     // 存放所有的图形item
     QList<QGraphicsItem *> m_allShapeItemList;
+
+    // 所有相机显示相关的信息
+    QList<CameraViewData> m_cameraViewDataList;
 };
 
 
@@ -397,6 +422,10 @@ public:
 
     // 图片检测
     void detectImage(QImage imgFg, int cameraId, int sceneId, int &detectRes);
+
+private:
+    // Mat列表内存回收
+    void releaseMatList(QList<Mat> &matList);
 
 signals:
     void resultReadySig(int result, QVector<QVector<QPointF>> resPointList, QList<int> resAreaSizeList);

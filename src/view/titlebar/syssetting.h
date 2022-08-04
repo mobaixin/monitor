@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QRadioButton>
+#include <QPushButton>
+#include <QButtonGroup>
 
 #include "src/view/common/myslider.h"
 #include "src/view/titlebar/camerapara.h"
@@ -39,6 +41,8 @@ private:
     void updateProdTimes(int value);
     void updateProdDetect(bool checked);
 
+    void updateCameraCount();
+
     void updateDisPlay(bool isShowProd);
 
 private:
@@ -47,6 +51,7 @@ private:
     QLabel *m_prodDelayLab;
     QLabel *m_prodTimesLab;
     QLabel *m_prodDetectLab;
+    QLabel *m_cameraCountLab;
 
     MySlider *m_moldDelaySlider;
     MySlider *m_moldTimesSlider;
@@ -55,12 +60,17 @@ private:
 
     QRadioButton *m_prodDetectBtn;
 
+    // 相机数
+    QList<QPushButton *> m_cameraBtnList;
+    QButtonGroup *m_cameraBtnGroup;
+
     QPushButton *m_changeTimeBtn;
     QPushButton *m_ioSettingsBtn;
     QPushButton *m_cameraParaBtn;
     QPushButton *m_closeSetBtn;
 
     QGridLayout *m_sysSetLayout;
+    QHBoxLayout *m_camBtnLayout;
     QHBoxLayout *m_btnLayout;
     QVBoxLayout *m_mainLayout;
 

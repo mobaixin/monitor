@@ -82,6 +82,9 @@ public:
     // 设置检测场景
     void setDetectScene();
 
+    // 更新显示数据
+    void updateShowData();
+
 signals:
     void updateShapeImgMoldSig(int cameraId, int sceneId);
 

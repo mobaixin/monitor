@@ -45,6 +45,8 @@ public:
 //    int detectCurImage(int sceneId = -1, bool isShowNGRes = true);
 
 private:
+    void allCameraBtnClick();
+    void cameraBtnListClick();
     void startBtnClick();
     void stopBtnClick();
     void monitorSetBtnClick();
@@ -60,6 +62,12 @@ private:
     // 左上方标识
     QLabel *m_ptitleLab;
 
+    // 相机按钮
+    int m_cameraCount;
+    QPushButton *m_pAllCameraBtn;
+    QList<QPushButton *> m_pCameraBtnList;
+    QButtonGroup *m_pCameraBtnGroup;
+
     // 标题栏按钮
     QPushButton *m_pStartBtn;
     QPushButton *m_pStopBtn;
@@ -73,6 +81,7 @@ private:
     QPushButton *m_pCloseBtn;
 
     // 界面布局
+    QHBoxLayout *m_pCameraBtnLayout;
     QHBoxLayout *m_pBtnLayout;
 
     QButtonGroup *m_pBtnGroup;

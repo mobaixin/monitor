@@ -45,6 +45,10 @@ MainWindow::~MainWindow()
 // 初始化组件
 void MainWindow::setWidgetUi()
 {
+    this->setWindowFlags(Qt::Window);
+    this->setFixedSize(1350, 750);
+//    this->showFullScreen();
+
     MyDataBase::getInstance();
     MySettings::getInstance();
     MySerialPort::getInstance();
@@ -81,8 +85,8 @@ void MainWindow::setWidgetUi()
 // 设置组件样式
 void MainWindow::setWidgetStyle()
 {
-    this->setWindowFlags(Qt::Window);
-    this->setFixedSize(1350, 750);
+//    this->setWindowFlags(Qt::Window);
+//    this->setFixedSize(1350, 750);
 //    this->showFullScreen();
 //    this->setWindowFlags(Qt::FramelessWindowHint);
     this->setWindowTitle("模具监视器");
@@ -102,7 +106,10 @@ void MainWindow::setWidgetStyle()
     m_pImgArea->setFixedSize(this->width(), this->height() - m_pTitleBar->height());
     m_pImgArea->setSceneSize();
 
-    showMonitorSet(false, 1);
+//    showMonitorSet(false, 1);
+    m_pBottomBar->hide();
+    m_pSideBar->setDisplayState(false);
+    m_pImgArea->setShowState(true);
 }
 
 void MainWindow::setData()

@@ -208,10 +208,10 @@ void SideBar::setData()
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
 
     imgData.sceneId  = 1;
-    m_deteMoldNum     = MyDataBase::getInstance()->getImageMoldNum(imgData);
+    m_deteMoldNum    = MyDataBase::getInstance()->getImageMoldNum(imgData);
 
     imgData.sceneId  = 2;
-    m_prodMoldNum     = MyDataBase::getInstance()->getImageMoldNum(imgData);
+    m_prodMoldNum    = MyDataBase::getInstance()->getImageMoldNum(imgData);
 
     m_curDeteMoldIdx = m_deteMoldNum > 0 ? 1 : 0;
     m_curProdMoldIdx = m_prodMoldNum > 0 ? 1 : 0;
@@ -420,6 +420,25 @@ void SideBar::setDetectScene()
     }
 }
 
+void SideBar::updateShowData()
+{
+    int cameraId = TitleBar::getInstance()->getCurCameraId();
+
+    ImageMoldData imgData;
+    imgData.cameraId = cameraId;
+
+    imgData.sceneId = 1;
+    m_deteMoldNum   = MyDataBase::getInstance()->getImageMoldNum(imgData);
+
+    imgData.sceneId = 2;
+    m_prodMoldNum   = MyDataBase::getInstance()->getImageMoldNum(imgData);
+
+    m_curDeteMoldIdx = m_deteMoldNum > 0 ? 1 : 0;
+    m_curProdMoldIdx = m_prodMoldNum > 0 ? 1 : 0;
+
+    updateOrderLab();
+}
+
 void SideBar::positionBtnClick()
 {
     if (this->x() > 500) {
@@ -513,7 +532,7 @@ void SideBar::saveMoldBtnClick()
 {
     OptRecord::addOptRecord("点击保存模板");
 
-    if (ImgArea::getInstance()->getCameraStatus(TitleBar::getInstance()->getCurCameraId()) == 0) {
+    if (ImgArea::getInstance()->getCameraState(TitleBar::getInstance()->getCurCameraId()) == 0) {
         return ;
     }
 
@@ -534,7 +553,7 @@ void SideBar::saveMoldBtnClick()
 
     MyDataBase::getInstance()->addImgMoldData(imgData);
 
-    QImage curImage = ImgArea::getInstance()->getCurImage();
+    QImage curImage = ImgArea::getInstance()->getCurImage(imgData.cameraId);
     curImage.save(imgData.imgPath);
 
     ImgArea::getInstance()->loadImage(imgData.imgPath);
@@ -573,7 +592,7 @@ void SideBar::addMoldBtnClick()
 {
     OptRecord::addOptRecord("点击添加模板");
 
-    if (ImgArea::getInstance()->getCameraStatus(TitleBar::getInstance()->getCurCameraId()) == 0) {
+    if (ImgArea::getInstance()->getCameraState(TitleBar::getInstance()->getCurCameraId()) == 0) {
         return ;
     }
 

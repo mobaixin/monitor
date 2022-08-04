@@ -20,7 +20,7 @@ public:
 
 
 signals:
-    void captured(QImage img);
+    void captured(QImage img, int cameraId);
 private:
     bool pause_status;
 
