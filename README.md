@@ -5,12 +5,12 @@
 
 #### 软件架构
 软件架构说明
-./data 为数据目录
-./src 为源码目录
-./src/camera 为相机初始化的库函数目录
-./src/database 为数据库交互模块目录
-./src/serialport 为串口及GPIO交互模块目录
-./src/view 为界面交互模块目录
+##### ./data 为数据目录
+##### ./src 为源码目录
+##### ./src/camera 为相机初始化的库函数目录
+##### ./src/database 为数据库交互模块目录
+##### ./src/serialport 为串口及GPIO交互模块目录
+##### ./src/view 为界面交互模块目录
 
 #### 安装教程
 

@@ -129,11 +129,12 @@ void ImgArea::setWidgetUi()
         cameraViewData.camView   = new QGraphicsView(this);
         cameraViewData.camScene  = new MyGraphicsScene(this);
         cameraViewData.imageItem = new QGraphicsPixmapItem();
-//        cameraViewData.camThread = new CaptureThread(this, i + 1);
+        cameraViewData.camThread = new CaptureThread(this, i + 1);
         cameraViewData.curImage  = QImage();
         cameraViewData.curDetectImage   = QImage();
         cameraViewData.curDetectSceneId = 1;
         cameraViewData.scaleValue       = 1;
+        cameraViewData.isShowCamImage   = true;
 
         m_cameraViewDataList.append(cameraViewData);
     }
@@ -216,6 +217,18 @@ void ImgArea::setWidgetUi()
 
 //    connect(m_thread, SIGNAL(captured(QImage)),
 //            this, SLOT(imageProcess(QImage)), Qt::BlockingQueuedConnection);
+
+    connect(m_cameraViewDataList[0].camThread, &CaptureThread::captured,
+            this, &ImgArea::imageProcess1, Qt::BlockingQueuedConnection);
+
+    connect(m_cameraViewDataList[1].camThread, &CaptureThread::captured,
+            this, &ImgArea::imageProcess2, Qt::BlockingQueuedConnection);
+
+    connect(m_cameraViewDataList[2].camThread, &CaptureThread::captured,
+            this, &ImgArea::imageProcess3, Qt::BlockingQueuedConnection);
+
+    connect(m_cameraViewDataList[3].camThread, &CaptureThread::captured,
+            this, &ImgArea::imageProcess4, Qt::BlockingQueuedConnection);
 
     connect(this, &ImgArea::setCameraCountsSig,
             m_detectImageWork, &DetectImageWork::setCameraCounts, Qt::BlockingQueuedConnection);
@@ -336,9 +349,9 @@ void ImgArea::setData()
                 initParameter(g_hCamera[id],&g_tCapability[id]);
     //            CameraSetOnceWB(g_hCamera);
                 qDebug() << "after initParameter: " << id + 1;
-                m_cameraViewDataList[id].camThread = new CaptureThread(this, id + 1);
-                connect(m_cameraViewDataList[id].camThread, SIGNAL(captured(QImage, int)),
-                        this, SLOT(imageProcess(QImage, int)), Qt::BlockingQueuedConnection);
+
+//                connect(m_cameraViewDataList[id].camThread, SIGNAL(captured(QImage, int)),
+//                        this, SLOT(imageProcess(QImage, int)), Qt::BlockingQueuedConnection);
 
                 m_cameraViewDataList[id].camThread->start();
                 m_cameraViewDataList[id].camThread->stream();
@@ -627,7 +640,7 @@ void ImgArea::setSceneSize()
         itemData.sceneId  = SideBar::getInstance()->getCurSceneID();
         itemData.moldId   = 1;
 
-        loadShapeItem(itemData);
+        loadShapeItem(itemData, cameraId);
 
         updateShapeImgMold(cameraId, DetectScene::DetectMold);
         updateShapeImgMold(cameraId, DetectScene::DetectProd);
@@ -872,6 +885,10 @@ void ImgArea::loadImageItem(ImageMoldData imgData, int cameraId)
 
 void ImgArea::loadShapeItem(ShapeItemData itemData, int cameraId)
 {
+    if (cameraId == -1) {
+        cameraId = TitleBar::getInstance()->getCurCameraId();
+    }
+
     clearShapes(itemData.cameraId);
 
     QList<ShapeItemData> itemDataList = MyDataBase::getInstance()->queShapeItemData(itemData);
@@ -895,7 +912,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData, int cameraId)
             myRect->setAccuracy(itemDataList[i].accuracy);
             myRect->setPixel(itemDataList[i].pixel);
 //            m_pScene->addItem(myRect);
-            addShapeItemToList(myRect);
+            addShapeItemToList(myRect, itemData.cameraId);
         }
             break;
         case MyGraphicsItem::ItemType::Polygon:
@@ -927,7 +944,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData, int cameraId)
                 myPolygon->setAccuracy(itemDataList[i].accuracy);
                 myPolygon->setPixel(itemDataList[i].pixel);
 //                m_pScene->addItem(myPolygon);
-                addShapeItemToList(myPolygon);
+                addShapeItemToList(myPolygon, itemData.cameraId);
                 int cameraId = TitleBar::getInstance()->getCurCameraId();
                 connect(m_cameraViewDataList[cameraId - 1].camScene, &MyGraphicsScene::updatePolyPoint, myPolygon, &MyPolygon::pushPoint);
             }
@@ -952,7 +969,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData, int cameraId)
                 myCurve->setAccuracy(itemDataList[i].accuracy);
                 myCurve->setPixel(itemDataList[i].pixel);
 //                m_pScene->addItem(myCurve);
-                addShapeItemToList(myCurve);
+                addShapeItemToList(myCurve, itemData.cameraId);
             }
         }
             break;
@@ -967,7 +984,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData, int cameraId)
             myCircle->setAccuracy(itemDataList[i].accuracy);
             myCircle->setPixel(itemDataList[i].pixel);
 //            m_pScene->addItem(myCircle);
-            addShapeItemToList(myCircle);
+            addShapeItemToList(myCircle, itemData.cameraId);
         }
             break;
         case MyGraphicsItem::ItemType::Concentric_Circle: {
@@ -981,7 +998,7 @@ void ImgArea::loadShapeItem(ShapeItemData itemData, int cameraId)
             myConCircle->setAccuracy(itemDataList[i].accuracy);
             myConCircle->setPixel(itemDataList[i].pixel);
 //            m_pScene->addItem(myConCircle);
-            addShapeItemToList(myConCircle);
+            addShapeItemToList(myConCircle, itemData.cameraId);
         }
             break;
         default:
@@ -1093,6 +1110,7 @@ void ImgArea::startCamera(int cameraId)
     if (m_cameraViewDataList[cameraId - 1].camThread->quit) {
         return ;
     }
+    m_cameraViewDataList[cameraId - 1].isShowCamImage = true;
     m_cameraViewDataList[cameraId - 1].camThread->stream();
 }
 
@@ -1129,6 +1147,7 @@ int ImgArea::initSDK()
         return -1;
     }
 
+//    m_cameraCounts = 4;
     for (int id = 0; id < m_cameraCounts; id++){
         // 获取相机IP信息
         char* ipInfo[6];
@@ -1138,31 +1157,39 @@ int ImgArea::initSDK()
 
         int res = CameraGigeGetIp(&tCameraEnumList[id], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
 
+//        for (int i = 0; i < 6; i++) {
+//            qDebug() << QString(ipInfo[i]);
+//        }
+        QString cameraGigeIp = QString(ipInfo[0]);
+        QString cameraGigeEtIp = QString(ipInfo[3]);
+
         // 设置相机IP
-//        QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1)).arg(QString(ipInfo[3]).right(1));
-        QString cameraIp = m_cameraIp.arg(1).arg(1);
+//        QString cameraIp = m_cameraIp.arg(cameraGigeEtIp.right(1)).arg(cameraGigeEtIp.right(1));
+        QString cameraIp = m_cameraIp.arg(0).arg(id+5);
         QString cameraMask  = m_cameraMask;
-        QString cameraGtway = m_gateway.arg(QString(ipInfo[3]).right(1));
-//        QString cameraGtway = m_gateway.arg(1);
-        qDebug() << "cameraIP: " << cameraIp;
+//        QString cameraGtway = m_gateway.arg((cameraGigeEtIp).right(1));
+        QString cameraGtway = m_gateway.arg(0);
+        qDebug() << "cameraGigeIp: " << cameraGigeIp;
+        qDebug() << "set cameraIP: " << cameraIp;
 
         // 数据库交互
         CameraIPData cameraIPData;
         cameraIPData.cameraId = id + 1;
         cameraIPData.serialId = QString(tCameraEnumList[0].acSn);
         cameraIPData.nickName = QString(tCameraEnumList[0].acFriendlyName);
-        cameraIPData.portIp   = QString(ipInfo[3]);
+        cameraIPData.portIp   = cameraGigeEtIp;
         cameraIPData.state    = "可用";
         cameraIPData.cameraIp = cameraIp;
         cameraIPData.cameraMask    = cameraMask;
         cameraIPData.cameraGateway = cameraGtway;
 
         // 判断本机IP和相机IP
-        if (QString(ipInfo[0]) != cameraIp) {
+        if (cameraGigeIp != cameraIp) {
     //        int res = CameraGigeSetIp(&tCameraEnumList[id], (cameraIp.toLatin1()).data(), (QString(ipInfo[4]).toLatin1()).data(),
     //                                 (QString(ipInfo[5]).toLatin1()).data(), true);
 //            int res = CameraGigeSetIp(&tCameraEnumList[id], (cameraIp.toLatin1()).data(), (cameraMask.toLatin1()).data(),
 //                                     (cameraGtway.toLatin1()).data(), true);
+
             if (res == CAMERA_STATUS_SUCCESS) {
                 qDebug() << "相机IP设置成功";
                 cameraIPData.state = "可用";
@@ -1171,12 +1198,12 @@ int ImgArea::initSDK()
                 cameraIPData.state = "不可用";
             }
 
-//            // 数据库交互
-//            if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
-//                MyDataBase::getInstance()->addCameraIPData(cameraIPData);
-//            } else {
-//                MyDataBase::getInstance()->altCameraIPData(cameraIPData);
-//            }
+            // 数据库交互
+            if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
+                MyDataBase::getInstance()->addCameraIPData(cameraIPData);
+            } else {
+                MyDataBase::getInstance()->altCameraIPData(cameraIPData);
+            }
 
             // 根据情况返回不同的值
 //            if (res == CAMERA_STATUS_SUCCESS) {
@@ -1187,23 +1214,17 @@ int ImgArea::initSDK()
 
         }
 
-
-
-        for (int i = 0; i < 6; i++) {
-            qDebug() << QString(ipInfo[i]);
-        }
-
         // 获取相机序列号信息
         qDebug() << tCameraEnumList[0].acProductSeries;
         qDebug() << tCameraEnumList[0].acProductName;
         qDebug() << tCameraEnumList[0].acFriendlyName;
         qDebug() << tCameraEnumList[0].acLinkName;
         qDebug() << tCameraEnumList[0].acSn;
-        qDebug() << "1";
+//        qDebug() << "1";
 
         //相机初始化。初始化成功后，才能调用任何其他相机相关的操作接口
         iStatus = CameraInit(&tCameraEnumList[id],-1,-1,&g_hCamera[id]);
-        qDebug() << "2";
+//        qDebug() << "2";
 
         //初始化失败
         if(iStatus!=CAMERA_STATUS_SUCCESS){
@@ -1220,21 +1241,21 @@ int ImgArea::initSDK()
             continue ;
         }
 
-        qDebug() << "2";
+//        qDebug() << "2";
 
         //获得相机的特性描述结构体。该结构体中包含了相机可设置的各种参数的范围信息。决定了相关函数的参数
         CameraGetCapability(g_hCamera[id],&g_tCapability[id]);
-        qDebug() << "3";
+//        qDebug() << "3";
 
         g_pRgbBuffer = (unsigned char*)malloc(g_tCapability[id].sResolutionRange.iHeightMax*g_tCapability[id].sResolutionRange.iWidthMax*3);
         g_readBuf = (unsigned char*)malloc(g_tCapability[id].sResolutionRange.iHeightMax*g_tCapability[id].sResolutionRange.iWidthMax*3);
-        qDebug() << "4";
+//        qDebug() << "4";
 
         /*让SDK进入工作模式，开始接收来自相机发送的图像
         数据。如果当前相机是触发模式，则需要接收到
         触发帧以后才会更新图像。    */
         CameraPlay(g_hCamera[id]);
-        qDebug() << "5";
+//        qDebug() << "5";
 
         /*
             设置图像处理的输出格式，彩色黑白都支持RGB24位
@@ -1244,7 +1265,7 @@ int ImgArea::initSDK()
         }else{
             CameraSetIspOutFormat(g_hCamera[id],CAMERA_MEDIA_TYPE_RGB8);
         }
-        qDebug() << "6";
+//        qDebug() << "6";
 
         m_cameraViewDataList[id].camState = CameraState::Running;
     }
@@ -1339,7 +1360,7 @@ void ImgArea::updateShapeImgMold(int cameraId, int sceneId)
         return ;
     }
 
-    qDebug() << "1";
+//    qDebug() << "1";
 
     // 清理原数据
 //    if (sceneId == 1) {
@@ -1361,7 +1382,7 @@ void ImgArea::updateShapeImgMold(int cameraId, int sceneId)
     itemData.moldId   = 1;
 
     QList<ShapeItemData> itemDataList = MyDataBase::getInstance()->queShapeItemData(itemData);
-    qDebug() << "2";
+//    qDebug() << "2";
 
     // 获取图片模板
     ImageMoldData imgData;
@@ -1369,13 +1390,13 @@ void ImgArea::updateShapeImgMold(int cameraId, int sceneId)
     imgData.sceneId  = sceneId;
 
     QList<ImageMoldData> imgDataList = MyDataBase::getInstance()->queAllImgMoldData(imgData);
-    qDebug() << "3";
+//    qDebug() << "3";
 
-    if (imgDataList.size() == 0) {
-        return ;
-    }
+//    if (imgDataList.size() == 0) {
+//        return ;
+//    }
 
-    qDebug() << "4";
+//    qDebug() << "4";
 
 //    NGRecord::addNgTextRecord(QString("相机%1 场景%2 收到学习信号").arg(cameraId).arg(sceneId));
     emit startUpdateMoldSig(cameraId, sceneId, itemDataList, imgDataList);
@@ -1492,7 +1513,7 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
         m_cameraViewDataList[m_detectCameraId - 1].curDetectImage = getCurImage(m_detectCameraId);
         m_cameraViewDataList[m_detectCameraId - 1].curDetectImage.save(filePath);
 
-        m_isShowImage = false;
+        m_cameraViewDataList[m_detectCameraId - 1].isShowCamImage = false;
         loadImage(filePath);
 
         targetImg = QImage(filePath);
@@ -1557,7 +1578,7 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
     }
 
     if (detectRes == DetectRes::OK) {
-        m_isShowImage = true;
+        m_cameraViewDataList[m_detectCameraId - 1].isShowCamImage = true;
     } else {
         QApplication::beep();
     }
@@ -1900,24 +1921,28 @@ void ImgArea::setShowState(bool isShow, int cameraId)
 
     // 相机断线时不显示图片item
     if (isShow && getCameraState(cameraId) == 0) {
-        m_isShowImage = false;
+        m_cameraViewDataList[cameraId - 1].isShowCamImage = false;
         m_cameraViewDataList[cameraId - 1].imageItem->hide();
 
         return ;
     }
 
-    m_isShowImage = isShow;
+    m_cameraViewDataList[cameraId - 1].isShowCamImage = isShow;
 
-    if (m_isShowImage == false) {
+    if (m_cameraViewDataList[cameraId - 1].isShowCamImage == false) {
         m_cameraViewDataList[cameraId - 1].imageItem->hide();
     } else {
         m_cameraViewDataList[cameraId - 1].imageItem->show();
     }
 }
 
-bool ImgArea::getShowState()
+bool ImgArea::getShowState(int cameraId)
 {
-    return m_isShowImage;
+    if (cameraId == -1) {
+        cameraId = TitleBar::getInstance()->getCurCameraId();
+    }
+
+    return m_cameraViewDataList[cameraId - 1].isShowCamImage;
 }
 
 QImage ImgArea::getCurImage(int cameraId)
@@ -2287,6 +2312,7 @@ void ImgArea::setSigDelayTimeLab()
 
 void ImgArea::imageProcess(QImage img, int cameraId)
 {
+//    qDebug() << "imageProcess: " << cameraId;
     if (m_cameraViewDataList[cameraId - 1].camThread->quit) {
         return ;
     }
@@ -2307,9 +2333,87 @@ void ImgArea::imageProcess(QImage img, int cameraId)
 
 //    m_pScene->setSceneRect(0, 0, img.width(), img.height());
 
-    m_cameraViewDataList[cameraId - 1].curImage = img;
+    m_cameraViewDataList[cameraId - 1].curImage = QImage(img);
 
-    if (m_isShowImage) {
+    if (m_cameraViewDataList[cameraId - 1].isShowCamImage) {
+        QPixmap imgPix = (QPixmap::fromImage(img));
+        imgPix = imgPix.scaled(m_sceneSize);
+        m_cameraViewDataList[cameraId - 1].imageItem->setPixmap(imgPix);
+    }
+
+    g_disply_fps++;
+}
+
+void ImgArea::imageProcess1(QImage img, int cameraId)
+{
+//    qDebug() << "imageProcess1: " << cameraId;
+
+    cameraId = 1;
+    if (m_cameraViewDataList[cameraId - 1].camThread->quit) {
+        return ;
+    }
+
+    m_cameraViewDataList[cameraId - 1].curImage = QImage(img);
+//    getImageItem(cameraId);
+
+    if (m_cameraViewDataList[cameraId - 1].isShowCamImage) {
+        QPixmap imgPix = (QPixmap::fromImage(img));
+        imgPix = imgPix.scaled(m_sceneSize);
+        m_cameraViewDataList[cameraId - 1].imageItem->setPixmap(imgPix);
+    }
+
+    g_disply_fps++;
+}
+
+void ImgArea::imageProcess2(QImage img, int cameraId)
+{
+//    qDebug() << "imageProcess2: " << cameraId;
+    cameraId = 2;
+    if (m_cameraViewDataList[cameraId - 1].camThread->quit) {
+        return ;
+    }
+
+    m_cameraViewDataList[cameraId - 1].curImage = QImage(img);
+
+    if (m_cameraViewDataList[cameraId - 1].isShowCamImage) {
+        QPixmap imgPix = (QPixmap::fromImage(img));
+        imgPix = imgPix.scaled(m_sceneSize);
+        m_cameraViewDataList[cameraId - 1].imageItem->setPixmap(imgPix);
+    }
+
+    g_disply_fps++;
+}
+
+void ImgArea::imageProcess3(QImage img, int cameraId)
+{
+//    qDebug() << "imageProcess3: " << cameraId;
+    cameraId = 3;
+    if (m_cameraViewDataList[cameraId - 1].camThread->quit) {
+        return ;
+    }
+
+    m_cameraViewDataList[cameraId - 1].curImage = QImage(img);
+
+    if (m_cameraViewDataList[cameraId - 1].isShowCamImage) {
+        QPixmap imgPix = (QPixmap::fromImage(img));
+        imgPix = imgPix.scaled(m_sceneSize);
+        m_cameraViewDataList[cameraId - 1].imageItem->setPixmap(imgPix);
+    }
+
+    g_disply_fps++;
+}
+
+void ImgArea::imageProcess4(QImage img, int cameraId)
+{
+//    qDebug() << "imageProcess4: " << cameraId;
+    cameraId = 4;
+    if (m_cameraViewDataList[cameraId - 1].camThread->quit) {
+        return ;
+    }
+
+    m_cameraViewDataList[cameraId - 1].curImage = QImage(img);
+
+    if (m_cameraViewDataList[cameraId - 1].isShowCamImage) {
         QPixmap imgPix = (QPixmap::fromImage(img));
         imgPix = imgPix.scaled(m_sceneSize);
         m_cameraViewDataList[cameraId - 1].imageItem->setPixmap(imgPix);
@@ -2485,16 +2589,16 @@ void DetectImageWork::updateShapeImgMold(int cameraId, int sceneId, QList<ShapeI
 //        qDeleteAll(m_moldShapeMaskList);
 //        qDeleteAll(m_moldMOG2DataList);
 
-//        for (Mat temp : m_cameraDetectDataList[cameraId - 1].moldShapeMaskList) {
-//            temp.release();
-//        }
+        for (Mat temp : m_cameraDetectDataList[cameraId - 1].moldShapeMaskList) {
+            temp.release();
+        }
 //        for (MyMOG2Data temp : m_cameraDetectDataList[cameraId - 1].moldMOG2DataList) {
 //            temp.fgMaskMat.release();
 //            temp.myMOG2.release();
 //        }
-//        for (Mat temp : m_moldShapeMaskList) {
-//            temp.release();
-//        }
+        for (Mat temp : m_moldShapeMaskList) {
+            temp.release();
+        }
 //        for (MyMOG2Data temp : m_moldMOG2DataList) {
 //            temp.fgMaskMat.release();
 //            temp.myMOG2.release();
@@ -2526,7 +2630,7 @@ void DetectImageWork::updateShapeImgMold(int cameraId, int sceneId, QList<ShapeI
 
 //    QList<ImageMoldData> imgDataList = MyDataBase::getInstance()->queAllImgMoldData(imgData);
 
-    if (imgDataList.size() == 0) {
+    if (imgDataList.size() == 0 || itemDataList.size() == 0) {
         return ;
     }
 
@@ -2548,6 +2652,7 @@ void DetectImageWork::updateShapeImgMold(int cameraId, int sceneId, QList<ShapeI
 
     // 获取图形mask
     QImage img = QImage(imgDataList[0].imgPath).scaled(m_sceneRectSize);
+    img = img.convertToFormat(QImage::Format_Grayscale8);
     for (int i = 0; i < itemDataList.size(); i++) {
         qDebug() << "2";
         Mat shapeMask = getShapeMask(itemDataList[i], img, maskItemDataList);
@@ -2569,6 +2674,8 @@ void DetectImageWork::updateShapeImgMold(int cameraId, int sceneId, QList<ShapeI
     // 对每张图片模板进行检测
     for (int i = 0; i < imgDataList.size(); i++) {
         QImage imgBg = QImage(imgDataList[i].imgPath).scaled(m_sceneRectSize);
+        imgBg = imgBg.convertToFormat(QImage::Format_Grayscale8);
+//        imshow("imgBg", qimToMat(imgBg));
 
         // 对每个图形模板进行检测
         for (int j = 0; j < itemDataList.size(); j++) {
@@ -2584,18 +2691,23 @@ void DetectImageWork::updateShapeImgMold(int cameraId, int sceneId, QList<ShapeI
             double acc  = itemDataList[j].accuracy;
             int pix     = itemDataList[j].pixel;
 
-            qDebug() << "1";
-            Ptr<BackgroundSubtractorMOG2> m_pMOG2 = createBackgroundSubtractorMOG2(50, acc, false);
+//            qDebug() << "1";
+            Ptr<BackgroundSubtractorMOG2> m_pMOG2 = createBackgroundSubtractorMOG2(10, acc, false);
             Mat fgMaskMOG2Mat;
 
-            qDebug() << "2";
+//            qDebug() << "2";
 
+            // TODO: 对图像进行裁剪
             Mat frameBg = dstBg.clone();
+
             for (int k = 0; k < m_pMOG2->getHistory(); k++) {
                 m_frame = frameBg.clone();
+//                Rect area(10, 10, 100, 100);
+//                m_frame = m_frame(area);
+
                 m_pMOG2->apply(m_frame, fgMaskMOG2Mat);
             }
-            qDebug() << "3";
+//            qDebug() << "3";
 
             MyMOG2Data myMOG2Data;
             myMOG2Data.myMOG2    = m_pMOG2;
@@ -2617,6 +2729,10 @@ void DetectImageWork::updateShapeImgMold(int cameraId, int sceneId, QList<ShapeI
     if (sceneId == 1) {
         m_cameraDetectDataList[cameraId - 1].moldShapeMaskList = m_moldShapeMaskList;
         m_cameraDetectDataList[cameraId - 1].moldMOG2DataList  = m_moldMOG2DataList;
+
+
+//        m_cameraDetectDataList[cameraId - 1].moldMOG2DataList.clear();
+        m_moldMOG2DataList.clear();
     } else {
         m_cameraDetectDataList[cameraId - 1].prodShapeMaskList = m_prodShapeMaskList;
         m_cameraDetectDataList[cameraId - 1].prodMOG2DataList  = m_prodMOG2DataList;
@@ -2746,7 +2862,7 @@ QImage DetectImageWork::matToQim(Mat &mat)
 
 Mat DetectImageWork::qimToMat(QImage &qim)
 {
-    qim = qim.convertToFormat(QImage::Format_RGB888);
+//    qim = qim.convertToFormat(QImage::Format_RGB888);
     Mat mat = Mat(qim.height(), qim.width(),
                   CV_8UC1,(void*)qim.constBits(),qim.bytesPerLine());
 //    cvtColor(mat, mat, CV_BGR2GRAY);

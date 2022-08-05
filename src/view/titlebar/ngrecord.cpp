@@ -241,15 +241,16 @@ QString NGRecord::getNGTextRecord()
 
 void NGRecord::showNgRecordImg(const QModelIndex &index)
 {
-    m_imgAreaShowState = ImgArea::getInstance()->getShowState();
-
     int row = index.row();
+    int cameraId = m_recordDataList[row].cameraId;
     QString ngImgPath = m_recordDataList[row].imgPath;
 
+    m_imgAreaShowState = ImgArea::getInstance()->getShowState(cameraId);
+
     if (m_imgAreaShowState) {
-        ImgArea::getInstance()->setShowState(false);
+        ImgArea::getInstance()->setShowState(false, cameraId);
     }
 
-    ImgArea::getInstance()->clearShapes();
-    ImgArea::getInstance()->loadImage(ngImgPath);
+    ImgArea::getInstance()->clearShapes(cameraId);
+    ImgArea::getInstance()->loadImage(ngImgPath, cameraId);
 }

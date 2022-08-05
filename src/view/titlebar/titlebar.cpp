@@ -291,6 +291,12 @@ void TitleBar::cameraBtnListClick()
     if (m_pIsSetMonitor) {
         MainWindow::getInstance()->showMonitorSet(true, m_cameraId);
     }
+
+    if (ImgArea::getInstance()->getCameraState(m_cameraId) == CameraState::Running) {
+        m_pStartBtn->setChecked(true);
+    } else {
+        m_pStopBtn->setChecked(true);
+    }
 }
 
 void TitleBar::startBtnClick()

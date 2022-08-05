@@ -10,7 +10,7 @@ extern int                  g_hCamera[4];          //设备句柄
 extern unsigned char        * g_pRawBuffer;     //raw数据
 extern unsigned char        * g_pRgbBuffer;     //处理后数据缓存区
 extern tSdkFrameHead        g_tFrameHead;       //图像帧头信息
-extern tSdkCameraCapbility  g_tCapability;      //设备描述信息
+extern tSdkCameraCapbility  g_tCapability[4];      //设备描述信息
 
 
 extern Width_Height         g_W_H_INFO;         //显示画板到大小和图像大小

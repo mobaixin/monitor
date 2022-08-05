@@ -69,6 +69,7 @@ typedef struct CameraViewData {
     QImage curDetectImage;
     int curDetectSceneId;
     double scaleValue;
+    bool isShowCamImage;
 } CameraViewData;
 
 // 相机检测数据
@@ -149,8 +150,8 @@ public:
     QList<ShapeItemData> getShapeItems(int cameraId = -1);
 
     // 加载图像图形模板
-    void loadImageItem(ImageMoldData imgData, int cameraId = 1);
-    void loadShapeItem(ShapeItemData itemData, int cameraId = 1);
+    void loadImageItem(ImageMoldData imgData, int cameraId = -1);
+    void loadShapeItem(ShapeItemData itemData, int cameraId = -1);
 
     // 保存为图片
     QImage saveAsImage(QString imgPath);
@@ -213,7 +214,7 @@ public:
     void setShowState(bool isShow, int cameraId = -1);
 
     // 获取显示状态
-    bool getShowState();
+    bool getShowState(int cameraId = -1);
 
     // 获取当前图片
     QImage getCurImage(int cameraId);
@@ -288,6 +289,10 @@ private:
 
 private slots:
     void imageProcess(QImage img, int cameraId);
+    void imageProcess1(QImage img, int cameraId);
+    void imageProcess2(QImage img, int cameraId);
+    void imageProcess3(QImage img, int cameraId);
+    void imageProcess4(QImage img, int cameraId);
 
 private:
     // 相机状态
@@ -347,7 +352,7 @@ private:
 
     // 相机IP地址
 //    QString m_cameraIp = QString("192.168.0.11%1");
-    QString m_cameraIp   = QString("192.168.%1.11%2");
+    QString m_cameraIp   = QString("192.168.%1.21%2");
     QString m_cameraMask = QString("255.255.255.0");
 
     // 网关地址
