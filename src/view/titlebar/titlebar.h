@@ -41,6 +41,9 @@ public:
     // 获取当前监视状态
     bool getMonitorSetState();
 
+    // 获取全部按钮选中状态
+    bool getAllCamBtnState();
+
 //    // 检测当前的图片 手动检测时sceneId为-1
 //    int detectCurImage(int sceneId = -1, bool isShowNGRes = true);
 

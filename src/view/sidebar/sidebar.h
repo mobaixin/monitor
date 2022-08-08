@@ -85,6 +85,9 @@ public:
     // 更新显示数据
     void updateShowData();
 
+    // 更新图形模板显示
+    void updateShapeData();
+
 signals:
     void updateShapeImgMoldSig(int cameraId, int sceneId);
 

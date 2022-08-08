@@ -347,6 +347,15 @@ void ImgArea::setData()
                 }
 
                 initParameter(g_hCamera[id],&g_tCapability[id]);
+
+                m_cameraViewDataList[id].cameraParaData.pfExposureTime  = m_pfExposureTime;
+                m_cameraViewDataList[id].cameraParaData.exposureTimeMin = m_exposureTimeMin;
+                m_cameraViewDataList[id].cameraParaData.exposureTimeMax = m_exposureTimeMax;
+                m_cameraViewDataList[id].cameraParaData.expLineTime     = m_expLineTime;
+                m_cameraViewDataList[id].cameraParaData.pusAnalogGain   = m_pusAnalogGain;
+                m_cameraViewDataList[id].cameraParaData.analogGainMin   = m_analogGainMin;
+                m_cameraViewDataList[id].cameraParaData.analogGainMax   = m_analogGainMax;
+
     //            CameraSetOnceWB(g_hCamera);
                 qDebug() << "after initParameter: " << id + 1;
 

@@ -56,20 +56,37 @@ typedef struct MyMOG2Data {
     int pixel;
 } MyMOG2Data;
 
+// 相机参数数据
+typedef struct CameraParaData {
+    // 曝光时间
+    double pfExposureTime;
+    double exposureTimeMin;
+    double exposureTimeMax;
+    double expLineTime;
+
+    // 增益值
+    int pusAnalogGain;
+    int analogGainMin;
+    int analogGainMax;
+} CameraParaData;
+
 // 相机显示数据
 typedef struct CameraViewData {
-    int cameraId;
-    int camState;
-    QGraphicsView *camView;
-    MyGraphicsScene *camScene;
-    QGraphicsPixmapItem *imageItem;
-    QList<QGraphicsItem *> allShapeItemList;
-    CaptureThread *camThread;
-    QImage curImage;
-    QImage curDetectImage;
-    int curDetectSceneId;
-    double scaleValue;
-    bool isShowCamImage;
+    int cameraId;                   // 相机id
+    int camState;                   // 相机状态
+    QGraphicsView *camView;         // 视频流显示
+    MyGraphicsScene *camScene;      // 场景
+    QGraphicsPixmapItem *imageItem; // 显示视频流的item
+    QList<QGraphicsItem *> allShapeItemList;    // 所有的图形item
+    CaptureThread *camThread;       // 视频流线程
+    QImage curImage;                // 当前获取的图片
+    QImage curDetectImage;          // 当前检测的图片
+    int curDetectSceneId;           // 当前检测场景
+    double scaleValue;              // 缩放的值
+    bool isShowCamImage;            // 是否显示视频流
+    QVector<QVector<QPointF>> resPointList;   // NG区域的边缘点
+    QList<int> resAreaSizeList;   // NG区域的范围大小
+    CameraParaData cameraParaData;  // 相机参数
 } CameraViewData;
 
 // 相机检测数据

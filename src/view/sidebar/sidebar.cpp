@@ -439,6 +439,34 @@ void SideBar::updateShowData()
     updateOrderLab();
 }
 
+void SideBar::updateShapeData()
+{
+    // 清除检测结果
+    ImgArea::getInstance()->clearDetectResult();
+
+    MainWindow::getInstance()->setDetectObject();
+
+    if (TitleBar::getInstance()->getMonitorSetState()) {
+        // 加载当前场景的模板
+        loadCurMold();
+    } else {
+        ShapeItemData itemData;
+        itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+        itemData.sceneId  = m_sceneId;
+        itemData.moldId   = 1;
+
+        if (TitleBar::getInstance()->getAllCamBtnState()) {
+            for (int i = 0; i < ImgArea::getInstance()->getCameraCounts(); i++) {
+                int cameraId = i + 1;
+                itemData.cameraId = cameraId;
+                ImgArea::getInstance()->loadShapeItem(itemData);
+            }
+        } else {
+            ImgArea::getInstance()->loadShapeItem(itemData);
+        }
+    }
+}
+
 void SideBar::positionBtnClick()
 {
     if (this->x() > 500) {
@@ -483,7 +511,15 @@ void SideBar::checkMoldBtnClick()
         itemData.sceneId  = m_sceneId;
         itemData.moldId   = 1;
 
-        ImgArea::getInstance()->loadShapeItem(itemData);
+        if (TitleBar::getInstance()->getAllCamBtnState()) {
+            for (int i = 0; i < ImgArea::getInstance()->getCameraCounts(); i++) {
+                int cameraId = i + 1;
+                itemData.cameraId = cameraId;
+                ImgArea::getInstance()->loadShapeItem(itemData);
+            }
+        } else {
+            ImgArea::getInstance()->loadShapeItem(itemData);
+        }
     }
 
     OptRecord::addOptRecord("点击检模");
@@ -522,7 +558,15 @@ void SideBar::productBtnClick()
         itemData.sceneId  = m_sceneId;
         itemData.moldId   = 1;
 
-        ImgArea::getInstance()->loadShapeItem(itemData);
+        if (TitleBar::getInstance()->getAllCamBtnState()) {
+            for (int i = 0; i < ImgArea::getInstance()->getCameraCounts(); i++) {
+                int cameraId = i + 1;
+                itemData.cameraId = cameraId;
+                ImgArea::getInstance()->loadShapeItem(itemData);
+            }
+        } else {
+            ImgArea::getInstance()->loadShapeItem(itemData);
+        }
     }
 
     OptRecord::addOptRecord("点击产品");

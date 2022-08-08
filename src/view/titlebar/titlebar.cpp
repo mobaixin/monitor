@@ -262,10 +262,26 @@ bool TitleBar::getMonitorSetState()
     return m_pIsSetMonitor;
 }
 
+bool TitleBar::getAllCamBtnState()
+{
+    if (m_pAllCameraBtn->isHidden()) {
+        return false;
+    }
+
+    if (m_pAllCameraBtn->isChecked()) {
+        return true;
+    }
+
+    return false;
+}
+
 void TitleBar::allCameraBtnClick()
 {
     m_pTestBtn->setDisabled(true);
     ImgArea::getInstance()->showAllCameraView();
+
+    // 更新图形模板显示
+    SideBar::getInstance()->updateShapeData();
 }
 
 void TitleBar::cameraBtnListClick()
@@ -287,6 +303,9 @@ void TitleBar::cameraBtnListClick()
     // 侧边栏数据更新
     SideBar::getInstance()->updateShowData();
 
+    // 更新图形模板显示
+    SideBar::getInstance()->updateShapeData();
+
     // 处于监视设定状态
     if (m_pIsSetMonitor) {
         MainWindow::getInstance()->showMonitorSet(true, m_cameraId);
@@ -301,26 +320,34 @@ void TitleBar::cameraBtnListClick()
 
 void TitleBar::startBtnClick()
 {
+    ShapeItemData itemData;
+    itemData.cameraId = m_cameraId;
+    itemData.sceneId  = SideBar::getInstance()->getCurSceneID();
+    itemData.moldId   = 1;
+
     if (m_pAllCameraBtn->isChecked()) {
         for (int i = 0; i < m_cameraCount; i++) {
-            ImgArea::getInstance()->setRunState(CameraState::Running, i + 1);
-            ImgArea::getInstance()->startCamera(i + 1);
+            int cameraId = i + 1;
+            itemData.cameraId = cameraId;
+
+            ImgArea::getInstance()->setRunState(CameraState::Running, cameraId);
+            ImgArea::getInstance()->startCamera(cameraId);
+            ImgArea::getInstance()->loadShapeItem(itemData);
         }
     } else {
         ImgArea::getInstance()->setRunState(CameraState::Running, m_cameraId);
         ImgArea::getInstance()->startCamera(m_cameraId);
+        ImgArea::getInstance()->loadShapeItem(itemData);
     }
 
 
     // 清除检测结果
     ImgArea::getInstance()->clearDetectResult();
 
-    ShapeItemData itemData;
-    itemData.cameraId = m_cameraId;
-    itemData.sceneId  = SideBar::getInstance()->getCurSceneID();
-    itemData.moldId   = 1;
-    ImgArea::getInstance()->loadShapeItem(itemData);
-    ImgArea::getInstance()->setShowState(true);
+    // 判断监视设定状态
+    if (!m_pIsSetMonitor) {
+        ImgArea::getInstance()->setShowState(true);
+    }
 
     OptRecord::addOptRecord("点击开始运行");
 }
