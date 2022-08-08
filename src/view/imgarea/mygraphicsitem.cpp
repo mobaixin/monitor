@@ -575,7 +575,7 @@ void MyPolygon::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void MyPolygon::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     m_isAddedPoint = false;
-    return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
+    return QAbstractGraphicsShapeItem::mouseReleaseEvent(event);
 }
 
 MyCurve::MyCurve(MyGraphicsItem::ItemType type)
