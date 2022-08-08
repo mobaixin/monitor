@@ -959,29 +959,31 @@ int ImgArea::initSDK()
 
     int res = CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
 
+    QString cameraGigeIp = QString(ipInfo[0]);
+    QString cameraGigeEtIp = QString(ipInfo[3]);
+
     // 设置相机IP
-//    QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1)).arg(QString(ipInfo[3]).right(1));
+//    QString cameraIp = m_cameraIp.arg(cameraGigeEtIp.right(1)).arg(cameraGigeEtIp.right(1));
     QString cameraIp = m_cameraIp.arg(1).arg(1);
     QString cameraMask  = m_cameraMask;
-//    QString cameraGtway = m_gateway.arg(QString(ipInfo[3]).right(1));
+//    QString cameraGtway = m_gateway.arg((cameraGigeEtIp).right(1));
     QString cameraGtway = m_gateway.arg(1);
-    qDebug() << "cameraIP: " << cameraIp;
+    qDebug() << "cameraGigeIp: " << cameraGigeIp;
+    qDebug() << "set cameraIP: " << cameraIp;
 
     // 数据库交互
     CameraIPData cameraIPData;
     cameraIPData.cameraId = 1;
     cameraIPData.serialId = QString(tCameraEnumList[0].acSn);
     cameraIPData.nickName = QString(tCameraEnumList[0].acFriendlyName);
-    cameraIPData.portIp   = QString(ipInfo[3]);
+    cameraIPData.portIp   = cameraGigeEtIp;
     cameraIPData.state    = "可用";
     cameraIPData.cameraIp = cameraIp;
     cameraIPData.cameraMask    = cameraMask;
     cameraIPData.cameraGateway = cameraGtway;
 
     // 判断本机IP和相机IP
-    if (QString(ipInfo[0]) != cameraIp) {
-//        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (QString(ipInfo[4]).toLatin1()).data(),
-//                                 (QString(ipInfo[5]).toLatin1()).data(), true);
+    if (cameraGigeIp != cameraIp) {
 //        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (cameraMask.toLatin1()).data(),
 //                                 (cameraGtway.toLatin1()).data(), true);
         if (res == CAMERA_STATUS_SUCCESS) {
