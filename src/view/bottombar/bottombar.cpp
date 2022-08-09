@@ -173,12 +173,13 @@ void BottomBar::setWidgetUi()
 //    connect(m_pAccLine, &QLineEdit::editingFinished, this, &BottomBar::setAccSliderValue);
 //    connect(m_pPixLine, &QLineEdit::editingFinished, this, &BottomBar::setPixSliderValue);
 
-    connect(m_pCurvBtn, &QPushButton::clicked, this, &BottomBar::curveBtnClick);
-    connect(m_pPolyBtn, &QPushButton::clicked, this, &BottomBar::polygonBtnClick);
-    connect(m_pRectBtn, &QPushButton::clicked, this, &BottomBar::rectBtnClick);
+    connect(m_pCurvBtn,   &QPushButton::clicked, this, &BottomBar::curveBtnClick);
+    connect(m_pPolyBtn,   &QPushButton::clicked, this, &BottomBar::polygonBtnClick);
+    connect(m_pRectBtn,   &QPushButton::clicked, this, &BottomBar::rectBtnClick);
     connect(m_pCircleBtn, &QPushButton::clicked, this, &BottomBar::circleBtnClick);
     connect(m_pConCirBtn, &QPushButton::clicked, this, &BottomBar::conCircleBtnClick);
-    connect(m_pMaskBtn, &QPushButton::clicked, this, &BottomBar::maskBtnClick);
+    connect(m_pMaskBtn,   &QPushButton::clicked, this, &BottomBar::maskBtnClick);
+    connect(m_pCopyBtn,   &QPushButton::clicked, this, &BottomBar::copyBtnClick);
     connect(m_pPositionBtn, &QPushButton::clicked, this, &BottomBar::positionBtnClick);
 
 }
@@ -555,11 +556,11 @@ void BottomBar::maskBtnClick()
     }
 }
 
-void BottomBar::CopyBtnClick()
+void BottomBar::copyBtnClick()
 {
-
-
     OptRecord::addOptRecord("点击复制");
+
+    ImgArea::getInstance()->copySelectedShapeItem();
 }
 
 void BottomBar::positionBtnClick()
@@ -590,7 +591,7 @@ void BottomBar::updateItemAcc(int acc)
         }
     }
 
-    MySettings::getInstance()->setValue(ShapeSection, "accuracy", QString::number(acc));
+    MySettings::getInstance()->setValue(ShapeSection, AccuracyKey, QString::number(acc));
 }
 
 void BottomBar::updateItemPix(int pix)
@@ -611,6 +612,6 @@ void BottomBar::updateItemPix(int pix)
         }
     }
 
-    MySettings::getInstance()->setValue(ShapeSection, "pixel", QString::number(pix));
+    MySettings::getInstance()->setValue(ShapeSection, PixelKey, QString::number(pix));
 }
 

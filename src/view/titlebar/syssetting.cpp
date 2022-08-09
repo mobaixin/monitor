@@ -121,11 +121,6 @@ void SysSetting::setWidgetStyle()
     m_prodDelaySlider->setStep(1);
     m_prodTimesSlider->setStep(1);
 
-    m_moldDelaySlider->setValueRange(0, 20);
-    m_moldTimesSlider->setValueRange(0, 40);
-    m_prodDelaySlider->setValueRange(0, 20);
-    m_prodTimesSlider->setValueRange(0, 40);
-
 //    m_moldDelaySlider->setValue(6);
 //    m_moldTimesSlider->setValue(4);
 //    m_prodDelaySlider->setValue(4);
@@ -153,11 +148,22 @@ void SysSetting::setWidgetStyle()
 
 void SysSetting::setData()
 {
-    int moldDelay  = MySettings::getInstance()->getValue(SysSection, "moldDelay").toInt();
-    int moldTimes  = MySettings::getInstance()->getValue(SysSection, "moldTimes").toInt();
-    int prodDelay  = MySettings::getInstance()->getValue(SysSection, "prodDelay").toInt();
-    int prodTimes  = MySettings::getInstance()->getValue(SysSection, "prodTimes").toInt();
-    int prodDetect = MySettings::getInstance()->getValue(SysSection, "prodDetect").toInt();
+    // 获取最大重检次数
+    int maxDetectTimes = MySettings::getInstance()->getValue(IOSetSection, MaxReDeteNumKey).toInt();
+
+    m_moldDelaySlider->setValueRange(0, 20);
+    m_moldTimesSlider->setValueRange(0, maxDetectTimes);
+    m_prodDelaySlider->setValueRange(0, 20);
+    m_prodTimesSlider->setValueRange(0, maxDetectTimes);
+
+    // 获取延时和重检次数
+    int moldDelay  = MySettings::getInstance()->getValue(SysSection, MoldDelayKey).toInt();
+    int moldTimes  = MySettings::getInstance()->getValue(SysSection, MoldTimesKey).toInt();
+    int prodDelay  = MySettings::getInstance()->getValue(SysSection, ProdDelayKey).toInt();
+    int prodTimes  = MySettings::getInstance()->getValue(SysSection, ProdTimesKey).toInt();
+
+    int prodDetect = MySettings::getInstance()->getValue(SysSection, ProdDetectKey).toInt();
+    int cameraPara = MySettings::getInstance()->getValue(IOSetSection, FrameListKey.arg(24)).toInt();
 
     m_moldDelaySlider->setValue(moldDelay);
     m_moldTimesSlider->setValue(moldTimes);
@@ -167,6 +173,12 @@ void SysSetting::setData()
     m_prodDetectBtn->setChecked(prodDetect);
 
     updateDisPlay(prodDetect);
+
+    if (cameraPara == 0) {
+        m_cameraParaBtn->hide();
+    } else {
+        m_cameraParaBtn->show();
+    }
 }
 
 void SysSetting::changeTimeBtnClick()
@@ -200,28 +212,28 @@ void SysSetting::closeSetBtnClick()
 
 void SysSetting::updateMoldDelay(int value)
 {
-    MySettings::getInstance()->setValue(SysSection, "moldDelay", QString::number(value));
+    MySettings::getInstance()->setValue(SysSection, MoldDelayKey, QString::number(value));
 }
 
 void SysSetting::updateMoldTimes(int value)
 {
-    MySettings::getInstance()->setValue(SysSection, "moldTimes", QString::number(value));
+    MySettings::getInstance()->setValue(SysSection, MoldTimesKey, QString::number(value));
 }
 
 void SysSetting::updateProdDelay(int value)
 {
-    MySettings::getInstance()->setValue(SysSection, "prodDelay", QString::number(value));
+    MySettings::getInstance()->setValue(SysSection, ProdDelayKey, QString::number(value));
 }
 
 void SysSetting::updateProdTimes(int value)
 {
-    MySettings::getInstance()->setValue(SysSection, "prodTimes", QString::number(value));
+    MySettings::getInstance()->setValue(SysSection, ProdTimesKey, QString::number(value));
 }
 
 void SysSetting::updateProdDetect(bool checked)
 {
     int value = checked ? 1 : 0;
-    MySettings::getInstance()->setValue(SysSection, "prodDetect", QString::number(value));
+    MySettings::getInstance()->setValue(SysSection, ProdDetectKey, QString::number(value));
 
     SideBar::getInstance()->setDetectScene();
 

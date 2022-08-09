@@ -13,6 +13,7 @@
 #include "src/database/mydatabase.h"
 #include "src/view/sidebar/sidebar.h"
 #include "src/view/bottombar/bottombar.h"
+#include "src/view/titlebar/ngrecord.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -70,6 +71,7 @@ ImgArea::~ImgArea()
     {
         QApplication::processEvents();
     }
+    m_thread->deleteLater();
 
     if(g_readBuf!=NULL){
         free(g_readBuf);
@@ -271,8 +273,10 @@ void ImgArea::setData()
     qDebug() << "status: " << status;
 
     // 获取设置的相机数
-    int count = MySettings::getInstance()->getValue(SysSection, "cameraCounts").toInt();
+    int count = MySettings::getInstance()->getValue(SysSection, CameraCountsKey).toInt();
     emit setCameraCountsSig(count);
+
+    m_cameraStateList.append(status);
 
     CameraDetectData cameraData;
     m_cameraDetectDataList.append(cameraData);
@@ -406,8 +410,15 @@ void ImgArea::clearShapes()
     qDebug() << "out clearShapes";
 }
 
-void ImgArea::setRunState(int state)
+void ImgArea::setRunState(int state, int cameraId)
 {
+    // 设置相机状态
+    if (cameraId == -1) {
+        cameraId = TitleBar::getInstance()->getCurCameraId();
+    }
+
+    m_cameraStateList[cameraId - 1] = state;
+
     if (state == CameraState::Running && status == 0) {
         state = CameraState::OffLine;
     }
@@ -519,7 +530,7 @@ void ImgArea::setSampleLab(bool isDetectMold, int curIdx)
 QImage ImgArea::getImageItem()
 {
     QDateTime time   = QDateTime::currentDateTime();
-    QString fileName = time.toString("yyyy-MM-dd-HH-mm-ss");
+    QString fileName = time.toString("yyyy-MM-dd-HH-mm-ss-zzz");
     QString timeStr  = time.toString("yyyy-MM-dd HH:mm:ss");
 
     ImageMoldData imgData;
@@ -591,6 +602,19 @@ QList<ShapeItemData> ImgArea::getShapeItems()
                 qDebug() << "myList.size: " << myList.size();
                 myList.removeLast();
 
+                if (myList.size() < 3) {
+                    break;
+                }
+
+                QPointF oldCenter = item->getCenter();
+                int difX = center.x() - oldCenter.x();
+                int difY = center.y() - oldCenter.y();
+
+                for (int k = 0; k < myList.size(); k++) {
+                    myList[k].setX(myList[k].x() + difX);
+                    myList[k].setY(myList[k].y() + difY);
+                }
+
 //                itemData.edge      = QString("");
                 itemData.edge      = itemData.center;
                 itemData.pointList = pointListToStr(myList);
@@ -627,11 +651,20 @@ QList<ShapeItemData> ImgArea::getShapeItems()
             case MyGraphicsItem::ItemType::Curve: {
                 QList<QPointF> myList = item->getMyPointList();
                 qDebug() << "Curve myList.size: " << myList.size();
-                if (myList.size() < 1) {
+                if (myList.size() < 3) {
                     break;
                 }
 
                 myList.removeLast();
+
+                QPointF oldCenter = item->getCenter();
+                int difX = center.x() - oldCenter.x();
+                int difY = center.y() - oldCenter.y();
+
+                for (int k = 0; k < myList.size(); k++) {
+                    myList[k].setX(myList[k].x() + difX);
+                    myList[k].setY(myList[k].y() + difY);
+                }
 
                 itemData.edge      = QString("");
                 itemData.pointList = pointListToStr(myList);
@@ -722,10 +755,13 @@ void ImgArea::loadShapeItem(ShapeItemData itemData)
                     if (i + 1 < myStrList.size()) {
                         myEdgePoint = QPointF(myStrList[i].toInt(), myStrList[i+1].toInt());
                         myEdgePointList.append(myEdgePoint);
-                        myPolygon->pushPoint(myEdgePoint, myEdgePointList, false);
+//                        myPolygon->pushPoint(myEdgePoint, myEdgePointList, false);
                     }
                 }
-                myPolygon->pushPoint(myEdgePoint, myEdgePointList, true);
+//                myPolygon->pushPoint(myEdgePoint, myEdgePointList, true);
+
+                myPolygon->setPointList(myEdgePointList);
+
                 myPolygon->setAccuracy(itemDataList[i].accuracy);
                 myPolygon->setPixel(itemDataList[i].pixel);
 //                m_pScene->addItem(myPolygon);
@@ -918,36 +954,38 @@ int ImgArea::initSDK()
     // 获取相机IP信息
     char* ipInfo[6];
     for (int i = 0; i < 6; i++) {
-        ipInfo[i] = (QString("000000000000").toLatin1()).data();
+        ipInfo[i] = (QString("000000000000000").toLatin1()).data();
     }
 
-    CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
+    int res = CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
+
+    QString cameraGigeIp = QString(ipInfo[0]);
+    QString cameraGigeEtIp = QString(ipInfo[3]);
 
     // 设置相机IP
-//    QString cameraIp = m_cameraIp.arg(QString(ipInfo[3]).right(1)).arg(QString(ipInfo[3]).right(1));
+//    QString cameraIp = m_cameraIp.arg(cameraGigeEtIp.right(1)).arg(cameraGigeEtIp.right(1));
     QString cameraIp = m_cameraIp.arg(1).arg(1);
     QString cameraMask  = m_cameraMask;
-//    QString cameraGtway = m_gateway.arg(QString(ipInfo[3]).right(1));
+//    QString cameraGtway = m_gateway.arg((cameraGigeEtIp).right(1));
     QString cameraGtway = m_gateway.arg(1);
-    qDebug() << "cameraIP: " << cameraIp;
+    qDebug() << "cameraGigeIp: " << cameraGigeIp;
+    qDebug() << "set cameraIP: " << cameraIp;
 
     // 数据库交互
     CameraIPData cameraIPData;
     cameraIPData.cameraId = 1;
     cameraIPData.serialId = QString(tCameraEnumList[0].acSn);
     cameraIPData.nickName = QString(tCameraEnumList[0].acFriendlyName);
-    cameraIPData.portIp   = QString(ipInfo[3]);
+    cameraIPData.portIp   = cameraGigeEtIp;
     cameraIPData.state    = "可用";
     cameraIPData.cameraIp = cameraIp;
     cameraIPData.cameraMask    = cameraMask;
     cameraIPData.cameraGateway = cameraGtway;
 
     // 判断本机IP和相机IP
-    if (QString(ipInfo[0]) != cameraIp) {
-//        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (QString(ipInfo[4]).toLatin1()).data(),
-//                                 (QString(ipInfo[5]).toLatin1()).data(), true);
-        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (cameraMask.toLatin1()).data(),
-                                 (cameraGtway.toLatin1()).data(), true);
+    if (cameraGigeIp != cameraIp) {
+//        int res = CameraGigeSetIp(&tCameraEnumList[0], (cameraIp.toLatin1()).data(), (cameraMask.toLatin1()).data(),
+//                                 (cameraGtway.toLatin1()).data(), true);
         if (res == CAMERA_STATUS_SUCCESS) {
             qDebug() << "相机IP设置成功";
             cameraIPData.state = "可用";
@@ -1145,6 +1183,7 @@ void ImgArea::updateShapeImgMold(int cameraId, int sceneId)
         return ;
     }
 
+//    NGRecord::addNgTextRecord(QString("相机%1 场景%2 收到学习信号").arg(cameraId).arg(sceneId));
     emit startUpdateMoldSig(cameraId, sceneId, itemDataList, imgDataList);
 
     return ;
@@ -1254,7 +1293,7 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
     // 检测次数
     for (int t = 0; t < detectTimes; t++) {
         detectTime = QDateTime::currentDateTime();
-        fileName   = detectTime.toString("yyyy-MM-dd-HH-mm-ss");
+        fileName   = detectTime.toString("yyyy-MM-dd-HH-mm-ss-zzz");
         filePath   = QString("%1/%2.png").arg(MyDataBase::dbFilePath).arg(fileName);
         m_curDetectImage = getCurImage();
         m_curDetectImage.save(filePath);
@@ -1266,8 +1305,11 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
 //        targetImg = getCurImage();
 
         // 删除临时文件
-        tmpFile.setFileName(fileName);
-        tmpFile.remove();
+        tmpFile.setFileName(filePath);
+        tmpFile.setPermissions(filePath, QFile::ReadOther | QFile::WriteOther);
+        if (tmpFile.exists()) {
+            tmpFile.remove();
+        }
 
         // 获得检测结果
         detectRes = detectImage(targetImg, m_detectCameraId, m_detectSceneId);
@@ -1292,6 +1334,10 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
             // 顶栏变化
             TitleBar::getInstance()->setAlarmBtnState(true);
 
+            // 记录NG次数
+            int NGTimes = MySettings::getInstance()->getValue(DetectSection, DetectNGTimes).toInt();
+            MySettings::getInstance()->setValue(DetectSection, DetectNGTimes, QString::number(NGTimes + 1));
+
         // 检测到OK
         } else if (detectRes == DetectRes::OK) {
 
@@ -1308,6 +1354,10 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
             // 顶栏变化
             TitleBar::getInstance()->setAlarmBtnState(false);
 
+            // 记录OK次数
+            int OKTimes = MySettings::getInstance()->getValue(DetectSection, DetectOKTimes).toInt();
+            MySettings::getInstance()->setValue(DetectSection, DetectOKTimes, QString::number(OKTimes + 1));
+
             break;
         }
     }
@@ -1323,6 +1373,17 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
 
 int ImgArea::autoDetectImage(int cameraId, int sceneId, double delayTime, int reDetectTimes)
 {
+    if (cameraId <= 0) {
+        return 0;
+    }
+
+    // 判断相机监视状态
+    if (m_cameraStateList[cameraId - 1] != CameraState::Running) {
+        return 0;
+    }
+
+    NGRecord::addNgTextRecord(QString("相机%1 场景%2 收到触发信号").arg(cameraId).arg(sceneId));
+
     // 设置场景和延时
     m_detectCameraId = cameraId;
     m_detectSceneId  = sceneId;
@@ -1776,6 +1837,106 @@ bool ImgArea::judgePolygonState(MyGraphicsItem *newPolygon)
     return false;
 }
 
+void ImgArea::copySelectedShapeItem()
+{
+    int offset = 20;
+
+    QList<QGraphicsItem *> selectItemList = getSelectItemList();
+    if (!selectItemList.isEmpty()) {
+        QGraphicsItem *temp = selectItemList.first();
+        MyGraphicsItem *item = static_cast<MyGraphicsItem *>(temp);
+        QPointF center = item->getCenter();
+        QPointF edge   = item->getEdge();
+        QPointF realCenter = item->getRealCenter().toPoint();
+        realCenter.setX(center.x() + offset);
+        realCenter.setY(center.y() + offset);
+
+        int accuracy = item->getAccuracy();
+        int pixel = item->getPixel();
+
+        switch (item->getType()) {
+        case MyGraphicsItem::ItemType::Rectangle: {
+            int width  = abs(edge.x() - center.x()) * 2;
+            int height = abs(edge.y() - center.y()) * 2;
+
+            MyRectangle *myRect = new MyRectangle(realCenter.x(), realCenter.y(), width, height, MyGraphicsItem::ItemType::Rectangle);
+            myRect->setAccuracy(accuracy);
+            myRect->setPixel(pixel);
+            addShapeItemToList(myRect);
+        }
+            break;
+        case MyGraphicsItem::ItemType::Polygon:
+        case MyGraphicsItem::ItemType::Polygon_Mask: {
+
+            MyPolygon *myPolygon;
+
+            if (item->getType() == MyGraphicsItem::ItemType::Polygon) {
+                myPolygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon);
+            } else {
+                myPolygon = new MyPolygon(MyGraphicsItem::ItemType::Polygon_Mask);
+            }
+
+            QList<QPointF> edgePointList = item->getMyPointList();
+            edgePointList.removeLast();
+
+            for (int i = 0; i < edgePointList.size(); i++) {
+                edgePointList[i].setX(edgePointList[i].x() + offset);
+                edgePointList[i].setY(edgePointList[i].y() + offset);
+            }
+
+            myPolygon->setPointList(edgePointList);
+            myPolygon->setAccuracy(accuracy);
+            myPolygon->setPixel(pixel);
+            addShapeItemToList(myPolygon);
+            connect(m_pScene, &MyGraphicsScene::updatePolyPoint, myPolygon, &MyPolygon::pushPoint);
+
+        }
+            break;
+        case MyGraphicsItem::ItemType::Curve: {
+            MyCurve *myCurve = new MyCurve(MyGraphicsItem::ItemType::Curve);
+
+            QList<QPointF> edgePointList = item->getMyPointList();
+            edgePointList.removeLast();
+
+            for (int i = 0; i < edgePointList.size(); i++) {
+                edgePointList[i].setX(edgePointList[i].x() + offset);
+                edgePointList[i].setY(edgePointList[i].y() + offset);
+            }
+
+            myCurve->setPointList(edgePointList);
+            myCurve->setAccuracy(accuracy);
+            myCurve->setPixel(pixel);
+            addShapeItemToList(myCurve);
+        }
+            break;
+        case MyGraphicsItem::ItemType::Circle: {
+            int radius = sqrt(pow(center.x() - edge.x(), 2) + pow(center.y() - edge.y(), 2));
+            MyCircle *myCircle = new MyCircle(realCenter.x(), realCenter.y(), radius, MyGraphicsItem::ItemType::Circle);
+            myCircle->setAccuracy(accuracy);
+            myCircle->setPixel(pixel);
+            addShapeItemToList(myCircle);
+        }
+            break;
+        case MyGraphicsItem::ItemType::Concentric_Circle: {
+            QList<QPointF> myList = item->getMyPointList();
+
+            // 记录内外圆的半径
+            int radius1 = sqrt(pow(myList[1].x() - myList[0].x(), 2) + pow(myList[1].y() - myList[0].y(), 2));
+            int radius2 = sqrt(pow(myList[1].x() - myList[2].x(), 2) + pow(myList[1].y() - myList[2].y(), 2));
+
+            MyConcentricCircle *myConCircle = new MyConcentricCircle(realCenter.x(), realCenter.y(), radius1, radius2, MyGraphicsItem::ItemType::Concentric_Circle);
+            myConCircle->setAccuracy(accuracy);
+            myConCircle->setPixel(pixel);
+            addShapeItemToList(myConCircle);
+        }
+            break;
+        default:
+            break;
+
+        }
+    }
+}
+
 int ImgArea::initLocalNetwork()
 {
     QList<QNetworkInterface> ifaceList = QNetworkInterface::allInterfaces();
@@ -1873,7 +2034,7 @@ void ImgArea::setSigDelayTimeLab()
 
         setShapeNoMove(true);
         clearDetectResult();
-        detectCurImage(m_detectCameraId, m_detectSceneId, m_reDetectTimes);
+        detectCurImage(m_detectCameraId, m_detectSceneId, m_reDetectTimes + 1);
     }
 }
 
@@ -2269,7 +2430,7 @@ void DetectImageWork::detectImage(QImage imgFg, int cameraId, int sceneId, int &
                 }
             }
 
-            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
+//            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
             imshow(QString("fgMaskMat_%1_%2").arg(i).arg(j).toStdString(), myMOG2Data.fgMaskMat);
 //            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), srcFg);
 

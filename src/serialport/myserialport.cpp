@@ -2,6 +2,7 @@
 
 #include "myserialport.h"
 #include "src/view/mainwindow.h"
+#include "src/view/common/mysettings.h"
 
 #include <opencv2\opencv.hpp>
 
@@ -173,9 +174,17 @@ void MySerialPort::receiveInfo()
 
 void MySerialPort::readTimesInfo()
 {
+    // 开模
     unsigned int openMoldSig = 0x0080;
+
+    // 顶退
     unsigned int topBackSig  = 0x0040;
 
+    // 获取信号设置
+    int openMoldFlag = MySettings::getInstance()->getValue(IOSetSection, FrameListKey.arg(0)).toInt();
+    int topBackFlag  = MySettings::getInstance()->getValue(IOSetSection, FrameListKey.arg(3)).toInt();
+
+    // 获取GPIO信号
     unsigned int value = 0;
     int res = readInfo(m_devHandle[0], InputMask, &value);
 
@@ -192,11 +201,15 @@ void MySerialPort::readTimesInfo()
             }
         }
 
+        // TODO: 根据GPIO信号判断相机和场景
+
         // 产品
-        if ((value & openMoldSig) != 0x0000) {
-            MainWindow::getInstance()->autoDetectImage(1, 2);
+        if ((((value & openMoldSig) != 0x0000) && openMoldFlag == 1) ||
+            (((value & openMoldSig) == 0x0000) && openMoldFlag == 0)) {
+            MainWindow::getInstance()->autoDetectImage(1, 2);   
         // 检模
-        } else if ((value == topBackSig) != 0x0000) {
+        } else if ((((value & topBackSig) != 0x0000) && topBackFlag == 1) ||
+                   (((value & topBackSig) == 0x0000) && topBackFlag == 0)) {
             MainWindow::getInstance()->autoDetectImage(1, 1);
         }
 

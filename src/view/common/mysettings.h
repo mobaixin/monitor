@@ -7,10 +7,35 @@
 #include <QApplication>
 #include <QDir>
 
+// all sections
 const QString ShapeSection  = "ShapeSetting";
 const QString SysSection    = "SysSetting";
 const QString CameraSection = "CameraSetting";
 const QString IOSetSection  = "IOSetting";
+const QString DetectSection = "DetectSetting";
+
+// all keys
+const QString AccuracyKey   = "accuracy";
+const QString PixelKey      = "pixel";
+
+const QString MoldDelayKey  = "moldDelay";
+const QString MoldTimesKey  = "moldTimes";
+const QString ProdDelayKey  = "prodDelay";
+const QString ProdTimesKey  = "prodTimes";
+const QString ProdDetectKey   = "prodDetect";
+const QString CameraCountsKey = "cameraCounts";
+
+const QString ExposeTimeKey = "exposeTime";
+const QString CameraGainKey = "cameraGain";
+
+const QString FrameListKey     = QString("frameList%1");
+const QString PeriodSigKey     = "periodSig";
+const QString AseismicLevelKey = "aseismicLevel";
+const QString MaxSampleNumKey  = "maxSampleNum";
+const QString MaxReDeteNumKey  = "maxReDeteNum";
+
+const QString DetectNGTimes = "detectNGTimes";
+const QString DetectOKTimes = "detectOKTimes";
 
 class MySettings : public QObject
 {
