@@ -10,6 +10,7 @@
 QString MyDataBase::dbFilePath      = "";
 QString MyDataBase::imgMoldFilePath = "";
 QString MyDataBase::imgNgFilePath   = "";
+QString MyDataBase::txtNgFilePath   = "";
 
 MyDataBase *MyDataBase::getInstance()
 {
@@ -45,6 +46,7 @@ MyDataBase::MyDataBase(QObject *parent)
     dbFilePath      = QCoreApplication::applicationDirPath() + "/data";
     imgMoldFilePath = dbFilePath + "/imgmold";
     imgNgFilePath   = dbFilePath + "/imgng";
+    txtNgFilePath   = dbFilePath + "/ngrecord.txt";
 
     QDir dir(dbFilePath);
     if (!dir.exists()) {

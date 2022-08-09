@@ -33,6 +33,9 @@ public:
     // 添加NG记录
     void addNgRecord(NGRecordData ngData);
 
+    // 添加NG文字记录
+    static void addNgTextRecord(QString ngText);
+
     void closeEvent(QCloseEvent *event);
 
 private:
@@ -43,6 +46,9 @@ private:
     // 获取模型数据
     void getModelData();
 
+    // 获取NG文字记录
+    QString getNGTextRecord();
+
     // 显示NG记录图片
     void showNgRecordImg(const QModelIndex &index);
 
@@ -50,7 +56,7 @@ private:
     QTableView *m_ngTableView;
     QStandardItemModel *m_ngModel;
 
-    QTextEdit *m_recordText;
+    QTextEdit *m_recordTextEdit;
 
     QLabel *m_resultLab;
 

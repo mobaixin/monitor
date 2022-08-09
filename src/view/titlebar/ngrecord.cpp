@@ -1,11 +1,17 @@
-﻿#include <QDebug>
+﻿#include <QFile>
+#include <QDateTime>
+#include <QTextStream>
+#include <QDebug>
 
 #include "ngrecord.h"
 #include "src/view/imgarea/imgarea.h"
+#include "src/view/common/mysettings.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
 #endif
+
+const QString VersionNum = "版本号: 1.1.0.0(20220801)\n";
 
 NGRecord::NGRecord(QWidget *parent)
     : QDialog(parent)
@@ -25,7 +31,7 @@ void NGRecord::setWidgetUi()
     m_ngTableView = new QTableView(this);
     m_ngModel = new QStandardItemModel(this);
 
-    m_recordText = new QTextEdit(this);
+    m_recordTextEdit = new QTextEdit(this);
 
     m_resultLab = new QLabel(this);
 
@@ -46,7 +52,7 @@ void NGRecord::setWidgetUi()
     m_rightLayout->setSpacing(10);
 
     m_mainLayout->addWidget(m_ngTableView);
-    m_mainLayout->addWidget(m_recordText);
+    m_mainLayout->addWidget(m_recordTextEdit);
     m_mainLayout->addLayout(m_rightLayout);
     m_mainLayout->setContentsMargins(0, 0, 0, 0);
     m_mainLayout->setSpacing(5);
@@ -67,7 +73,7 @@ void NGRecord::setWidgetStyle()
     this->setWindowTitle("NG记录");
 
     m_ngTableView->setFixedSize(325, this->height());
-    m_recordText->setFixedSize(225, this->height());
+    m_recordTextEdit->setFixedSize(225, this->height());
     m_resultLab->setFixedSize(140, 30);
     m_resetBtn->setFixedSize(135, 30);
     m_optRecordBtn->setFixedSize(135, 30);
@@ -86,8 +92,8 @@ void NGRecord::setWidgetStyle()
     m_ngTableView->setModel(m_ngModel);
 //    m_ngTableView->setFocusPolicy(Qt::NoFocus);
 
-    m_recordText->setFont(viewFont);
-    m_recordText->setReadOnly(true);
+    m_recordTextEdit->setFont(viewFont);
+    m_recordTextEdit->setReadOnly(true);
 
     m_resultLab->setFont(viewFont);
     m_resultLab->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -116,22 +122,29 @@ void NGRecord::setData()
     m_ngTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     m_ngTableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
 
+    QString recordStr = getNGTextRecord();
+    recordStr = VersionNum + recordStr;
+    m_recordTextEdit->setText(recordStr);
 
-    m_recordText->setText("10:40:07\n版本号:2.1.3.0(20220505)\n"
-                          "10:40:14\n相机1场景1 收到触发信号\n"
-                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
-                          "10:40:14\n相机1场景1 收到触发信号\n"
-                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
-                          "10:40:14\n相机1场景1 收到触发信号\n"
-                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
-                          "10:40:14\n相机1场景1 收到触发信号\n"
-                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
-                          "10:40:14\n相机1场景1 收到触发信号\n"
-                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
-                          "10:40:14\n相机1场景1 收到触发信号\n"
-                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
-                          );
-    m_resultLab->setText(QString("正常%1次，异常%2次").arg(m_okTotalNum).arg(m_ngTotalNum));
+//    m_recordTextEdit->setText("10:40:07\n版本号:2.1.3.0(20220505)\n"
+//                          "10:40:14\n相机1场景1 收到触发信号\n"
+//                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
+//                          "10:40:14\n相机1场景1 收到触发信号\n"
+//                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
+//                          "10:40:14\n相机1场景1 收到触发信号\n"
+//                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
+//                          "10:40:14\n相机1场景1 收到触发信号\n"
+//                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
+//                          "10:40:14\n相机1场景1 收到触发信号\n"
+//                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
+//                          "10:40:14\n相机1场景1 收到触发信号\n"
+//                          "10:40:14\nCam1 Scene1\nNG, tick = 33ms\n"
+//                          );
+
+    int ngTimes = MySettings::getInstance()->getValue(DetectSection, DetectNGTimes).toInt();
+    int okTimes = MySettings::getInstance()->getValue(DetectSection, DetectOKTimes).toInt();
+
+    m_resultLab->setText(QString("正常%1次，异常%2次").arg(okTimes).arg(ngTimes));
 }
 
 void NGRecord::addNgRecord(NGRecordData ngData)
@@ -144,6 +157,21 @@ void NGRecord::addNgRecord(NGRecordData ngData)
     m_ngModel->appendRow(itemList);
 }
 
+void NGRecord::addNgTextRecord(QString ngText)
+{
+    QDateTime time  = QDateTime::currentDateTime();
+    QString timeStr = time.toString("yyyy-MM-dd HH:mm:ss");
+
+    ngText = timeStr + "\n" + ngText;
+
+    QFile txtNgFile(MyDataBase::txtNgFilePath);
+    if (txtNgFile.exists()) {
+        txtNgFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Append);
+        txtNgFile.write(ngText.toUtf8());
+    }
+    txtNgFile.close();
+}
+
 void NGRecord::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event);
@@ -153,6 +181,10 @@ void NGRecord::closeEvent(QCloseEvent *event)
 void NGRecord::resetBtnClick()
 {
     OptRecord::addOptRecord("点击清零");
+
+    // 配置文件修改
+    MySettings::getInstance()->setValue(DetectSection, DetectNGTimes, "0");
+    MySettings::getInstance()->setValue(DetectSection, DetectOKTimes, "0");
 
     m_resultLab->setText("正常0次，异常0次");
 }
@@ -188,11 +220,23 @@ void NGRecord::getModelData()
         m_ngModel->setItem(i, 1, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].cameraId)));
         m_ngModel->setItem(i, 2, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].sceneId)));
         m_ngModel->setItem(i, 3, new QStandardItem(QString(" %1 ").arg(m_recordDataList[i].result)));
-
-        if (m_recordDataList[i].result == "异常") {
-            m_ngTotalNum++;
-        }
     }
+}
+
+QString NGRecord::getNGTextRecord()
+{
+    QString txtNgStr;
+
+    QFile txtNgFile(MyDataBase::txtNgFilePath);
+    txtNgFile.open(QIODevice::ReadOnly | QIODevice::Text);
+
+    txtNgStr = QString::fromUtf8(txtNgFile.readAll());
+
+//    qDebug() << "------------txtNgStr: " << txtNgStr;
+
+    txtNgFile.close();
+
+    return txtNgStr;
 }
 
 void NGRecord::showNgRecordImg(const QModelIndex &index)

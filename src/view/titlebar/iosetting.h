@@ -32,7 +32,7 @@ private:
 
     void updatePeriodSig(int value);
     void updateAseismicLevel(int value);
-    void updateMaxSimpleNum(int value);
+    void updateMaxSampleNum(int value);
     void updateMaxReDeteNum(int value);
 
     void restartBtnClick();

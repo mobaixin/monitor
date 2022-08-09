@@ -179,14 +179,19 @@ public:
         return Type;
     }
 
+    // 获取中心点
     QPointF getCentroid(QList<QPointF> list);
     void getMaxLength();
     void updatePolygon(QPointF origin, QPointF end);
 
+    // 判断点是否在边上
     bool isPointOnLine(QPointF point);
 
     void setMask(bool isMask);
     bool getMask();
+
+    // 设置边缘点
+    void setPointList(QList<QPointF> edgePointList);
 
 public slots:
     void pushPoint(QPointF p, QList<QPointF> list, bool isCenter);
@@ -227,7 +232,9 @@ public:
     QPointF getCentroid(QList<QPointF> list);
     void getMaxLength();
     void updateCurve(QPointF origin, QPointF end);
-//    void updateCurve(QPointF origin, QPointF mid, QPointF end);
+
+    // 设置边缘点
+    void setPointList(QList<QPointF> edgePointList);
 
 public slots:
     void pushPoint(QPointF p, QList<QPointF> list, bool isCenter);
