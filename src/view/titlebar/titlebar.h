@@ -102,7 +102,7 @@ private:
     int m_cameraId = 1;
 
     // 检测时间
-    QDateTime m_detectTime;
+    QList<QDateTime> m_detectTimeList;
 };
 
 

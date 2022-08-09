@@ -89,8 +89,10 @@ void CameraPara::setWidgetStyle()
     m_cameraGainSlider->setEditSize(50, 20);
 //    m_widDynamicSlider->setEditSize(50, 20);
 
-    QList<double> exposeTimeList = ImgArea::getInstance()->getExposureTime();
-    QList<int>    cameraGainList = ImgArea::getInstance()->getCameraGain();
+    int cameraId = TitleBar::getInstance()->getCurCameraId();
+
+    QList<double> exposeTimeList = ImgArea::getInstance()->getExposureTime(cameraId);
+    QList<int>    cameraGainList = ImgArea::getInstance()->getCameraGain(cameraId);
 
     m_exposeTimeSlider->setEditReadOnly(true);
     m_cameraGainSlider->setEditReadOnly(true);
@@ -119,8 +121,8 @@ void CameraPara::setWidgetStyle()
     m_cancelBtn->setFixedSize(100, 30);
     m_confirmBtn->setFixedSize(100, 30);
 
-    m_exposeTimeLab->setText("相机1曝光时间:");
-    m_cameraGainLab->setText("相机1增益:");
+    m_exposeTimeLab->setText(QString("相机%1曝光时间:").arg(cameraId));
+    m_cameraGainLab->setText(QString("相机%1增益:").arg(cameraId));
 //    m_widDynamicLab->setText("相机1宽动态值:");
 
     m_defaultBtn->setText("默认");
@@ -162,7 +164,9 @@ void CameraPara::updateExposeTime(int value)
 {
     value = value > 0 ? value : 0;
     qDebug() << "value: " << value;
-    ImgArea::getInstance()->setExposeTime(value);
+
+    int cameraId = TitleBar::getInstance()->getCurCameraId();
+    ImgArea::getInstance()->setExposeTime(value, cameraId);
 
     QList<double> timeList = ImgArea::getInstance()->getExposureTime();
     double time = (value * timeList.at(3)) / 1000;

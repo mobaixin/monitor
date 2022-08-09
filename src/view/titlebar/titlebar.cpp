@@ -152,7 +152,7 @@ void TitleBar::setWidgetUi()
         m_pCameraBtnList[0]->setChecked(true);
     } else {
         m_pAllCameraBtn->setChecked(true);
-        m_pTestBtn->setDisabled(true);
+//        m_pTestBtn->setDisabled(true);
     }
 }
 
@@ -223,6 +223,10 @@ void TitleBar::setWidgetStyle()
 
 void TitleBar::setData()
 {
+    for (int i = 0; i < 4; i++) {
+        m_detectTimeList.append(QDateTime::currentDateTime());
+    }
+
     m_pIsSetMonitor = false;
     m_cameraId = 1;
 
@@ -277,7 +281,9 @@ bool TitleBar::getAllCamBtnState()
 
 void TitleBar::allCameraBtnClick()
 {
-    m_pTestBtn->setDisabled(true);
+    m_cameraId = 1;
+
+//    m_pTestBtn->setDisabled(true);
     ImgArea::getInstance()->showAllCameraView();
 
     // 更新图形模板显示
@@ -286,7 +292,7 @@ void TitleBar::allCameraBtnClick()
 
 void TitleBar::cameraBtnListClick()
 {
-    m_pTestBtn->setDisabled(false);
+//    m_pTestBtn->setDisabled(false);
 
     int i = 0;
     for (; i < m_pCameraBtnList.size(); i++) {
@@ -434,19 +440,28 @@ void TitleBar::testBtnClick()
     ImgArea::getInstance()->setShapeNoMove(true);
     ImgArea::getInstance()->clearDetectResult();
 
+    qDebug() << "after clearDetectResult";
     if (ImgArea::getInstance()->getCameraState(m_cameraId) != CameraState::OffLine) {
-        m_detectTime = QDateTime::currentDateTime();
+        m_detectTimeList[m_cameraId - 1] = QDateTime::currentDateTime();
         ImgArea::getInstance()->detectCurImage(m_cameraId);
+        qDebug() << "3";
     }
 
+//    for (int i = 1; i < 2; i++) {
+//        if (ImgArea::getInstance()->getCameraState(i + 1) != CameraState::OffLine) {
+//            m_detectTimeList[i] = QDateTime::currentDateTime();
+//            ImgArea::getInstance()->detectCurImage(i + 1);
+//        }
+//    }
+    qDebug() << "after detectCurImage";
 }
 
 void TitleBar::addMoldBtnClick()
 {
-    m_detectTime = QDateTime::currentDateTime();
+    m_detectTimeList[m_cameraId - 1] = QDateTime::currentDateTime();
 
-    QString fileName = m_detectTime.toString("yyyy-MM-dd-HH-mm-ss-zzz");
-    QString timeStr  = m_detectTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString fileName = m_detectTimeList[m_cameraId - 1].toString("yyyy-MM-dd-HH-mm-ss-zzz");
+    QString timeStr  = m_detectTimeList[m_cameraId - 1].toString("yyyy-MM-dd HH:mm:ss");
     QString moldFilePath = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
     QString ngFilePath   = QString("%1/%2.png").arg(MyDataBase::imgNgFilePath).arg(fileName);
 
@@ -480,7 +495,7 @@ void TitleBar::reDetectBtnClick()
     ImgArea::getInstance()->clearDetectResult();
 
     if (ImgArea::getInstance()->getCameraState(m_cameraId) == 1) {
-        m_detectTime = QDateTime::currentDateTime();
+        m_detectTimeList[m_cameraId - 1] = QDateTime::currentDateTime();
         ImgArea::getInstance()->detectCurImage(m_cameraId);
     }
 

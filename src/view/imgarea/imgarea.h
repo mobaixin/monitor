@@ -86,6 +86,8 @@ typedef struct CameraViewData {
     bool isShowCamImage;            // 是否显示视频流
     QVector<QVector<QPointF>> resPointList;   // NG区域的边缘点
     QList<int> resAreaSizeList;   // NG区域的范围大小
+    QList<QGraphicsPolygonItem *> detectResItemList;    // 检测结果图形
+    QList<QGraphicsTextItem *> detectResTxtItemList;    // 检测结果范围
     CameraParaData cameraParaData;  // 相机参数
 } CameraViewData;
 
@@ -177,16 +179,16 @@ public:
     void setResolution(int index);
 
     // 设置曝光时间
-    void setExposeTime(int value, int cameraIdx = 1);
+    void setExposeTime(int value, int cameraId = -1);
 
     // 设置相机增益
-    void setCameraGain(int gain, int cameraIdx = 1);
+    void setCameraGain(int gain, int cameraId = -1);
 
     // 获取曝光数据
-    QList<double> getExposureTime();
+    QList<double> getExposureTime(int cameraId = -1);
 
     // 获取增益数据
-    QList<int> getCameraGain();
+    QList<int> getCameraGain(int cameraId = -1);
 
     // 保存相机参数
     void saveCameraPara(int cameraIdx = 1);
@@ -321,6 +323,7 @@ private:
     QLabel *m_pSampleLab;
     // 检测结果
     QLabel *m_pResultLab;
+    QList<QLabel *> m_resultLabList;
 
     QImage *m_pMainImg;
 
