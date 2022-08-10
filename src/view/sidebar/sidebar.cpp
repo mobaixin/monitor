@@ -442,7 +442,7 @@ void SideBar::updateShowData()
 void SideBar::updateShapeData()
 {
     // 清除检测结果
-    ImgArea::getInstance()->clearDetectResult();
+//    ImgArea::getInstance()->clearDetectResult();
 
     MainWindow::getInstance()->setDetectObject();
 

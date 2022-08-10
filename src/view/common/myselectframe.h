@@ -40,6 +40,7 @@ private:
     void radioButtonClick();
 
 signals:
+    // 选项变化信号
     void valueChange(int frameId, int selectNum);
 
 private:
@@ -49,9 +50,9 @@ private:
     QHBoxLayout *m_frameLayout;
     QHBoxLayout *m_mainLayout;
 
-    int m_frameId;
-    int m_radioBtnNum;
-    int m_selectNum;
+    int m_frameId;      // ID
+    int m_radioBtnNum;  // 选项个数
+    int m_selectNum;    // 选择的选项ID
 };
 
 #endif // MYSELECTFRAME_H

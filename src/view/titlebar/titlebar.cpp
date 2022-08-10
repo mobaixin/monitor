@@ -57,7 +57,6 @@ void TitleBar::setWidgetUi()
         m_pCameraBtnGroup->addButton(m_pCameraBtnList[i]);
     }
 
-    m_ptitleLab      = new QLabel(this);
     m_pStartBtn      = new QPushButton(this);
     m_pStopBtn       = new QPushButton(this);
     m_pMonitorSetBtn = new QPushButton(this);
@@ -80,7 +79,6 @@ void TitleBar::setWidgetUi()
     for (int i = 0; i < m_pCameraBtnList.size(); i++) {
         m_pCameraBtnList[i]->setFixedSize(50, 30);
     }
-    m_ptitleLab->setFixedSize(250, 30);
     m_pStartBtn->setFixedSize(80, 30);
     m_pStopBtn->setFixedSize(80, 30);
     m_pMonitorSetBtn->setFixedSize(80, 30);
@@ -115,9 +113,6 @@ void TitleBar::setWidgetUi()
     m_pBtnLayout->addStretch();
     m_pBtnLayout->setContentsMargins(0, 0, 0, 0);
     m_pBtnLayout->setSpacing(6);
-
-    m_ptitleLab->setLayout(m_pCameraBtnLayout);
-    m_ptitleLab->setGeometry(0, 0, 200, 30);
 
     this->setLayout(m_pBtnLayout);
 
@@ -179,9 +174,6 @@ void TitleBar::setWidgetStyle()
     m_pDelAlarmBtn->setText("删除报警");
     m_pCloseBtn->setText("退出");
 
-//    m_ptitleLab->setStyleSheet("background:#00BFFF;color:#FFFF00;border-radius:4px;");
-//    m_ptitleLab->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-
     QPalette pal = m_pDelAlarmBtn->palette();
     pal.setColor(QPalette::Button,Qt::red);
     m_pDelAlarmBtn->setPalette(pal);
@@ -231,12 +223,6 @@ void TitleBar::setData()
     m_cameraId = 1;
 
     setAlarmBtnState(false);
-}
-
-// 设置左上方标识
-void TitleBar::setTitleLab(QString label)
-{
-//    m_ptitleLab->setText(label);
 }
 
 int TitleBar::getCurCameraId()
@@ -310,7 +296,7 @@ void TitleBar::cameraBtnListClick()
     SideBar::getInstance()->updateShowData();
 
     // 更新图形模板显示
-    SideBar::getInstance()->updateShapeData();
+//    SideBar::getInstance()->updateShapeData();
 
     // 处于监视设定状态
     if (m_pIsSetMonitor) {
@@ -441,18 +427,18 @@ void TitleBar::testBtnClick()
     ImgArea::getInstance()->clearDetectResult();
 
     qDebug() << "after clearDetectResult";
-    if (ImgArea::getInstance()->getCameraState(m_cameraId) != CameraState::OffLine) {
-        m_detectTimeList[m_cameraId - 1] = QDateTime::currentDateTime();
-        ImgArea::getInstance()->detectCurImage(m_cameraId);
-        qDebug() << "3";
-    }
-
-//    for (int i = 1; i < 2; i++) {
-//        if (ImgArea::getInstance()->getCameraState(i + 1) != CameraState::OffLine) {
-//            m_detectTimeList[i] = QDateTime::currentDateTime();
-//            ImgArea::getInstance()->detectCurImage(i + 1);
-//        }
+//    if (ImgArea::getInstance()->getCameraState(m_cameraId) != CameraState::OffLine) {
+//        m_detectTimeList[m_cameraId - 1] = QDateTime::currentDateTime();
+//        ImgArea::getInstance()->detectCurImage(m_cameraId);
+//        qDebug() << "3";
 //    }
+
+    for (int i = 0; i < 2; i++) {
+        if (ImgArea::getInstance()->getCameraState(i + 1) != CameraState::OffLine) {
+            m_detectTimeList[i] = QDateTime::currentDateTime();
+            ImgArea::getInstance()->detectCurImage(i + 1);
+        }
+    }
     qDebug() << "after detectCurImage";
 }
 

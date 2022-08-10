@@ -12,12 +12,12 @@
 const unsigned int InputMask  = 0x03C0;
 const unsigned int OutputMask = 0x003F;
 
-// 可顶针
+// 可顶针  产品
 const unsigned int ThimbleMask      = 0x0001;
 const unsigned int CanThimbleValue  = 0x0001;
 const unsigned int NotThimbleValue  = 0x0000;
 
-// 可合模
+// 可合模  检模
 const unsigned int ClampMoldMask      = 0x0002;
 const unsigned int CanClampMoldValue  = 0x0002;
 const unsigned int NotClampMoldValue  = 0x0000;

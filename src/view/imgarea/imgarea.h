@@ -48,12 +48,12 @@ typedef struct _WIDTH_HEIGHT{
 
 // MOG2数据
 typedef struct MyMOG2Data {
-    int cameraId;
-    int sceneId;
-    Ptr<BackgroundSubtractorMOG2> myMOG2;
-    Mat fgMaskMat;
-    double accuracy;
-    int pixel;
+    int cameraId;       // 相机ID
+    int sceneId;        // 场景ID
+    Ptr<BackgroundSubtractorMOG2> myMOG2;   // 学习数据
+    Mat fgMaskMat;      // 图形掩膜
+    double accuracy;    // 精确度
+    int pixel;          // 像素值
 } MyMOG2Data;
 
 // 相机参数数据
@@ -84,8 +84,9 @@ typedef struct CameraViewData {
     int curDetectSceneId;           // 当前检测场景
     double scaleValue;              // 缩放的值
     bool isShowCamImage;            // 是否显示视频流
+    bool isNGState;                 // 是否处于NG状态
     QVector<QVector<QPointF>> resPointList;   // NG区域的边缘点
-    QList<int> resAreaSizeList;   // NG区域的范围大小
+    QList<int> resAreaSizeList;     // NG区域的范围大小
     QList<QGraphicsPolygonItem *> detectResItemList;    // 检测结果图形
     QList<QGraphicsTextItem *> detectResTxtItemList;    // 检测结果范围
     CameraParaData cameraParaData;  // 相机参数
@@ -93,25 +94,25 @@ typedef struct CameraViewData {
 
 // 相机检测数据
 typedef struct CameraDetectData {
-    int cameraId;
-    int cameraRunState;
-    QList<Mat> moldShapeMaskList;
-    QList<Mat> prodShapeMaskList;
-    QList<MyMOG2Data> moldMOG2DataList;
-    QList<MyMOG2Data> prodMOG2DataList;
+    int cameraId;                       // 相机ID
+    int cameraRunState;                 // 相机运行状态
+    QList<Mat> moldShapeMaskList;       // 检模图形掩膜列表
+    QList<Mat> prodShapeMaskList;       // 产品图形掩膜列表
+    QList<MyMOG2Data> moldMOG2DataList; // 检模学习数据列表
+    QList<MyMOG2Data> prodMOG2DataList; // 产品学习数据列表
 } CameraDetectData;
 
 // 相机运行状态
 enum CameraState {
-    OffLine = 0,
-    Running = 1,
-    Pause   = 2,
+    OffLine = 0,    // 相机断线
+    Running = 1,    // 监视运行
+    Pause   = 2,    // 保护停止
 };
 
 // 检测结果
 enum DetectRes {
-    NG = 0,
-    OK = 1,
+    NG = 0,         // NG
+    OK = 1,         // OK
 };
 
 class DetectImageWork;
@@ -120,6 +121,7 @@ class ImgArea : public QWidget
 {
     Q_OBJECT
 public:
+    // 单例
     static ImgArea *getInstance(QWidget *parent = nullptr);
 
     explicit ImgArea(QWidget *parent = nullptr);
@@ -277,13 +279,23 @@ public:
     // 显示单个相机画面
     void showSingleCameraView(int cameraId);
 
+    // 获取单个相机的NG状态
+    bool getCamNGState(int cameraId);
+
 public:
     int status;
 
 signals:
+    // 设置相机个数信号
     void setCameraCountsSig(int cameraCounts);
+
+    // 设置场景尺寸信号
     void setSceneRectSizeSig(QSize size);
+
+    // 更新图形图像模板信号
     void startUpdateMoldSig(int cameraId, int sceneId, QList<ShapeItemData> itemDataList, QList<ImageMoldData> imgDataList);
+
+    // 开始检测图片信号
     void startDetectImageSig(QImage imgFg, int cameraId, int sceneId, int &detectRes);
 
 private:
@@ -293,13 +305,17 @@ private:
     // SDK初始化
     int initSDK();
     void cameraStatues();
+
+    // 初始化相机参数
     int initParameter(int hCamera,tSdkCameraCapbility * pCameraInfo);
 
+    // 坐标列表转字符串
     QString pointListToStr(QList<QPointF> pointList);
 
     // 获取MOG2
     Ptr<BackgroundSubtractorMOG2> getMOG2Data(ShapeItemData itemData);
 
+    // QImage和Mat格式转换
     static QImage matToQim(Mat & mat);
     static Mat qimToMat(QImage & qim);
 
@@ -307,6 +323,7 @@ private:
     void setSigDelayTimeLab();
 
 private slots:
+    // 视频流显示
     void imageProcess(QImage img, int cameraId);
     void imageProcess1(QImage img, int cameraId);
     void imageProcess2(QImage img, int cameraId);
@@ -315,29 +332,18 @@ private slots:
 
 private:
     // 相机状态
-    QLabel *m_pTipLab;
     QList<QLabel *> m_cameraStateLabList;
+
     // 信号倒计时
     QLabel *m_pSigTimeLab;
+
     // 图片模板序号
     QLabel *m_pSampleLab;
+
     // 检测结果
-    QLabel *m_pResultLab;
     QList<QLabel *> m_resultLabList;
 
-    QImage *m_pMainImg;
-
     QGridLayout *m_pImgAreaLayout;
-
-    QGraphicsView *m_pView;
-    MyGraphicsScene *m_pScene;
-    QGraphicsPixmapItem *m_pImageItem;
-    QImage m_pCurImage;
-
-    QList<QGraphicsView *> m_viewList;
-    QList<MyGraphicsScene *> m_sceneList;
-    QList<QGraphicsPixmapItem *> m_imageItemList;
-    QList<QImage> m_curImageList;
 
     // 单个scene的尺寸
     QSize m_sceneSize;
@@ -357,13 +363,16 @@ private:
     // 相机监视状态
     QList<int> m_cameraStateList;
 
+    // 检测结果显示倒计时
     QTimer *m_resTimer;
-    CaptureThread *m_thread;
-    QList<CaptureThread *>m_cameraThreadList;
 
-    // 信号倒计时
+    // 检测信号倒计时
     QTimer *m_sigDelayTimer;
+
+    // 检测延时
     double m_delayTime;
+
+    // 重检次数
     int m_reDetectTimes;
 
     // 本机IP地址
@@ -388,8 +397,6 @@ private:
     // NG区域的范围大小
     QList<int> m_resAreaSizeList;
 
-    bool m_isShowImage;
-
     // 曝光时间
     double m_pfExposureTime;
     double m_exposureTimeMin;
@@ -400,23 +407,6 @@ private:
     int m_pusAnalogGain;
     int m_analogGainMin;
     int m_analogGainMax;
-
-    // opencv
-    int m_minArea;
-    Mat m_frame;
-    Mat m_fgMaskMOG2;
-    Mat m_maskCountour;
-//    Ptr<BackgroundSubtractorMOG2> m_pMOG2;
-
-    QList<Mat> m_moldShapeMaskList;
-    QList<Mat> m_prodShapeMaskList;
-    QList<MyMOG2Data> m_moldMOG2DataList;
-    QList<MyMOG2Data> m_prodMOG2DataList;
-
-    QList<CameraDetectData> m_cameraDetectDataList;
-
-    QList<QGraphicsPolygonItem *> m_detectResItemList;
-    QList<QGraphicsTextItem *> m_detectResTxtItemList;
 
     // 存放所有的图形item
     QList<QGraphicsItem *> m_allShapeItemList;

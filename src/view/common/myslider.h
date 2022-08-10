@@ -54,9 +54,11 @@ public:
     void setEditReadOnly(bool isReadOnly);
 
 public:
+    // 滑动条
     QSlider *m_slider;
 
 signals:
+    // 数值变化信号
     void valueChange(int value);
 
 private:
@@ -64,19 +66,22 @@ private:
     void addBtnClick();
     void subBtnClick();
 
+    // 设置输入框的值
     void setLineValue(int value);
+
+    // 设置滑动条的值
     void setSliderValue();
 
 private:
-    int m_sliderStep;
-    bool m_isAutoSetEditValue;
+    int m_sliderStep;           // 滑动条步长
+    bool m_isAutoSetEditValue;  // 是否自动设置输入框的值
 
-    QLineEdit *m_lineEdit;
+    QLineEdit *m_lineEdit;      // 输入框
 
-    QPushButton *m_addBtn;
-    QPushButton *m_subBtn;
+    QPushButton *m_addBtn;      // 按钮＋
+    QPushButton *m_subBtn;      // 按钮-
 
-    QHBoxLayout *m_slideLayout;
+    QHBoxLayout *m_slideLayout; // 布局
 };
 
 #endif // MYSLIDER_H

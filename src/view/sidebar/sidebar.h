@@ -13,20 +13,21 @@
 #include "src/view/imgarea/mygraphicsitem.h"
 
 enum DetectScene {
-    DetectMold = 1,
-    DetectProd = 2
+    DetectMold = 1, // 检模
+    DetectProd = 2  // 产品
 };
 
 enum RadioBtnState {
-    NoState = 0,
-    Correct = 1,
-    Wrong = 2
+    NoState = 0,    // 无状态
+    Correct = 1,    // 正确
+    Wrong = 2       // 错误
 };
 
 class SideBar : public QWidget
 {
     Q_OBJECT
 public:
+    // 单例
     static SideBar *getInstance(QWidget *parent = nullptr);
 
     explicit SideBar(QWidget *parent = nullptr);
@@ -89,6 +90,7 @@ public:
     void updateShapeData();
 
 signals:
+    // 更新图形图像模板信号
     void updateShapeImgMoldSig(int cameraId, int sceneId);
 
 private:
@@ -103,55 +105,58 @@ private:
     void delMoldBtnClick();
     void clearMoldBtnClick();
 
+    // 更新模板序号显示
     void updateOrderLab();
 
     // 切换场景时更新图形模板
     void updateSceneItemMold();
 
+    // 加载当前的图形图片模板
     void loadCurMold();
     void loadCurImage();
 
+    // 设置按钮的状态
     void setRadioBtnState(QRadioButton *btn, int state);
 private:
-    bool m_isDetectMold;
-    bool m_isShowMold;
+    bool m_isDetectMold;    // 是否是检模
+    bool m_isShowMold;      // 是否显示模板
 
-    int m_sceneId;
+    int m_sceneId;          // 场景ID
 
-    int m_deteMoldNum;
-    int m_prodMoldNum;
+    int m_deteMoldNum;      // 检模模板数
+    int m_prodMoldNum;      // 产品模板数
 
-    int m_curDeteMoldIdx;
-    int m_curProdMoldIdx;
+    int m_curDeteMoldIdx;   // 当前检模模板索引
+    int m_curProdMoldIdx;   // 当前产品模板索引
 
-    QRadioButton *m_thimbleBox;
-    QRadioButton *m_openMoldBox;
-    QRadioButton *m_canThimbleBox;
-    QRadioButton *m_canClampMoldBox;
+    QRadioButton *m_thimbleBox;         // 顶针
+    QRadioButton *m_openMoldBox;        // 开模
+    QRadioButton *m_canThimbleBox;      // 可顶针
+    QRadioButton *m_canClampMoldBox;    // 可合模
 
-    QPushButton *m_positionBtn;
-    QPushButton *m_checkMoldBtn;
-    QPushButton *m_productBtn;
+    QPushButton *m_positionBtn;     // 位置按钮
+    QPushButton *m_checkMoldBtn;    // 检模按钮
+    QPushButton *m_productBtn;      // 产品按钮
 
-    QLabel *m_orderLab;
+    QLabel *m_orderLab;             // 模板序号显示
 
-    QPushButton *m_saveMoldBtn;
-    QPushButton *m_addMoldBtn;
-    QPushButton *m_homePageBtn;
-    QPushButton *m_prevPageBtn;
-    QPushButton *m_nextPageBtn;
-    QPushButton *m_delMoldBtn;
-    QPushButton *m_clearMoldBtn;
+    QPushButton *m_saveMoldBtn;     // 保存模板
+    QPushButton *m_addMoldBtn;      // 添加模板
+    QPushButton *m_homePageBtn;     // 首页
+    QPushButton *m_prevPageBtn;     // 上一页
+    QPushButton *m_nextPageBtn;     // 下一页
+    QPushButton *m_delMoldBtn;      // 删除模板
+    QPushButton *m_clearMoldBtn;    // 清空模板
 
-    QVBoxLayout *m_sideBarLayout;
+    QVBoxLayout *m_sideBarLayout;   // 侧边栏布局
 
-    QButtonGroup *m_btnGroup;
+    QButtonGroup *m_btnGroup;       // 按钮组
 
-    QList<QGraphicsPixmapItem *>  m_deteImgItemList;
-    QList<QList<QGraphicsItem *>> m_deteShapeItemList;
+    QList<QGraphicsPixmapItem *>  m_deteImgItemList;    // 检模图片模板列表
+    QList<QList<QGraphicsItem *>> m_deteShapeItemList;  // 检模图形模板列表
 
-    QList<QGraphicsPixmapItem *>  m_prodImgItemList;
-    QList<QList<QGraphicsItem *>> m_prodShapeItemList;
+    QList<QGraphicsPixmapItem *>  m_prodImgItemList;    // 产品图片模板列表
+    QList<QList<QGraphicsItem *>> m_prodShapeItemList;  // 产品图形模板列表
 };
 
 

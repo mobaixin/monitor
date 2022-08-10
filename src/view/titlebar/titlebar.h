@@ -15,6 +15,7 @@ class TitleBar : public QWidget
 {
     Q_OBJECT
 public:
+    // 单例
     static TitleBar *getInstance(QWidget *parent = nullptr);
 
     explicit TitleBar(QWidget *parent = 0);
@@ -28,9 +29,6 @@ public:
 
     // 设置初始数据
     void setData();
-
-    // 设置左上方标识
-    void setTitleLab(QString label);
 
     // 获得当前相机ID
     int getCurCameraId();
@@ -48,40 +46,39 @@ public:
 //    int detectCurImage(int sceneId = -1, bool isShowNGRes = true);
 
 private:
-    void allCameraBtnClick();
-    void cameraBtnListClick();
-    void startBtnClick();
-    void stopBtnClick();
-    void monitorSetBtnClick();
-    void sysSettingBtnClick();
-    void testBtnClick();
-    void addMoldBtnClick();
-    void reDetectBtnClick();
-    void NGRecordBtnClick();
-    void delAlarmBtnClick();
-    void closeBtnClick();
+    void allCameraBtnClick();   // 全部
+    void cameraBtnListClick();  // 单个相机
+    void startBtnClick();       // 开始运行
+    void stopBtnClick();        // 停止运行
+    void monitorSetBtnClick();  // 监视设定
+    void sysSettingBtnClick();  // 系统设定
+    void testBtnClick();        // 测试
+    void addMoldBtnClick();     // 添加模板
+    void reDetectBtnClick();    // 重检
+    void NGRecordBtnClick();    // NG记录
+    void delAlarmBtnClick();    // 删除报警
+    void closeBtnClick();       // 退出
 
 private:
-    // 左上方标识
-    QLabel *m_ptitleLab;
+    // 相机数
+    int m_cameraCount;
 
     // 相机按钮
-    int m_cameraCount;
     QPushButton *m_pAllCameraBtn;
     QList<QPushButton *> m_pCameraBtnList;
     QButtonGroup *m_pCameraBtnGroup;
 
     // 标题栏按钮
-    QPushButton *m_pStartBtn;
-    QPushButton *m_pStopBtn;
-    QPushButton *m_pMonitorSetBtn;
-    QPushButton *m_pSysSettingBtn;
-    QPushButton *m_pTestBtn;
-    QPushButton *m_pAddMoldBtn;
-    QPushButton *m_pReDetectBtn;
-    QPushButton *m_pNGRecordBtn;
-    QPushButton *m_pDelAlarmBtn;
-    QPushButton *m_pCloseBtn;
+    QPushButton *m_pStartBtn;       // 开始运行
+    QPushButton *m_pStopBtn;        // 停止运行
+    QPushButton *m_pMonitorSetBtn;  // 监视设定
+    QPushButton *m_pSysSettingBtn;  // 系统设定
+    QPushButton *m_pTestBtn;        // 测试
+    QPushButton *m_pAddMoldBtn;     // 添加模板
+    QPushButton *m_pReDetectBtn;    // 重检
+    QPushButton *m_pNGRecordBtn;    // NG记录
+    QPushButton *m_pDelAlarmBtn;    // 删除报警
+    QPushButton *m_pCloseBtn;       // 退出
 
     // 界面布局
     QHBoxLayout *m_pCameraBtnLayout;

@@ -80,42 +80,41 @@ private:
 //    void setAccSliderValue();
 //    void setPixSliderValue();
 
-    void circleBtnClick();
-    void ellipseBtnClick();
-    void conCircleBtnClick();
-    void rectBtnClick();
-    void polygonBtnClick();
-    void curveBtnClick();
-    void maskBtnClick();
-    void copyBtnClick();
-    void positionBtnClick();
+    void circleBtnClick();      // 圆形
+    void conCircleBtnClick();   // 环形
+    void rectBtnClick();        // 矩形
+    void polygonBtnClick();     // 多边形
+    void curveBtnClick();       // 曲线
+    void maskBtnClick();        // 屏蔽区
+    void copyBtnClick();        // 复制
+    void positionBtnClick();    // 位置
 
-    void updateItemAcc(int acc);
-    void updateItemPix(int pix);
+    void updateItemAcc(int acc);    // 更新图形精确度
+    void updateItemPix(int pix);    // 更新图形像素值
 
 private:
 //    MyGraphicsScene *m_pAreaScene;
 
-    MyRectangle *m_newMyRect;
-    MyCircle *m_newMyCircle;
-    MyConcentricCircle *m_newMyConCircle;
-    MyPolygon *m_newPolygon;
+    MyRectangle *m_newMyRect;   // 新创建的矩形
+    MyCircle *m_newMyCircle;    // 新创建的圆形
+    MyConcentricCircle *m_newMyConCircle;   // 新创建的圆环
+    MyPolygon *m_newPolygon;    // 新创建的多边形
 
-    bool m_isCreatePolygon;
-    bool m_isCreateCurve;
-    bool m_isCreateMask;
+    bool m_isCreatePolygon;     // 判断创建多边形状态
+    bool m_isCreateCurve;       // 判断创建曲线状态
+    bool m_isCreateMask;        // 判断创建屏蔽区状态
 
-    bool m_isUpdateAcc;
-    bool m_isUpdatePix;
+    bool m_isUpdateAcc;         // 是否更新精确度
+    bool m_isUpdatePix;         // 是否更新像素值
 
-    MySlider *m_pAccMySlider;
-    MySlider *m_pPixMySlider;
+    MySlider *m_pAccMySlider;   // 精确度滑动条
+    MySlider *m_pPixMySlider;   // 像素值滑动条
 
-    int m_pAccStep;
-    int m_pPixStep;
+    int m_pAccStep;             // 精确度步长
+    int m_pPixStep;             // 像素值步长
 
-    QLabel *m_pAccLab;
-    QLabel *m_pPixLab;
+    QLabel *m_pAccLab;          // 精确度Lab
+    QLabel *m_pPixLab;          // 像素值Lab
 
 //    QLineEdit *m_pAccLine;
 //    QLineEdit *m_pPixLine;
@@ -129,16 +128,16 @@ private:
 //    QSlider *m_pPixSlider;
 
 
-    QPushButton *m_pCurvBtn;
-    QPushButton *m_pPolyBtn;
-    QPushButton *m_pRectBtn;
-    QPushButton *m_pCircleBtn;
-    QPushButton *m_pConCirBtn;
-    QPushButton *m_pMaskBtn;
-    QPushButton *m_pCopyBtn;
-    QPushButton *m_pEraseBtn;
-    QPushButton *m_pClearBtn;
-    QPushButton *m_pPositionBtn;
+    QPushButton *m_pCurvBtn;        // 曲线
+    QPushButton *m_pPolyBtn;        // 多边形
+    QPushButton *m_pRectBtn;        // 矩形
+    QPushButton *m_pCircleBtn;      // 圆形
+    QPushButton *m_pConCirBtn;      // 环形
+    QPushButton *m_pMaskBtn;        // 屏蔽区
+    QPushButton *m_pCopyBtn;        // 复制
+    QPushButton *m_pEraseBtn;       // 擦除
+    QPushButton *m_pClearBtn;       // 清除
+    QPushButton *m_pPositionBtn;    // 位置
 
     QHBoxLayout *m_pBottomLayout;
     QGridLayout *m_pLeftWidLayout;

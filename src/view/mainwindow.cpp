@@ -74,10 +74,6 @@ void MainWindow::setWidgetUi()
     // 按钮事件绑定
     m_pBottomBar->setClearBtnConnect();
 
-    // 设置标题文字
-    m_pTitleBar->setTitleLab("相机1");
-    m_pTitleBar->setFixedHeight(30);
-
     m_pImgArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 }

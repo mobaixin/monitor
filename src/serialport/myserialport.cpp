@@ -174,10 +174,10 @@ void MySerialPort::receiveInfo()
 
 void MySerialPort::readTimesInfo()
 {
-    // 开模
+    // 开模  产品
     unsigned int openMoldSig = 0x0080;
 
-    // 顶退
+    // 顶退  检模
     unsigned int topBackSig  = 0x0040;
 
     // 获取信号设置
