@@ -25,9 +25,9 @@ INCLUDEPATH += $$PWD\src\camera\include
 #LIBS += D:\Documents\QTProjects\monitor\src\camera\lib\MVCAMSDK_X64.lib
 LIBS += $$PWD\src\camera\lib\MVCAMSDK.lib
 
-LIBS += "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\legacy_stdio_definitions.lib"
+#LIBS += "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\legacy_stdio_definitions.lib"
 #LIBS += D:\Documents\QTProjects\monitor\src\serialport\lib\Lucero.lib
-LIBS += $$PWD\src\serialport\lib\Lucero.lib
+#LIBS += $$PWD\src\serialport\lib\Lucero.lib
 
 
 #INCLUDEPATH +=D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\include \
@@ -46,7 +46,7 @@ SOURCES += \
     src/camera/capturethread.cpp \
     src/camera/detect.cpp \
     src/database/mydatabase.cpp \
-    src/serialport/myserialport.cpp \
+#    src/serialport/myserialport.cpp \
     src/view/bottombar/bottombar.cpp    \
     src/view/common/myselectframe.cpp \
     src/view/common/mysettings.cpp \
@@ -70,9 +70,9 @@ HEADERS += \
     src/camera/capturethread.h \
     src/camera/resource.h \
     src/database/mydatabase.h \
-    src/serialport/myserialport.h \
-    src/serialport/usb2gpio.h \
-    src/serialport/usbdevice.h \
+#    src/serialport/myserialport.h \
+#    src/serialport/usb2gpio.h \
+#    src/serialport/usbdevice.h \
     src/view/common/myselectframe.h \
     src/view/common/mysettings.h \
     src/view/common/myslider.h \

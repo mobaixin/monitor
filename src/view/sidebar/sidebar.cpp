@@ -6,7 +6,7 @@
 #include "src/view/mainwindow.h"
 #include "src/view/imgarea/imgarea.h"
 #include "src/view/titlebar/titlebar.h"
-#include "src/serialport/myserialport.h"
+//#include "src/serialport/myserialport.h"
 #include "src/view/common/mysettings.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
@@ -387,22 +387,22 @@ void SideBar::setCanThimbleState(int state)
 {
     setRadioBtnState(m_canThimbleBox, state);
 
-    if (state == RadioBtnState::Correct) {
-        MySerialPort::getInstance()->writeInfo(ThimbleMask, CanThimbleValue);
-    } else if (state == RadioBtnState::Wrong) {
-        MySerialPort::getInstance()->writeInfo(ThimbleMask, NotThimbleValue);
-    }
+//    if (state == RadioBtnState::Correct) {
+//        MySerialPort::getInstance()->writeInfo(ThimbleMask, CanThimbleValue);
+//    } else if (state == RadioBtnState::Wrong) {
+//        MySerialPort::getInstance()->writeInfo(ThimbleMask, NotThimbleValue);
+//    }
 }
 
 void SideBar::setCanClampMoldState(int state)
 {
     setRadioBtnState(m_canClampMoldBox, state);
 
-    if (state == RadioBtnState::Correct) {
-        MySerialPort::getInstance()->writeInfo(ClampMoldMask, CanClampMoldValue);
-    } else if (state == RadioBtnState::Wrong) {
-        MySerialPort::getInstance()->writeInfo(ClampMoldMask, NotClampMoldValue);
-    }
+//    if (state == RadioBtnState::Correct) {
+//        MySerialPort::getInstance()->writeInfo(ClampMoldMask, CanClampMoldValue);
+//    } else if (state == RadioBtnState::Wrong) {
+//        MySerialPort::getInstance()->writeInfo(ClampMoldMask, NotClampMoldValue);
+//    }
 }
 
 void SideBar::setDetectScene()

@@ -5,7 +5,7 @@
 #include <QDebug>
 
 #include "mainwindow.h"
-#include "src/serialport/myserialport.h"
+//#include "src/serialport/myserialport.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -39,7 +39,7 @@ MainWindow::~MainWindow()
 
     MyDataBase::getInstance()->deleteLater();
     MySettings::getInstance()->deleteLater();
-    MySerialPort::getInstance()->deleteLater();
+//    MySerialPort::getInstance()->deleteLater();
 }
 
 // 初始化组件
@@ -51,7 +51,7 @@ void MainWindow::setWidgetUi()
 
     MyDataBase::getInstance();
     MySettings::getInstance();
-    MySerialPort::getInstance();
+//    MySerialPort::getInstance();
 
     m_pMainWid   = new QWidget(this);
     m_pTitleBar  = TitleBar::getInstance(this);
