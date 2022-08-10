@@ -1362,11 +1362,11 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
 //        targetImg = getCurImage();
 
         // 删除临时文件
-//        tmpFile.setFileName(filePath);
-//        tmpFile.setPermissions(filePath, QFile::ReadOther | QFile::WriteOther);
-//        if (tmpFile.exists()) {
-//            tmpFile.remove();
-//        }
+        tmpFile.setFileName(filePath);
+        tmpFile.setPermissions(filePath, QFile::ReadOther | QFile::WriteOther);
+        if (tmpFile.exists()) {
+            tmpFile.remove();
+        }
 
         qDebug() << "before detectImage";
 
@@ -1418,7 +1418,7 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
             }
 
             // 顶栏变化
-            TitleBar::getInstance()->setAlarmBtnState(false);
+//            TitleBar::getInstance()->setAlarmBtnState(false);
 
             // 记录OK次数
             int OKTimes = MySettings::getInstance()->getValue(DetectSection, DetectOKTimes).toInt();
@@ -1974,6 +1974,11 @@ void ImgArea::showSingleCameraView(int cameraId)
 bool ImgArea::getCamNGState(int cameraId)
 {
     return m_cameraViewDataList[cameraId - 1].isNGState;
+}
+
+void ImgArea::setCamNGState(int cameraId, bool state)
+{
+    m_cameraViewDataList[cameraId - 1].isNGState = state;
 }
 
 int ImgArea::initLocalNetwork()

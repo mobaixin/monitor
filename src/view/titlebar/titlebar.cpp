@@ -283,6 +283,15 @@ void TitleBar::allCameraBtnClick()
 
     // 更新图形模板显示
     SideBar::getInstance()->updateShapeData();
+
+    for(int i = 0; i < m_cameraCount; i++)//多相机NG状态显示
+    {
+        if(ImgArea::getInstance()->getCamNGState(i+1))
+        {
+             setAlarmBtnState(true);
+             break;
+        }
+    }
 }
 
 void TitleBar::cameraBtnListClick()
@@ -316,6 +325,16 @@ void TitleBar::cameraBtnListClick()
         m_pStartBtn->setChecked(true);
     } else {
         m_pStopBtn->setChecked(true);
+    }
+
+	//单相机NG状态显示
+    if(ImgArea::getInstance()->getCamNGState(m_cameraId))
+    {
+        setAlarmBtnState(true);
+    }
+    else
+    {
+        setAlarmBtnState(false);
     }
 }
 
@@ -442,12 +461,24 @@ void TitleBar::testBtnClick()
 //        qDebug() << "3";
 //    }
 
-    for (int i = 0; i < 2; i++) {
-        if (ImgArea::getInstance()->getCameraState(i + 1) != CameraState::OffLine) {
-            m_detectTimeList[i] = QDateTime::currentDateTime();
-            ImgArea::getInstance()->detectCurImage(i + 1);
+    if(getAllCamBtnState()) // 多相机测试
+    {
+        for (int i = 0; i < 4; i++) {
+            if (ImgArea::getInstance()->getCameraState(i + 1) != CameraState::OffLine) {
+                m_detectTimeList[i] = QDateTime::currentDateTime();
+                ImgArea::getInstance()->detectCurImage(i + 1);
+            }
         }
     }
+    else    // 单相机测试
+    {
+        if (ImgArea::getInstance()->getCameraState(m_cameraId) != CameraState::OffLine)
+        {
+            m_detectTimeList[m_cameraId - 1] = QDateTime::currentDateTime();
+            ImgArea::getInstance()->detectCurImage(m_cameraId);
+        }
+    }
+
     qDebug() << "after detectCurImage";
 }
 

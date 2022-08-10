@@ -282,6 +282,9 @@ public:
     // 获取单个相机的NG状态
     bool getCamNGState(int cameraId);
 
+    //设置单个相机的NG状态
+    void setCamNGState(int cameraId, bool state);
+
 public:
     int status;
 
