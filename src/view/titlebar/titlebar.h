@@ -63,6 +63,9 @@ private:
     // 相机数
     int m_cameraCount;
 
+    // 放置所有相机按钮
+    QLabel *m_ptitleLab;
+
     // 相机按钮
     QPushButton *m_pAllCameraBtn;
     QList<QPushButton *> m_pCameraBtnList;

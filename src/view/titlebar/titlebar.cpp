@@ -41,6 +41,8 @@ TitleBar::~TitleBar()
 void TitleBar::setWidgetUi()
 {
     // 组件初始化
+    m_ptitleLab = new QLabel(this);
+
     m_cameraCount = MySettings::getInstance()->getValue(SysSection, CameraCountsKey).toInt();
     m_pCameraBtnGroup = new QButtonGroup(this);
 
@@ -114,6 +116,10 @@ void TitleBar::setWidgetUi()
     m_pBtnLayout->setContentsMargins(0, 0, 0, 0);
     m_pBtnLayout->setSpacing(6);
 
+    m_ptitleLab->setLayout(m_pCameraBtnLayout);
+    m_ptitleLab->setFixedSize(250, 30);
+    m_ptitleLab->setGeometry(0, 0, 250, 30);
+
     this->setLayout(m_pBtnLayout);
 
     m_pBtnGroup->addButton(m_pStartBtn);
@@ -173,6 +179,9 @@ void TitleBar::setWidgetStyle()
     m_pNGRecordBtn->setText("NG记录");
     m_pDelAlarmBtn->setText("删除报警");
     m_pCloseBtn->setText("退出");
+
+//    m_ptitleLab->setStyleSheet("background:#00BFFF;color:#FFFF00;border-radius:4px;");
+//    m_ptitleLab->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
     QPalette pal = m_pDelAlarmBtn->palette();
     pal.setColor(QPalette::Button,Qt::red);
