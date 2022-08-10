@@ -29,43 +29,53 @@ public:
     MyGraphicsItem(QPointF center, QPointF edge, ItemType type);
     ~MyGraphicsItem();
 
+    // 中心点
     QPointF getCenter() { return m_center; }
     void setCenter(QPointF p) { m_center = p; }
 
+    // 边缘点
     QPointF getEdge() { return m_edge; }
     void setEdge(QPointF p) { m_edge = p; }
 
+    // 获取类型
     ItemType getType() { return m_type; }
 
+    // 获取真正的中心点坐标
     QPointF getRealCenter() { return scenePos() + boundingRect().center(); }
+
+    // 获取边缘点列表
     QList<QPointF> getMyPointList();
 
+    // 精确度
     int getAccuracy() { return m_accuracy; }
     void setAccuracy(int acc) { m_accuracy = acc; }
 
+    // 像素值
     int getPixel() { return m_pixel; }
     void setPixel(int pix) { m_pixel = pix; }
 
-    QPointF m_center;
-    QPointF m_edge;
-    QList<QPointF> m_myPointList;
+    QPointF m_center;   // 中心点
+    QPointF m_edge;     // 边缘点
+    QList<QPointF> m_myPointList;   // 边缘点列表
 
-    ItemType m_type;
-    MyPointItemList m_pointList;
+    ItemType m_type;    // 类型
+    MyPointItemList m_pointList;    // 功能点列表
 
-    int m_accuracy;
-    int m_pixel;
+    int m_accuracy;     // 精确度
+    int m_pixel;        // 像素值
 
-    QPen m_penIsSelected;
-    QPen m_penNoSelected;
-    QPen m_penMaskArea;
+    QPen m_penIsSelected;   // 选中时画笔颜色
+    QPen m_penNoSelected;   // 未选中时画笔颜色
+    QPen m_penMaskArea;     // 屏蔽区画笔颜色
 
 protected:
+    // 焦点事件 选中和未选中
     virtual void focusInEvent(QFocusEvent *event) override;
     virtual void focusOutEvent(QFocusEvent *event) override;
 
 //    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 
+    // 绘制事件
     virtual void paint(QPainter *painter,
                        const QStyleOptionGraphicsItem *option,
                        QWidget *widget) override;
@@ -91,7 +101,7 @@ protected:
 //    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 };
 
-// 圆
+// 圆形
 class MyCircle : public MyEllipse
 {
 public:
@@ -102,8 +112,10 @@ public:
         return Type;
     }
 
+    // 更新半径
     void updateRadius();
 
+    // 获取边缘功能点
     MyPointItem *getEdgeItem();
 
 protected:
@@ -114,10 +126,10 @@ protected:
 //    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
 public:
-    qreal m_radius;
+    qreal m_radius; // 半径
 };
 
-// 同心圆
+// 同心圆 圆环 环形
 class MyConcentricCircle : public MyCircle
 {
 public:
@@ -126,9 +138,14 @@ public:
     int type() const {
         return Type;
     }
+
+    // 更新第二个半径
     void updateOtherRadius();
+
+    // 设置第二个边缘点
     void setAnotherEdge(QPointF p);
 
+    // 获取第二个边缘功能点
     MyPointItem *getAnotherEdgeItem();
 
 protected:
@@ -136,8 +153,8 @@ protected:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 public:
-    QPointF m_anotherEdge;
-    qreal m_anotherRadius;
+    QPointF m_anotherEdge;  // 第二个边缘点
+    qreal m_anotherRadius;  // 第二个半径
 };
 
 // 矩形
@@ -145,7 +162,11 @@ class MyRectangle : public MyGraphicsItem
 {
 public:
     MyRectangle(qreal x, qreal y, qreal width, qreal height, ItemType type);
+
+    // 获取矩形边长
     qreal getRectLength(QString type);
+
+    // 设置中心点和宽高
     void setRect(qreal x, qreal y, qreal width, qreal height);
 
     enum { Type = 23 };
@@ -153,6 +174,7 @@ public:
         return Type;
     }
 
+    // 获取边缘功能点
     MyPointItem *getEdgeItem();
 
 protected:
@@ -162,8 +184,8 @@ protected:
                        QWidget *widget) override;
 
 public:
-    qreal m_width;
-    qreal m_height;
+    qreal m_width;  // 宽度
+    qreal m_height; // 高度
 };
 
 
@@ -181,12 +203,17 @@ public:
 
     // 获取中心点
     QPointF getCentroid(QList<QPointF> list);
+
+    // 获取边缘点到中心点的最大距离
     void getMaxLength();
+
+    // 更新边缘点的坐标
     void updatePolygon(QPointF origin, QPointF end);
 
     // 判断点是否在边上
     bool isPointOnLine(QPointF point);
 
+    // 是否是屏蔽区
     void setMask(bool isMask);
     bool getMask();
 
@@ -194,6 +221,7 @@ public:
     void setPointList(QList<QPointF> edgePointList);
 
 public slots:
+    // 添加边缘点
     void pushPoint(QPointF p, QList<QPointF> list, bool isCenter);
 
 protected:
@@ -206,14 +234,14 @@ protected:
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 protected:
-    qreal m_radius;
-    bool m_isCreateFinished;
-    bool m_isMaskArea;
-    bool m_isAddPoint;
-    bool m_isAddedPoint;
-    int  m_addPoingIdx;
+    qreal m_radius;             // 半径 即边缘点到中心点的最大距离
+    bool m_isCreateFinished;    // 判断创建完成
+    bool m_isMaskArea;          // 判断屏蔽区
+    bool m_isAddPoint;          // 判断添加点
+    bool m_isAddedPoint;        // 判断已添加点
+    int  m_addPoingIdx;         // 添加点的位置
 
-    MyPointItem *m_newPoint;
+    MyPointItem *m_newPoint;    // 新边缘功能点
 };
 
 
@@ -229,14 +257,21 @@ public:
     int type() const {
         return Type;
     }
+
+    // 获取中心点
     QPointF getCentroid(QList<QPointF> list);
+
+    // 获取边缘点到中心点的最大距离
     void getMaxLength();
+
+    // 更新边缘点的坐标
     void updateCurve(QPointF origin, QPointF end);
 
     // 设置边缘点
     void setPointList(QList<QPointF> edgePointList);
 
 public slots:
+    // 添加边缘点
     void pushPoint(QPointF p, QList<QPointF> list, bool isCenter);
 
 protected:
@@ -246,8 +281,8 @@ protected:
                        QWidget *widget) override;
 
 protected:
-    qreal m_radius;
-    bool m_isCreateFinished;
+    qreal m_radius;             // 半径 即边缘点到中心点的最大距离
+    bool m_isCreateFinished;    // 判断创建完成
 };
 
 #endif // MYGRAPHICSITEM_H

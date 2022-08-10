@@ -29,7 +29,9 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
+    // 单例
     static MainWindow *getInstance();
+
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
@@ -42,6 +44,7 @@ public:
     // 设置初始数据
     void setData();
 
+    // 关闭事件
     void closeEvent(QCloseEvent *);
 
     // 设置运行状态
@@ -64,12 +67,6 @@ public:
 
     // 自动检测
     int autoDetectImage(int cameraId, int sceneId);
-
-public:
-    int status;
-
-private:
-    int init_SDK();
 
 private:
     // 标题栏

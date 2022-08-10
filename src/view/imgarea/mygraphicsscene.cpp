@@ -6,9 +6,11 @@
 MyGraphicsScene::MyGraphicsScene(QObject *parent)
     : QGraphicsScene(parent)
 {
+    // 初始化数据
     setData();
 }
 
+// 初始化数据
 void MyGraphicsScene::setData()
 {
 //    m_ploygonList = [];
@@ -112,6 +114,7 @@ void MyGraphicsScene::finishCreateConCircle()
 
 void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    // 创建多边形
     if (m_isCreatePolygon) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
 
@@ -121,6 +124,8 @@ void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         } else if (event->buttons() == Qt::RightButton) {
 //            finishCreatePloygon();
         }
+
+    // 创建曲线
     } else if (m_isCreateCurve) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
 
@@ -133,16 +138,22 @@ void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 //            finishCreateCurve();
 
         }
+
+    // 创建矩形
     } else if (m_isCreateRect) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
 
         BottomBar::getInstance()->createRect(p);
         m_isCreatingRect = true;
+
+    // 创建圆形
     } else if (m_isCreateCircle) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
 
         BottomBar::getInstance()->createCircle(p);
         m_isCreatingCircle = true;
+
+    // 创建环形
     } else if (m_isCreateConCir) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
 
@@ -155,11 +166,14 @@ void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void MyGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
+    // 曲线
     if (m_isCreateCurve && !m_isPauseCurve) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
         m_curveList.push_back(p);
 
         emit updateCurvePoint(p, m_curveList, false);
+
+    // 矩形
     } else if (m_isCreateRect && m_isCreatingRect) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
         MyRectangle *myRect = BottomBar::getInstance()->getNewMyRect();
@@ -170,6 +184,8 @@ void MyGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
         myRect->setEdge(p);
         edgeItem->scene()->update();
+
+    // 圆形
     } else if (m_isCreateCircle && m_isCreatingCircle) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
         MyCircle *myCircle = BottomBar::getInstance()->getNewMyCircle();
@@ -181,6 +197,8 @@ void MyGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         myCircle->setEdge(p);
         edgeItem->scene()->update();
         myCircle->updateRadius();
+
+    // 环形
     } else if (m_isCreateConCir && m_isCreatingConCir) {
         QPointF p(event->scenePos().x(), event->scenePos().y());
         MyConcentricCircle *myConCircle = BottomBar::getInstance()->getNewMyConCircle();
@@ -207,12 +225,19 @@ void MyGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void MyGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+    // 曲线
     if (m_isCreateCurve) {
         m_isPauseCurve = true;
+
+    // 矩形
     } else if (m_isCreatingRect) {
         finishCreateRect();
+
+    // 圆形
     } else if (m_isCreatingCircle) {
         finishCreateCircle();
+
+    // 环形
     } else if (m_isCreateConCir) {
         finishCreateConCircle();
     }

@@ -30,25 +30,25 @@ public:
     static void addOptRecord(QString optLog = "");
 
 private:
-    void prevPageBtnClick();
-    void nextPageBtnClick();
-    void closeBtnClick();
+    void prevPageBtnClick();    // 上一页
+    void nextPageBtnClick();    // 下一页
+    void closeBtnClick();       // 关闭
 
     // 获取模型数据
     void getModelData();
 
 private:
-    QPushButton *m_prevPageBtn;
-    QPushButton *m_nextPageBtn;
-    QPushButton *m_closeBtn;
+    QPushButton *m_prevPageBtn; // 上一页
+    QPushButton *m_nextPageBtn; // 下一页
+    QPushButton *m_closeBtn;    // 关闭
 
-    QTableView *m_optTableView;
-    QStandardItemModel *m_optModel;
+    QTableView *m_optTableView;     // 操作记录显示view
+    QStandardItemModel *m_optModel; // 操作记录数据model
 
-    QHBoxLayout *m_btnLayout;
-    QVBoxLayout *m_mainLayout;
+    QHBoxLayout *m_btnLayout;   // 按钮布局
+    QVBoxLayout *m_mainLayout;  // 总体布局
 
-    int m_pageValue = 17;
+    int m_pageValue = 17;       // 每页显示的记录条数
 };
 
 #endif // OPTRECORD_H

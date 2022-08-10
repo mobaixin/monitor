@@ -33,51 +33,51 @@ enum DB_RETURN_STATUS{              //数据库操作结果返回表
 };
 
 typedef struct ShapeItemData{
-    int cameraId;
-    int sceneId;
-    int moldId;
-    int itemId;
-    int type;
-    QString center;
-    QString edge;
-    QString pointList;
-    int accuracy;
-    int pixel;
+    int cameraId;       // 相机ID
+    int sceneId;        // 场景ID
+    int moldId;         // 模板ID(未使用)
+    int itemId;         // 图形ID(未使用)
+    int type;           // 图形类型
+    QString center;     // 中心点坐标
+    QString edge;       // 边缘点坐标
+    QString pointList;  // 边缘点坐标列表
+    int accuracy;       // 精确度
+    int pixel;          // 像素范围
 }ShapeItemData;
 
 typedef struct ImageMoldData{
-    int cameraId;
-    int sceneId;
-    int moldId;
-    QString imgPath;
-    QString imgContent;
-    QString time;
+    int cameraId;       // 相机ID
+    int sceneId;        // 场景ID
+    int moldId;         // 模板ID(未使用)
+    QString imgPath;    // 图片路径
+    QString imgContent; // 图片内容(未使用)
+    QString time;       // 时间
 }ImageMoldData;
 
 typedef struct NGRecordData{
-    QString time;
-    int cameraId;
-    int sceneId;
-    QString result;
-    QString imgPath;
+    QString time;       // 时间
+    int cameraId;       // 相机ID
+    int sceneId;        // 场景ID
+    QString result;     // 检测结果
+    QString imgPath;    // NG图片路径
 }NGRecordData;
 
 typedef struct OptRecordData{
-    int recordId;
-    QString time;
-    QString optorName;
-    QString optLog;
+    int recordId;       // 操作记录ID
+    QString time;       // 操作时间
+    QString optorName;  // 操作员
+    QString optLog;     // 操作内容
 }OptRecordData;
 
 typedef struct CameraIPData {
-    int cameraId;
-    QString serialId;
-    QString nickName;
-    QString portIp;
-    QString state;
-    QString cameraIp;
-    QString cameraMask;
-    QString cameraGateway;
+    int cameraId;           // 相机ID
+    QString serialId;       // 序列号
+    QString nickName;       // 自定义名称
+    QString portIp;         // 接口IP(本机网卡IP)
+    QString state;          // 相机状态
+    QString cameraIp;       // 相机IP
+    QString cameraMask;     // 相机掩码
+    QString cameraGateway;  // 相机网关
 }CameraIPData;
 
 class MyDataBase : public QObject
@@ -141,7 +141,6 @@ public:
     // 获取所有的操作记录
     QList<OptRecordData> queAllOptRecordData();
 
-
     // -----CameraIPDeploy表操作-----
     int addCameraIPData(CameraIPData cameraIPData);
     int delCameraIPData(CameraIPData cameraIPData);
@@ -152,12 +151,14 @@ public:
     QList<CameraIPData> queAllCameraIPData();
 
 public:
+    // 路径 静态变量
     static QString dbFilePath;
     static QString imgMoldFilePath;
     static QString imgNgFilePath;
     static QString txtNgFilePath;
 
 private:
+    // 数据检测
     bool checkShapeItemData(ShapeItemData itemData);
     bool checkImgMoldData(ImageMoldData imgData);
     bool checkNGRecordData(NGRecordData recordData);
@@ -165,9 +166,9 @@ private:
     bool checkCameraIPData(CameraIPData cameraIPData);
 
 private:
-    QSqlDatabase m_database;//数据库
-    QMutex m_mutex;
-    bool m_databaseOpenFlag = false;
+    QSqlDatabase m_database;    //数据库
+    QMutex m_mutex;             // 互斥锁
+    bool m_databaseOpenFlag = false;    // 数据库打开标识
 };
 
 #endif // MYDATABASE_H

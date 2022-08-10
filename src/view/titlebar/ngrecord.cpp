@@ -116,8 +116,6 @@ void NGRecord::setWidgetStyle()
 
 void NGRecord::setData()
 {
-    m_okTotalNum = 0;
-    m_ngTotalNum = 0;
     getModelData();
     m_ngTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     m_ngTableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);

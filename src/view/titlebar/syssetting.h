@@ -30,52 +30,52 @@ public:
     void setData();
 
 private:
-    void changeTimeBtnClick();
-    void ioSettingsBtnClick();
-    void cameraParaBtnClick();
-    void closeSetBtnClick();
+    void changeTimeBtnClick();          // 修改时间
+    void ioSettingsBtnClick();          // IO设置
+    void cameraParaBtnClick();          // 相机参数
+    void closeSetBtnClick();            // 关闭
 
-    void updateMoldDelay(int value);
-    void updateMoldTimes(int value);
-    void updateProdDelay(int value);
-    void updateProdTimes(int value);
-    void updateProdDetect(bool checked);
+    void updateMoldDelay(int value);    // 更新检模检测延时
+    void updateMoldTimes(int value);    // 更新检模重检次数
+    void updateProdDelay(int value);    // 更新产品检测延时
+    void updateProdTimes(int value);    // 更新产品重检次数
+    void updateProdDetect(bool checked);    // 更新启用产品检测
 
-    void updateCameraCount();
+    void updateCameraCount();           // 更新相机数
 
-    void updateDisPlay(bool isShowProd);
+    void updateDisPlay(bool isShowProd);    // 更新显示产品检测
 
 private:
-    QLabel *m_moldDelayLab;
-    QLabel *m_moldTimesLab;
-    QLabel *m_prodDelayLab;
-    QLabel *m_prodTimesLab;
-    QLabel *m_prodDetectLab;
-    QLabel *m_cameraCountLab;
+    QLabel *m_moldDelayLab;         // 检模检测延时
+    QLabel *m_moldTimesLab;         // 检模重检次数
+    QLabel *m_prodDelayLab;         // 产品检测延时
+    QLabel *m_prodTimesLab;         // 产品重检次数
+    QLabel *m_prodDetectLab;        // 产品检测启用
+    QLabel *m_cameraCountLab;       // 相机数
 
-    MySlider *m_moldDelaySlider;
-    MySlider *m_moldTimesSlider;
-    MySlider *m_prodDelaySlider;
-    MySlider *m_prodTimesSlider;
+    MySlider *m_moldDelaySlider;    // 检模检测延时滑动条
+    MySlider *m_moldTimesSlider;    // 检模重检次数滑动条
+    MySlider *m_prodDelaySlider;    // 产品检测延时滑动条
+    MySlider *m_prodTimesSlider;    // 产品重检次数滑动条
 
-    QRadioButton *m_prodDetectBtn;
+    QRadioButton *m_prodDetectBtn;  // 产品检测启用按钮
 
     // 相机数
     QList<QPushButton *> m_cameraBtnList;
     QButtonGroup *m_cameraBtnGroup;
 
-    QPushButton *m_changeTimeBtn;
-    QPushButton *m_ioSettingsBtn;
-    QPushButton *m_cameraParaBtn;
-    QPushButton *m_closeSetBtn;
+    QPushButton *m_changeTimeBtn;   // 修改时间
+    QPushButton *m_ioSettingsBtn;   // IO设置
+    QPushButton *m_cameraParaBtn;   // 相机参数
+    QPushButton *m_closeSetBtn;     // 关闭
 
-    QGridLayout *m_sysSetLayout;
-    QHBoxLayout *m_camBtnLayout;
-    QHBoxLayout *m_btnLayout;
-    QVBoxLayout *m_mainLayout;
+    QGridLayout *m_sysSetLayout;    // 设置布局
+    QHBoxLayout *m_camBtnLayout;    // 相机数布局
+    QHBoxLayout *m_btnLayout;       // 底部按钮布局
+    QVBoxLayout *m_mainLayout;      // 总体布局
 
-    CameraPara *m_cameraPara;
-    IOSetting *m_ioSetting;
+    CameraPara *m_cameraPara;       // 相机参数界面
+    IOSetting *m_ioSetting;         // IO设置界面
 };
 
 #endif // SYSSETTING_H
