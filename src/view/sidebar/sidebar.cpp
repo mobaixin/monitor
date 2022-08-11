@@ -758,7 +758,6 @@ void SideBar::delMoldBtnClick()
 {
     OptRecord::addOptRecord("点击删除模板");
 
-    bool isChange = false;
     ImageMoldData imgData;
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
     imgData.sceneId  = m_sceneId;
@@ -777,7 +776,6 @@ void SideBar::delMoldBtnClick()
 
             if (m_curDeteMoldIdx == m_deteMoldNum) {
                 m_curDeteMoldIdx -= 1;
-                isChange = true;
             }
             MyDataBase::getInstance()->delImgMoldData(imgData);
             MyDataBase::getInstance()->updateImgMoldId(imgData);
@@ -790,7 +788,6 @@ void SideBar::delMoldBtnClick()
 
             if (m_curProdMoldIdx == m_prodMoldNum) {
                 m_curProdMoldIdx -= 1;
-                isChange = true;
             }
             MyDataBase::getInstance()->delImgMoldData(imgData);
             MyDataBase::getInstance()->updateImgMoldId(imgData);
@@ -800,9 +797,7 @@ void SideBar::delMoldBtnClick()
     updateOrderLab();
     MainWindow::getInstance()->setDetectObject();
 
-    if (isChange) {
-        loadCurImage();
-    }
+    loadCurImage();
 }
 
 void SideBar::clearMoldBtnClick()
