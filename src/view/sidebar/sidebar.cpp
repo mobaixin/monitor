@@ -592,7 +592,7 @@ void SideBar::saveMoldBtnClick()
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
     imgData.sceneId  = SideBar::getInstance()->getCurSceneID();
     imgData.moldId   = SideBar::getInstance()->getCurMoldNum();
-    imgData.imgPath  = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
+    imgData.imgPath  = QString("%1/%2.jpg").arg(MyDataBase::imgMoldFilePath).arg(fileName);
     imgData.time     = timeStr;
 
     MyDataBase::getInstance()->addImgMoldData(imgData);

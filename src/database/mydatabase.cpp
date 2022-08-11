@@ -93,6 +93,7 @@ int MyDataBase::initDataBase()
                                        "type INTEGER,"
                                        "center VARCHAR(20),"
                                        "edge VARCHAR(20),"
+                                       "bound_rect VARCHAR(20),"
                                        "point_list TEXT,"
                                        "accuracy INTEGER,"
                                        "pixel INTEGER,"
@@ -163,8 +164,8 @@ int MyDataBase::addShapeItemData(ShapeItemData itemData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("INSERT INTO shape_item (camera_id, scene_id, mold_id, type, center, edge, point_list, accuracy, pixel) VALUES "
-                          "(:camera_id, :scene_id, :mold_id, :type, :center, :edge, :point_list, :accuracy, :pixel)");
+            query.prepare("INSERT INTO shape_item (camera_id, scene_id, mold_id, type, center, edge, bound_rect, point_list, accuracy, pixel) VALUES "
+                          "(:camera_id, :scene_id, :mold_id, :type, :center, :edge, :bound_rect, :point_list, :accuracy, :pixel)");
 
             query.bindValue(":camera_id",  QString::number(itemData.cameraId));
             query.bindValue(":scene_id",   QString::number(itemData.sceneId));
@@ -172,6 +173,7 @@ int MyDataBase::addShapeItemData(ShapeItemData itemData)
             query.bindValue(":type",       QString::number(itemData.type));
             query.bindValue(":center",     itemData.center);
             query.bindValue(":edge",       itemData.edge);
+            query.bindValue(":bound_rect", itemData.boundRect);
             query.bindValue(":point_list", itemData.pointList);
             query.bindValue(":accuracy",   QString::number(itemData.accuracy));
             query.bindValue(":pixel",      QString::number(itemData.pixel));
@@ -250,6 +252,7 @@ QList<ShapeItemData> MyDataBase::queShapeItemData(ShapeItemData itemData)
         resData.type      = query.value("type").toInt();
         resData.center    = query.value("center").toString();
         resData.edge      = query.value("edge").toString();
+        resData.boundRect = query.value("bound_rect").toString();
         resData.pointList = query.value("point_list").toString();
         resData.accuracy  = query.value("accuracy").toInt();
         resData.pixel     = query.value("pixel").toInt();
@@ -270,7 +273,7 @@ int MyDataBase::altShapeItemData(ShapeItemData itemData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("UPDATE shape_item SET type=:type, center=:center, edge=:edge, point_list=:point_list, accuracy=:accuracy, pixel=:pixel "
+            query.prepare("UPDATE shape_item SET type=:type, center=:center, edge=:edge, bound_rect=:bound_rect, point_list=:point_list, accuracy=:accuracy, pixel=:pixel "
                           "WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id=:mold_id");
 
             query.bindValue(":camera_id",  QString::number(itemData.cameraId));
@@ -279,6 +282,7 @@ int MyDataBase::altShapeItemData(ShapeItemData itemData)
             query.bindValue(":type",       QString::number(itemData.type));
             query.bindValue(":center",     itemData.center);
             query.bindValue(":edge",       itemData.edge);
+            query.bindValue(":bound_rect", itemData.boundRect);
             query.bindValue(":point_list", itemData.pointList);
             query.bindValue(":accuracy",   QString::number(itemData.accuracy));
             query.bindValue(":pixel",      QString::number(itemData.pixel));

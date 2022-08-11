@@ -43,6 +43,9 @@ public:
     // 获取真正的中心点坐标
     QPointF getRealCenter() { return scenePos() + boundingRect().center(); }
 
+    // 获取外接矩形的左上角坐标
+    QPointF getRealTopLeft() { return scenePos() + boundingRect().topLeft(); }
+
     // 获取边缘点列表
     QList<QPointF> getMyPointList();
 

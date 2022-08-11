@@ -94,16 +94,16 @@ signals:
     void updateShapeImgMoldSig(int cameraId, int sceneId);
 
 private:
-    void positionBtnClick();
-    void checkMoldBtnClick();
-    void productBtnClick();
-    void saveMoldBtnClick();
-    void addMoldBtnClick();
-    void homePageBtnClick();
-    void prevPageBtnClick();
-    void nextPageBtnClick();
-    void delMoldBtnClick();
-    void clearMoldBtnClick();
+    void positionBtnClick();    // 位置
+    void checkMoldBtnClick();   // 检模
+    void productBtnClick();     // 产品
+    void saveMoldBtnClick();    // 保存模板
+    void addMoldBtnClick();     // 添加模板
+    void homePageBtnClick();    // 首页
+    void prevPageBtnClick();    // 上一页
+    void nextPageBtnClick();    // 下一页
+    void delMoldBtnClick();     // 删除模板
+    void clearMoldBtnClick();   // 清空模板
 
     // 更新模板序号显示
     void updateOrderLab();

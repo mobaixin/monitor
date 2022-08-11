@@ -100,6 +100,10 @@ typedef struct CameraDetectData {
     QList<Mat> prodShapeMaskList;       // 产品图形掩膜列表
     QList<MyMOG2Data> moldMOG2DataList; // 检模学习数据列表
     QList<MyMOG2Data> prodMOG2DataList; // 产品学习数据列表
+    QList<QPointF> moldShapeCenterList; // 检模图形中心点列表
+    QList<QPointF> moldShapeBoundList;  // 检模图形外接矩形
+    QList<QPointF> prodShapeCenterList; // 产品图形中心点列表
+    QList<QPointF> prodShapeBoundList;  // 产品图形外接矩形
 } CameraDetectData;
 
 // 相机运行状态
@@ -228,9 +232,6 @@ public:
     // 获取item数
     int getShapeItemNum(int cameraId);
 
-    // 获取opencv mask
-    Mat getShapeMask(ShapeItemData itemData, QImage img, QList<ShapeItemData> maskItemData);
-
     // 设置显示状态
     void setShowState(bool isShow, int cameraId = -1);
 
@@ -314,9 +315,6 @@ private:
 
     // 坐标列表转字符串
     QString pointListToStr(QList<QPointF> pointList);
-
-    // 获取MOG2
-    Ptr<BackgroundSubtractorMOG2> getMOG2Data(ShapeItemData itemData);
 
     // QImage和Mat格式转换
     static QImage matToQim(Mat & mat);
@@ -441,95 +439,24 @@ public:
     // 图片检测
     void detectImage(QImage imgFg, int cameraId, int sceneId, int &detectRes);
 
-private:
-    // Mat列表内存回收
-    void releaseMatList(QList<Mat> &matList);
-
 signals:
+    // 检测结果信号
     void resultReadySig(int result, QVector<QVector<QPointF>> resPointList, QList<int> resAreaSizeList);
 
 private:
+    // QImage和Mat格式转换
     static QImage matToQim(Mat & mat);
     static Mat qimToMat(QImage & qim);
 
 private:
-    QSize m_sceneRectSize;
+    QSize m_sceneRectSize;  // 场景尺寸 即图片要缩放的尺寸
 
-    // opencv
-    int m_minArea;
-    Mat m_frame;
-    Mat m_fgMaskMOG2;
-    Mat m_maskCountour;
+    QList<Mat> m_moldShapeMaskList;         // 检模图形掩膜列表
+    QList<Mat> m_prodShapeMaskList;         // 产品图形掩膜列表
+    QList<MyMOG2Data> m_moldMOG2DataList;   // 检模学习数据列表
+    QList<MyMOG2Data> m_prodMOG2DataList;   // 产品学习数据列表
 
-    QList<Mat> m_moldShapeMaskList;
-    QList<Mat> m_prodShapeMaskList;
-    QList<MyMOG2Data> m_moldMOG2DataList;
-    QList<MyMOG2Data> m_prodMOG2DataList;
-
-    QList<CameraDetectData> m_cameraDetectDataList;
+    QList<CameraDetectData> m_cameraDetectDataList; // 相机检测数据列表
 };
-
-
-static std::string base64Encode(const unsigned char* Data, int DataByte) {
-    //编码表
-    const char EncodeTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    //返回值
-    std::string strEncode;
-    unsigned char Tmp[4] = { 0 };
-    int LineLength = 0;
-    for (int i = 0; i < (int)(DataByte / 3); i++) {
-        Tmp[1] = *Data++;
-        Tmp[2] = *Data++;
-        Tmp[3] = *Data++;
-        strEncode += EncodeTable[Tmp[1] >> 2];
-        strEncode += EncodeTable[((Tmp[1] << 4) | (Tmp[2] >> 4)) & 0x3F];
-        strEncode += EncodeTable[((Tmp[2] << 2) | (Tmp[3] >> 6)) & 0x3F];
-        strEncode += EncodeTable[Tmp[3] & 0x3F];
-        if (LineLength += 4, LineLength == 76) { strEncode += "\r\n"; LineLength = 0; }
-    }
-    //对剩余数据进行编码
-    int Mod = DataByte % 3;
-    if (Mod == 1) {
-        Tmp[1] = *Data++;
-        strEncode += EncodeTable[(Tmp[1] & 0xFC) >> 2];
-        strEncode += EncodeTable[((Tmp[1] & 0x03) << 4)];
-        strEncode += "==";
-    }
-    else if (Mod == 2) {
-        Tmp[1] = *Data++;
-        Tmp[2] = *Data++;
-        strEncode += EncodeTable[(Tmp[1] & 0xFC) >> 2];
-        strEncode += EncodeTable[((Tmp[1] & 0x03) << 4) | ((Tmp[2] & 0xF0) >> 4)];
-        strEncode += EncodeTable[((Tmp[2] & 0x0F) << 2)];
-        strEncode += "=";
-    }
-
-
-    return strEncode;
-}
-
-//imgType 包括png bmp jpg jpeg等opencv能够进行编码解码的文件
-static std::string Mat2Base64(const cv::Mat &img, std::string imgType) {
-    //Mat转base64
-    std::string img_data;
-    std::vector<uchar> vecImg;
-    std::vector<int> vecCompression_params;
-    vecCompression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
-    vecCompression_params.push_back(90);
-    imgType = "." + imgType;
-    cv::imencode(imgType, img, vecImg, vecCompression_params);
-    img_data = base64Encode(vecImg.data(), vecImg.size());
-    return img_data;
-}
-
-
-//static cv::Mat Base2Mat(std::string &base64_data) {
-//    cv::Mat img;
-//    std::string s_mat;
-//    s_mat = base64Decode(base64_data.data(), base64_data.size());
-//    std::vector<char> base64_img(s_mat.begin(), s_mat.end());
-//    img = cv::imdecode(base64_img, CV_LOAD_IMAGE_COLOR);
-//    return img;
-//}
 
 #endif // IMG_AREA

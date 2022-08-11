@@ -40,6 +40,7 @@ typedef struct ShapeItemData{
     int type;           // 图形类型
     QString center;     // 中心点坐标
     QString edge;       // 边缘点坐标
+    QString boundRect;  // 外接矩形的宽度和高度
     QString pointList;  // 边缘点坐标列表
     int accuracy;       // 精确度
     int pixel;          // 像素范围
@@ -48,7 +49,7 @@ typedef struct ShapeItemData{
 typedef struct ImageMoldData{
     int cameraId;       // 相机ID
     int sceneId;        // 场景ID
-    int moldId;         // 模板ID(未使用)
+    int moldId;         // 图片模板ID
     QString imgPath;    // 图片路径
     QString imgContent; // 图片内容(未使用)
     QString time;       // 时间
