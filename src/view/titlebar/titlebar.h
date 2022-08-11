@@ -90,6 +90,7 @@ private:
     QButtonGroup *m_pBtnGroup;
     QList<QAbstractButton *> m_pBtnList;
 
+    //监视设定状态
     bool m_pIsSetMonitor;
 
     // 系统设定

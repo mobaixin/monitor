@@ -298,6 +298,19 @@ void TitleBar::cameraBtnListClick()
 {
 //    m_pTestBtn->setDisabled(false);
 
+    if(getMonitorSetState())
+    {
+        // 清除数据库中的图形模板
+        ShapeItemData itemData;
+        itemData.cameraId = m_cameraId;
+        itemData.sceneId  = SideBar::getInstance()->getCurSceneID();
+
+        MyDataBase::getInstance()->delSceneShapeItemData(itemData);
+
+        // 将图形模板保存至数据库
+        ImgArea::getInstance()->getShapeItems();
+    }
+
     int i = 0;
     for (; i < m_pCameraBtnList.size(); i++) {
         if (m_pCameraBtnList[i]->isChecked()) {
