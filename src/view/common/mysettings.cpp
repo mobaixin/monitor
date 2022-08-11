@@ -84,6 +84,6 @@ void MySettings::setIOInitValue()
 
     m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(PeriodSigKey),     "0");
     m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(AseismicLevelKey), "3");
-    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(MaxSampleNumKey),  "20");
+    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(MaxSampleNumKey),  "10");
     m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(MaxReDeteNumKey),  "10");
 }

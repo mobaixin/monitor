@@ -1402,12 +1402,13 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
             // 显示检测结果
             setDetectRes(true, m_detectSceneId);
 
+            // TODO: 根据检测结果控制指示灯的变化
             // 指示灯变化
-            if (m_detectSceneId == 1) {
-                SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
-            } else {
-                SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
-            }
+//            if (m_detectSceneId == 1) {
+//                SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
+//            } else {
+//                SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
+//            }
 
             // 顶栏变化
 //            TitleBar::getInstance()->setAlarmBtnState(false);
@@ -1480,7 +1481,6 @@ int ImgArea::detectImage(QImage imgFg, int cameraId, int sceneId)
         return DetectRes::OK;
     }
 
-    qDebug() << "before startDetectImageSig";
     emit startDetectImageSig(imgFg, cameraId, sceneId, detectRes);
     return detectRes;
 }
@@ -2491,7 +2491,7 @@ void DetectImageWork::detectImage(QImage imgFg, int cameraId, int sceneId, int &
             }
 
 //            imshow(QString("mask_%1_%2").arg(i).arg(j).toStdString(), mask);
-            imshow(QString("fgMaskMat_%1_%2").arg(i).arg(j).toStdString(), myMOG2Data.fgMaskMat);
+//            imshow(QString("fgMaskMat_%1_%2").arg(i).arg(j).toStdString(), myMOG2Data.fgMaskMat);
 //            imshow(QString("detect result_%1_%2").arg(i).arg(j).toStdString(), srcFg);
 
 //            myMOG2Data.myMOG2->clear();

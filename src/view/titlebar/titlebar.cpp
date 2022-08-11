@@ -298,7 +298,7 @@ void TitleBar::cameraBtnListClick()
 {
 //    m_pTestBtn->setDisabled(false);
 
-    if(getMonitorSetState())
+    if (getMonitorSetState())
     {
         // 清除数据库中的图形模板
         ShapeItemData itemData;
@@ -311,6 +311,10 @@ void TitleBar::cameraBtnListClick()
         ImgArea::getInstance()->getShapeItems();
     }
 
+    // 获取上一个相机的ID
+    int prevCamId = m_cameraId;
+
+    // 获取当前相机ID
     int i = 0;
     for (; i < m_pCameraBtnList.size(); i++) {
         if (m_pCameraBtnList[i]->isChecked()) {
@@ -322,6 +326,11 @@ void TitleBar::cameraBtnListClick()
 
     // 显示单个相机画面
     ImgArea::getInstance()->showSingleCameraView(m_cameraId);
+
+    if (m_pIsSetMonitor) {
+        // 切换相机时恢复上一个相机的视频流显示
+        ImgArea::getInstance()->setShowState(true, prevCamId);
+    }
 
     // 侧边栏数据更新
     SideBar::getInstance()->updateShowData();
@@ -458,6 +467,12 @@ void TitleBar::testBtnClick()
 {
     OptRecord::addOptRecord("点击测试");
     NGRecord::addNgTextRecord(QString("相机%1 场景%2 手动检测").arg(m_cameraId).arg(SideBar::getInstance()->getCurSceneID()));
+
+    if (SideBar::getInstance()->getCurSceneID() == 1) {
+        SideBar::getInstance()->setCanClampMoldState(RadioBtnState::Correct);
+    } else {
+        SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
+    }
 
     // 测试延时自动检测
 //    m_detectTime = QDateTime::currentDateTime();
