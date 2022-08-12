@@ -184,7 +184,7 @@ public:
     QImage saveAsImage(QString imgPath);
 
     // 设置分辨率
-    void setResolution(int index);
+    void setResolution(int cameraId);
 
     // 设置曝光时间
     void setExposeTime(int value, int cameraId = -1);

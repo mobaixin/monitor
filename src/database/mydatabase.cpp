@@ -801,6 +801,7 @@ QList<OptRecordData> MyDataBase::queAllOptRecordData()
 int MyDataBase::addCameraIPData(CameraIPData cameraIPData)
 {
     bool queryRes = true;
+    qDebug() << "cameraId:" << cameraIPData.cameraId;
 
     if (!checkCameraIPData(cameraIPData)) {
         return INVALID_INPUT;

@@ -328,15 +328,20 @@ void ImgArea::setData()
                 m_cameraViewDataList[id].cameraParaData.analogGainMin   = m_analogGainMin;
                 m_cameraViewDataList[id].cameraParaData.analogGainMax   = m_analogGainMax;
 
+                // 自动白平衡
     //            CameraSetOnceWB(g_hCamera);
                 qDebug() << "after initParameter: " << id + 1;
 
-//                connect(m_cameraViewDataList[id].camThread, SIGNAL(captured(QImage, int)),
-//                        this, SLOT(imageProcess(QImage, int)), Qt::BlockingQueuedConnection);
+                // 设置相机分辨率
+                setResolution(id + 1);
 
+                // 开始获取视频流
                 m_cameraViewDataList[id].camThread->start();
                 m_cameraViewDataList[id].camThread->stream();
                 setRunState(CameraState::Running);
+
+                // 保存相机参数
+                saveCameraPara(id + 1);
             }
             status = 1;
 
@@ -946,9 +951,19 @@ QImage ImgArea::saveAsImage(QString imgPath)
 }
 
 // 设置分辨率
-void ImgArea::setResolution(int index)
+void ImgArea::setResolution(int cameraId)
 {
-    tSdkImageResolution   *pImageSizeDesc=g_tCapability[index].pImageSizeDesc;// 预设分辨率选择
+    tSdkImageResolution *pImageSizeDesc = g_tCapability[cameraId - 1].pImageSizeDesc;   // 预设分辨率选择
+    int iImageSizeDesc = g_tCapability[cameraId - 1].iImageSizeDesc;    // 预设分辨率的个数
+
+    // 获取1920*1080分辨率选项索引
+    const int imageWidth = 1920;
+    int index = 0;
+    for (; index < iImageSizeDesc; index++) {
+        if (pImageSizeDesc[index].iWidth == imageWidth) {
+            break;
+        }
+    }
 
     g_W_H_INFO.sensor_width=pImageSizeDesc[index].iWidth;
     g_W_H_INFO.sensor_height=pImageSizeDesc[index].iHeight;
@@ -970,12 +985,10 @@ void ImgArea::setResolution(int index)
         g_W_H_INFO.yOffsetFOV=0;
     }
 
-    for (int i = 0; i < m_cameraCounts; i++) {
-        m_cameraViewDataList[i].camThread->pause();
-        //设置预览的分辨率。
-        CameraSetImageResolution(g_hCamera[i],&(pImageSizeDesc[index]));
-        m_cameraViewDataList[i].camThread->stream();
-    }
+//    m_cameraViewDataList[i].camThread->pause();
+    //设置预览的分辨率。
+    CameraSetImageResolution(g_hCamera[cameraId - 1],&(pImageSizeDesc[index]));
+//    m_cameraViewDataList[i].camThread->stream();
 
 }
 
@@ -1119,12 +1132,12 @@ int ImgArea::initSDK()
         ipInfo[i] = (QString("000000000000000").toUtf8()).data();
     }
 
-    char *getCamIp   = (QString("00000000000000").toUtf8()).data();
-    char *getCamMask = (QString("00000000000000").toUtf8()).data();
-    char *getCamGate = (QString("000000000000").toUtf8()).data();
-    char *getLocalIp = (QString("00000000000000").toUtf8()).data();
-    char *getLocalMask   = (QString("00000000000000").toUtf8()).data();
-    char *getLocalGate   = (QString("000000000000").toUtf8()).data();
+    char *getCamIp   = (QString("0000000000000000").toUtf8()).data();
+    char *getCamMask = (QString("0000000000000000").toUtf8()).data();
+    char *getCamGate = (QString("0000000000000000").toUtf8()).data();
+    char *getLocalIp = (QString("0000000000000000").toUtf8()).data();
+    char *getLocalMask   = (QString("0000000000000000").toUtf8()).data();
+    char *getLocalGate   = (QString("0000000000000000").toUtf8()).data();
 
     for (int id = 0; id < m_cameraCounts; id++){
         // 调用获取IP的接口 偶尔也会出错
@@ -1150,8 +1163,8 @@ int ImgArea::initSDK()
         // 数据库交互
         CameraIPData cameraIPData;
         cameraIPData.cameraId = id + 1;
-        cameraIPData.serialId = QString(tCameraEnumList[0].acSn);
-        cameraIPData.nickName = QString(tCameraEnumList[0].acFriendlyName);
+        cameraIPData.serialId = QString(tCameraEnumList[id].acSn);
+        cameraIPData.nickName = QString(tCameraEnumList[id].acFriendlyName);
         cameraIPData.portIp   = cameraGigeEtIp;
         cameraIPData.state    = "可用";
         cameraIPData.cameraIp = cameraIp;
@@ -1182,7 +1195,7 @@ int ImgArea::initSDK()
             }
 
             // 跳过当前相机
-            continue;
+//            continue;
 
             // 根据情况返回不同的值
 //            if (res == CAMERA_STATUS_SUCCESS) {
@@ -1194,11 +1207,11 @@ int ImgArea::initSDK()
         }
 
         // 获取相机序列号信息
-        qDebug() << tCameraEnumList[0].acProductSeries;
-        qDebug() << tCameraEnumList[0].acProductName;
-        qDebug() << tCameraEnumList[0].acFriendlyName;
-        qDebug() << tCameraEnumList[0].acLinkName;
-        qDebug() << tCameraEnumList[0].acSn;
+        qDebug() << tCameraEnumList[id].acProductSeries;
+        qDebug() << tCameraEnumList[id].acProductName;
+        qDebug() << tCameraEnumList[id].acFriendlyName;
+        qDebug() << tCameraEnumList[id].acLinkName;
+        qDebug() << tCameraEnumList[id].acSn;
 //        qDebug() << "1";
 
         //相机初始化。初始化成功后，才能调用任何其他相机相关的操作接口
@@ -1219,6 +1232,13 @@ int ImgArea::initSDK()
 
             // 跳过当前相机
             continue ;
+        }
+
+        // 数据库交互
+        if (MyDataBase::getInstance()->queCameraIPData(cameraIPData).cameraId == -1) {
+            MyDataBase::getInstance()->addCameraIPData(cameraIPData);
+        } else {
+            MyDataBase::getInstance()->altCameraIPData(cameraIPData);
         }
 
 //        qDebug() << "2";
