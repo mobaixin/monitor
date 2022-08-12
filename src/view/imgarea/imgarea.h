@@ -18,15 +18,16 @@
 #include <QList>
 #include <QTimer>
 #include <QThread>
-#include <windows.h>
+
 #include <opencv2\opencv.hpp>
-#include <iostream>
-#include <stdlib.h>
-#include <string.h>
+//#include <iostream>
+//#include <stdlib.h>
+//#include <string.h>
 
 #include "src/view/imgarea/mygraphicsitem.h"
 #include "src/view/imgarea/mygraphicsscene.h"
 #include "src/camera/capturethread.h"
+#include <windows.h>
 #include "src/camera/Include/CameraApi.h"
 #include "src/database/mydatabase.h"
 
@@ -119,6 +120,7 @@ enum DetectRes {
     OK = 1,         // OK
 };
 
+// 检测图片类
 class DetectImageWork;
 
 class ImgArea : public QWidget
@@ -378,7 +380,7 @@ private:
 
     // 本机IP地址
 //    QString m_ifaceIp  = QString("192.168.0.10%1");
-    QString m_ifaceIp  = QString("192.168.%1.10%2");
+    QString m_ifaceIp  = QString("192.168.%1.20%2");
 
     // 相机IP地址
 //    QString m_cameraIp = QString("192.168.0.11%1");
@@ -416,7 +418,7 @@ private:
     QList<CameraViewData> m_cameraViewDataList;
 };
 
-
+// 检测图片类
 class DetectImageWork : public QObject
 {
     Q_OBJECT

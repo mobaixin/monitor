@@ -69,6 +69,12 @@ HEADERS += \
     src/camera/camera.h \
     src/camera/capturethread.h \
     src/camera/resource.h \
+    src/camera/include/CameraApi.h \
+    src/camera/include/CameraApiLoad.h \
+    src/camera/include/CameraDefine.H \
+    src/camera/include/CameraGrabber.h \
+    src/camera/include/CameraImage.h \
+    src/camera/include/CameraStatus.h \
     src/database/mydatabase.h \
 #    src/serialport/myserialport.h \
 #    src/serialport/usb2gpio.h \
