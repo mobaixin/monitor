@@ -66,7 +66,7 @@ ImgArea::~ImgArea()
 {
     qDebug() << "~ImgArea";
 
-    for (int i = 0; i < m_cameraCounts; i++) {
+    for (int i = 0; i < 4; i++) {
 
         m_cameraViewDataList[i].camThread->stop();
         while (!m_cameraViewDataList[i].camThread->wait(100))
@@ -1106,22 +1106,28 @@ int ImgArea::initSDK()
     }
 
 //    // 获取相机IP信息
-//    char* ipInfo[7];
+//    char* ipInfo1[7];
+//    int res1;
 //    for (int i = 0; i < 7; i++) {
-//        ipInfo[i] = QString("0000000000000").toUtf8().data();
+//        ipInfo1[i] = (QString("00000000000000000").toUtf8()).data();
 //    }
 
-//    CameraGigeGetIp(&tCameraEnumList[0], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
+//    res1 = CameraGigeGetIp(&tCameraEnumList[0], ipInfo1[0], ipInfo1[1], ipInfo1[2], ipInfo1[3], ipInfo1[4], ipInfo1[5]);
 
 //    for (int i = 0; i < 6; i++) {
-//        qDebug() << ipInfo[i];
+//        qDebug() << ipInfo1[i];
 //    }
 
 //    qDebug() << " ";
-//    CameraGigeGetIp(&tCameraEnumList[1], ipInfo[0], ipInfo[1], ipInfo[2], ipInfo[3], ipInfo[4], ipInfo[5]);
+
+//    for (int i = 0; i < 7; i++) {
+//        ipInfo1[i] = (QString("00000000000000000").toUtf8()).data();
+//    }
+
+//    res1 = CameraGigeGetIp(&tCameraEnumList[0], ipInfo1[0], ipInfo1[1], ipInfo1[2], ipInfo1[3], ipInfo1[4], ipInfo1[5]);
 
 //    for (int i = 0; i < 6; i++) {
-//        qDebug() << ipInfo[i];
+//        qDebug() << ipInfo1[i];
 //    }
 
 //    m_cameraCounts = 4;
@@ -1132,14 +1138,22 @@ int ImgArea::initSDK()
         ipInfo[i] = (QString("000000000000000").toUtf8()).data();
     }
 
-    char *getCamIp   = (QString("0000000000000000").toUtf8()).data();
-    char *getCamMask = (QString("0000000000000000").toUtf8()).data();
-    char *getCamGate = (QString("0000000000000000").toUtf8()).data();
-    char *getLocalIp = (QString("0000000000000000").toUtf8()).data();
-    char *getLocalMask   = (QString("0000000000000000").toUtf8()).data();
-    char *getLocalGate   = (QString("0000000000000000").toUtf8()).data();
+    char *getCamIp   = (QString("00000000000000000").toUtf8()).data();
+    char *getCamMask = (QString("00000000000000000").toUtf8()).data();
+    char *getCamGate = (QString("00000000000000000").toUtf8()).data();
+    char *getLocalIp = (QString("00000000000000000").toUtf8()).data();
+    char *getLocalMask = (QString("00000000000000000").toUtf8()).data();
+    char *getLocalGate = (QString("00000000000000000").toUtf8()).data();
 
     for (int id = 0; id < m_cameraCounts; id++){
+        getCamIp   = (QString("00000000000000000").toUtf8()).data();
+        getCamMask = (QString("00000000000000000").toUtf8()).data();
+        getCamGate = (QString("00000000000000000").toUtf8()).data();
+        getLocalIp = (QString("00000000000000000").toUtf8()).data();
+        getLocalMask = (QString("00000000000000000").toUtf8()).data();
+        getLocalGate = (QString("00000000000000000").toUtf8()).data();
+
+
         // 调用获取IP的接口 偶尔也会出错
         int res = CameraGigeGetIp(&tCameraEnumList[id], getCamIp, getCamMask, getCamGate, getLocalIp, getLocalMask, getLocalGate);
 
@@ -1174,8 +1188,15 @@ int ImgArea::initSDK()
         // 判断本机IP和相机IP
         if (cameraGigeIp != cameraIp) {
             // 设置IP后 相机可能无法实时修改 需要重启应用
-//            int res = CameraGigeSetIp(&tCameraEnumList[id], (cameraIp.toLatin1()).data(), (cameraMask.toLatin1()).data(),
-//                                     (cameraGtway.toLatin1()).data(), true);
+            // 相机初始默认IP在169.254的IP段
+            if (cameraGigeIp.contains("169.254")) {
+                int res = CameraGigeSetIp(&tCameraEnumList[id], (cameraIp.toLatin1()).data(), (cameraMask.toLatin1()).data(),
+                                         (cameraGtway.toLatin1()).data(), true);
+
+                // 跳过当前相机
+                continue;
+            }
+
 
 //            if (res == CAMERA_STATUS_SUCCESS) {
 //                qDebug() << "相机IP设置成功";

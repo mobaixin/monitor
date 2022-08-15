@@ -18,12 +18,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 #INCLUDEPATH += D:\Documents\QTProjects\monitor\src\camera\include
-INCLUDEPATH += $$PWD\src\camera\include
+INCLUDEPATH += $$PWD/src/camera/Include
 
 #lib
 #LIBS += D:\Documents\QTProjects\monitor\src\camera\lib\MVCAMSDK.lib
 #LIBS += D:\Documents\QTProjects\monitor\src\camera\lib\MVCAMSDK_X64.lib
-LIBS += $$PWD\src\camera\lib\MVCAMSDK.lib
+LIBS += $$PWD/src/camera/lib/MVCAMSDK.lib
+LIBS += $$PWD/src/camera/lib/MVCAMSDK_X64.lib
 
 #LIBS += "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\legacy_stdio_definitions.lib"
 #LIBS += D:\Documents\QTProjects\monitor\src\serialport\lib\Lucero.lib
@@ -69,12 +70,12 @@ HEADERS += \
     src/camera/camera.h \
     src/camera/capturethread.h \
     src/camera/resource.h \
-    src/camera/include/CameraApi.h \
-    src/camera/include/CameraApiLoad.h \
-    src/camera/include/CameraDefine.H \
-    src/camera/include/CameraGrabber.h \
-    src/camera/include/CameraImage.h \
-    src/camera/include/CameraStatus.h \
+    src/camera/Include/CameraApi.h \
+    src/camera/Include/CameraApiLoad.h \
+    src/camera/Include/CameraDefine.H \
+    src/camera/Include/CameraGrabber.h \
+    src/camera/Include/CameraImage.h \
+    src/camera/Include/CameraStatus.h \
     src/database/mydatabase.h \
 #    src/serialport/myserialport.h \
 #    src/serialport/usb2gpio.h \
@@ -117,7 +118,3 @@ DISTFILES += \
 RESOURCES += \
     data/database/database.qrc \
     data/img/img.qrc
-
-DISTFILES += \
-    lib/MVCAMSDK.lib \
-    lib/MVCAMSDK_X64.lib
