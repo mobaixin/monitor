@@ -591,11 +591,19 @@ void SideBar::saveMoldBtnClick()
     ImageMoldData imgData;
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
     imgData.sceneId  = SideBar::getInstance()->getCurSceneID();
-    imgData.moldId   = SideBar::getInstance()->getCurMoldNum();
+    imgData.moldId   = SideBar::getInstance()->getCurrentIdx();
     imgData.imgPath  = QString("%1/%2.jpg").arg(MyDataBase::imgMoldFilePath).arg(fileName);
     imgData.time     = timeStr;
 
-    MyDataBase::getInstance()->addImgMoldData(imgData);
+    // 删除原来的图片模板
+    ImageMoldData resImgData = MyDataBase::getInstance()->queImgMoldData(imgData);
+    QFile imgMoldFile(resImgData.imgPath);
+    if (imgMoldFile.exists()) {
+        imgMoldFile.remove();
+    }
+
+    // 图片模板数据更新
+    MyDataBase::getInstance()->altImgMoldData(imgData);
 
     QImage curImage = ImgArea::getInstance()->getCurImage(imgData.cameraId);
     curImage.save(imgData.imgPath);
