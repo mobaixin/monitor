@@ -5,7 +5,7 @@
 #include <QDebug>
 
 #include "mainwindow.h"
-#include "src/serialport/myserialport.h"
+//#include "src/serialport/myserialport.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
@@ -39,15 +39,22 @@ MainWindow::~MainWindow()
 
     MyDataBase::getInstance()->deleteLater();
     MySettings::getInstance()->deleteLater();
-    MySerialPort::getInstance()->deleteLater();
+//    MySerialPort::getInstance()->deleteLater();
 }
 
 // 初始化组件
 void MainWindow::setWidgetUi()
 {
+    this->setWindowFlags(Qt::Window);
+    this->setFixedSize(1350, 750);
+//    this->showFullScreen();
+
     MyDataBase::getInstance();
     MySettings::getInstance();
-    MySerialPort::getInstance();
+//    MySerialPort::getInstance();
+
+    // 获取数据库版本数据
+    MyDataBase::getInstance()->queAllDBVersionData();
 
     m_pMainWid   = new QWidget(this);
     m_pTitleBar  = TitleBar::getInstance(this);
@@ -70,10 +77,6 @@ void MainWindow::setWidgetUi()
     // 按钮事件绑定
     m_pBottomBar->setClearBtnConnect();
 
-    // 设置标题文字
-    m_pTitleBar->setTitleLab("相机1");
-    m_pTitleBar->setFixedHeight(30);
-
     m_pImgArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 }
@@ -81,9 +84,6 @@ void MainWindow::setWidgetUi()
 // 设置组件样式
 void MainWindow::setWidgetStyle()
 {
-    this->setWindowFlags(Qt::Window);
-    this->setFixedSize(1350, 750);
-//    this->showFullScreen();
 //    this->setWindowFlags(Qt::FramelessWindowHint);
     this->setWindowTitle("模具监视器");
 
@@ -102,7 +102,10 @@ void MainWindow::setWidgetStyle()
     m_pImgArea->setFixedSize(this->width(), this->height() - m_pTitleBar->height());
     m_pImgArea->setSceneSize();
 
-    showMonitorSet(false);
+//    showMonitorSet(false, 1);
+    m_pBottomBar->hide();
+    m_pSideBar->setDisplayState(false);
+    m_pImgArea->setShowState(true);
 }
 
 void MainWindow::setData()
@@ -154,17 +157,18 @@ void MainWindow::setRunState(int state)
     m_pImgArea->setRunState(state);
 }
 
-void MainWindow::showMonitorSet(bool isDisplay)
+void MainWindow::showMonitorSet(bool isDisplay, int cameraId)
 {
     if (isDisplay) {
         m_pBottomBar->show();
         m_pImgArea->setShowState(false);
+        m_pImgArea->setMonitorState(true, cameraId);
         setDetectObject();
     } else {
         m_pBottomBar->hide();
 //        ImgArea::getInstance()->clearShapes();
         m_pImgArea->setShowState(true);
-        m_pImgArea->setMonitorState(false);
+        m_pImgArea->setMonitorState(false, cameraId);
     }
     m_pSideBar->setDisplayState(isDisplay);
 }
@@ -234,7 +238,7 @@ int MainWindow::autoDetectImage(int cameraId, int sceneId)
         reDetectTimes = MySettings::getInstance()->getValue(SysSection, ProdTimesKey).toInt();
     }
 
-    qDebug() << delayTime << " " << reDetectTimes;
+//    qDebug() << delayTime << " " << reDetectTimes;
 
     m_pImgArea->autoDetectImage(cameraId, sceneId, delayTime * 1000, reDetectTimes);
 

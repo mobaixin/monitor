@@ -432,15 +432,6 @@ void BottomBar::circleBtnClick()
     OptRecord::addOptRecord("点击圆形");
 }
 
-void BottomBar::ellipseBtnClick()
-{
-    MyEllipse *ellipse = new MyEllipse(0, 0, 120, 80, MyGraphicsItem::ItemType::Ellipse);
-//    m_pAreaScene->addItem(ellipse);
-
-    ellipse->setAccuracy(getAccuracy());
-    ellipse->setPixel(getPixel());
-}
-
 void BottomBar::conCircleBtnClick()
 {
 //    MyConcentricCircle *conCircle = new MyConcentricCircle(500, 300, 50, 80, MyGraphicsItem::ItemType::Concentric_Circle);

@@ -1,4 +1,4 @@
-﻿#include <QVector>
+#include <QVector>
 #include <QDebug>
 #include <QMenu>
 #include <QSpinBox>
@@ -56,6 +56,7 @@ void MyGraphicsItem::focusOutEvent(QFocusEvent *event)
     Q_UNUSED(event);
     this->setPen(m_penNoSelected);
 
+    // 屏蔽区
     if (m_accuracy == -1) {
         this->setPen(m_penMaskArea);
     }
@@ -108,6 +109,7 @@ void MyGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
         font.setPixelSize(18);
         painter->setFont(font);
 
+        // 精确度和像素值文字
         painter->drawText(m_center.x() - 40, m_center.y(), QString("(%1, %2)").arg(m_accuracy).arg(m_pixel));
     }
 }
@@ -550,7 +552,7 @@ void MyPolygon::mousePressEvent(QGraphicsSceneMouseEvent *event)
     QPointF point = event->pos();
     isPointOnLine(point);
 
-    return QAbstractGraphicsShapeItem::mousePressEvent(event);
+    return QGraphicsItem::mousePressEvent(event);
 }
 
 void MyPolygon::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
@@ -566,7 +568,7 @@ void MyPolygon::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         m_newPoint->setPos(m_newPoint->getPoint());
         m_newPoint->scene()->update();
     } else {
-        return QAbstractGraphicsShapeItem::mouseMoveEvent(event);
+        return QGraphicsItem::mouseMoveEvent(event);
     }
 
 
@@ -575,7 +577,7 @@ void MyPolygon::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void MyPolygon::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     m_isAddedPoint = false;
-    return QAbstractGraphicsShapeItem::mouseReleaseEvent(event);
+    return QGraphicsItem::mouseReleaseEvent(event);
 }
 
 MyCurve::MyCurve(MyGraphicsItem::ItemType type)

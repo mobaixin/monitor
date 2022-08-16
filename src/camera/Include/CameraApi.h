@@ -412,6 +412,28 @@ MVSDK_API CameraSdkStatus __stdcall CameraSnapToBuffer(
 
 /// @ingroup API_GRAB
 /// \~chinese
+/// \brief 抓拍一张JPEG格式图像到文件中。(仅部分相机硬件支持此功能)
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] lpszFileName 图片保存文件完整路径。
+/// \param [in] byQuality 图像保存的质量因子，范围1到100。
+/// \param [in] wTimes 抓取图像的超时时间，单位毫秒。在wTimes时间内还未获得图像，则该函数会返回超时错误。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Capture a JPEG format image into the file. (Only some camera hardware supports this function)
+/// \param [in] hCamera Handle of the camera.
+/// \param [in] lpszFileName The full path of the image file.
+/// \param [in] byQuality The quality factor of image saving, ranging from 1 to 100.
+/// \param [in] wTimes The timeout period for capturing images, in milliseconds. If the image is not obtained within wTimes, the function will return a timeout error.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraSnapJpegToFile(
+	CameraHandle    hCamera,
+	char const*     lpszFileName,
+	BYTE            byQuality,
+	UINT            wTimes
+	);
+
+/// @ingroup API_GRAB
+/// \~chinese
 /// \brief 释放由@link #CameraGetImageBuffer @endlink获得的缓冲区。
 /// \param [in] hCamera 相机的句柄。
 /// \param [in] pbyBuffer 帧缓冲区地址。
@@ -741,6 +763,54 @@ MVSDK_API CameraSdkStatus __stdcall CameraSetMediaType(
     CameraHandle    hCamera, 
     INT             iMediaType
 );
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 获取RAW数据的最大有效位数
+/// \param [in] hCamera 相机的句柄。
+/// \param [out] pMaxAvailBits	返回RAW的最大有效位数
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the maximum number of significant bits of RAW data
+/// \param [in] hCamera Camera handle.
+/// \param [out] pMaxAvailBits	returns the maximum number of significant bits of RAW data
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraGetRawMaxAvailBits(
+	CameraHandle    hCamera,
+	int*           pMaxAvailBits
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 设置RAW数据的输出起始位
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] startBit 起始BIT（默认输出高8位）
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Set the output start bit of RAW data
+/// \param [in] hCamera Camera handle.
+/// \param [in] startBit Start BIT (The high 8 bits are output by default)
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraSetRawStartBit(
+	CameraHandle    hCamera,
+	int             startBit
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 获取RAW数据的输出起始位
+/// \param [in] hCamera 相机的句柄。
+/// \param [out] startBit 起始BIT
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the output start bit of RAW data
+/// \param [in] hCamera Camera handle.
+/// \param [out] startBit Start BIT
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraGetRawStartBit(
+	CameraHandle    hCamera,
+	int*            startBit
+	);
 
 /// @ingroup API_EXPOSURE
 /// \~chinese
@@ -1454,12 +1524,14 @@ MVSDK_API CameraSdkStatus __stdcall CameraGetMultiExposureMaxCount(
 /// \param [in] iAnalogGain 设定的模拟增益值。
 /// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
 /// \note 该值乘以@link #tSdkExpose.fAnalogGainStep @endlink，就得到实际的图像信号放大倍数。
+/// \note @link CameraSetAnalogGainX @endlink以放大倍数为单位。
 /// \~english
 /// \brief Set the camera's image analog gain value.
 /// \param [in] hCamera Camera handle.
 /// \param [in] iAnalogGain gain value set
 /// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
 /// \note This value is multiplied by @link #tSdkExpose.fAnalogGainStep @endlink to get the actual image signal magnification.
+/// \note @link CameraSetAnalogGainX @endlink takes the magnification as the unit.
 MVSDK_API CameraSdkStatus __stdcall CameraSetAnalogGain(
     CameraHandle    hCamera,
     INT             iAnalogGain
@@ -1471,17 +1543,75 @@ MVSDK_API CameraSdkStatus __stdcall CameraSetAnalogGain(
 /// \param [in] hCamera 相机的句柄。
 /// \param [out] piAnalogGain 指针，返回当前的模拟增益值。
 /// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \note CameraGetAnalogGainX以放大倍数为单位。
 /// \see CameraSetAnalogGain
 /// \~english
 /// \brief Obtain the analog gain value of the image signal.
 /// \param [in] hCamera Camera handle.
 /// \param [out] piAnalogGain Returns the current analog gain value.
 /// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+/// \note CameraGetAnalogGainX takes the magnification as the unit.
 /// \see CameraSetAnalogGain
 MVSDK_API CameraSdkStatus __stdcall CameraGetAnalogGain(
     CameraHandle    hCamera, 
     INT*            piAnalogGain
 );
+
+/// @ingroup API_EXPOSURE
+/// \~chinese
+/// \brief 设置相机的模拟增益放大倍数。
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] fGain 设定的模拟增益放大倍数。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Set the image gain magnification of the camera.
+/// \param [in] hCamera Camera handle.
+/// \param [in] fGain Gain magnification.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraSetAnalogGainX(
+	CameraHandle    hCamera,
+	float    		fGain
+	);
+
+/// @ingroup API_EXPOSURE
+/// \~chinese
+/// \brief 获得图像信号的模拟增益放大倍数。
+/// \param [in] hCamera 相机的句柄。
+/// \param [out] pfGain 指针，返回当前的模拟增益放大倍数。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \see CameraSetAnalogGainX
+/// \~english
+/// \brief Obtain the gain magnification of the image signal.
+/// \param [in] hCamera Camera handle.
+/// \param [out] pfGain pointer, returns the current gain magnification.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+/// \see CameraSetAnalogGainX
+MVSDK_API CameraSdkStatus __stdcall CameraGetAnalogGainX(
+	CameraHandle    hCamera, 
+	float*          pfGain
+	);
+
+/// @ingroup API_EXPOSURE
+/// \~chinese
+/// \brief 获得相机的模拟增益放大倍数取值范围
+/// \param [in] hCamera		相机的句柄。
+/// \param [out] pfMin		指针，返回最小倍数。
+/// \param [out] pfMax		指针，返回最大倍数。
+/// \param [out] pfStep		指针，返回步进值。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the value range of the camera's gain magnification
+/// \param [in] hCamera		Camera handle.
+/// \param [out] pfMin		pointer, returns the minimum multiple.
+/// \param [out] pfMax		pointer, returns the maximum multiple.
+/// \param [out] pfStep		pointer, returns the step value.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraGetAnalogGainXRange(
+	CameraHandle	hCamera, 
+	float*			pfMin,
+	float*			pfMax,
+	float*			pfStep
+	);
 
 /// @ingroup API_COLOR
 /// \~chinese
@@ -2523,12 +2653,12 @@ MVSDK_API CameraSdkStatus __stdcall CameraSoftTrigger(
 /// \~chinese
 /// \brief 设置相机的触发模式。
 /// \param [in] hCamera 相机的句柄。
-/// \param [in] iModeSel   模式选择索引号。0表示连续采集模式；1表示软件触发模式；2表示硬件触发模式。  
+/// \param [in] iModeSel   模式选择索引号。0: 连续采集；1: 软件触发；2: 硬件触发（线阵为帧触发）；3: 行触发（编码器触发）（仅线阵）；4: 条件行触发（仅线阵）；
 /// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
 /// \~english
 /// \brief Set the camera's trigger mode.
 /// \param [in] hCamera Camera handle.
-/// \param [in] iModeSel mode selects the index number. 0 means continuous acquisition mode; 1 means software trigger mode; 2 means hardware trigger mode.
+/// \param [in] iModeSel mode selects the index number. 0: continuous acquisition; 1: software trigger; 2: hardware trigger (line scan is frame trigger); 3: line trigger (encoder trigger) (line scan only); 4: conditional line trigger (line scan only);
 /// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
 MVSDK_API CameraSdkStatus __stdcall CameraSetTriggerMode(
     CameraHandle    hCamera, 
@@ -3131,12 +3261,12 @@ MVSDK_API CameraSdkStatus __stdcall CameraGetFrameStatistic(
 
 /// @ingroup API_ENHANCE
 /// \~chinese
-/// \brief 设置图像降噪模块的使能状态。
+/// \brief 使能2D降噪
 /// \param [in] hCamera 相机的句柄。
 /// \param [in] bEnable   TRUE，使能；FALSE，禁止。
 /// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
 /// \~english
-/// \brief Set the enable status of the image noise reduction module.
+/// \brief Enable 2D noise reduction
 /// \param [in] hCamera Camera handle.
 /// \param [in] bEnable TRUE, enable; FALSE, disable.
 /// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
@@ -3147,12 +3277,12 @@ MVSDK_API CameraSdkStatus __stdcall CameraSetNoiseFilter(
 
 /// @ingroup API_ENHANCE
 /// \~chinese
-/// \brief 获得图像降噪模块的使能状态。
+/// \brief 获取2D降噪使能状态
 /// \param [in] hCamera 相机的句柄。
 /// \param [out] pEnable   指针，返回状态。TRUE，为使能。
 /// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
 /// \~english
-/// \brief Get the image noise reduction module's enable state.
+/// \brief Get 2D noise reduction enable status
 /// \param [in] hCamera Camera handle.
 /// \param [out] pEnable Returns status. TRUE, to enable.
 /// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
@@ -3339,7 +3469,28 @@ MVSDK_API CameraSdkStatus __stdcall CameraGetInerfaceVersion(
 /// \brief 设置指定IO的电平状态，IO为输出型IO，相机预留可编程输出IO的个数由@link #tSdkCameraCapbility.iOutputIoCounts @endlink决定。
 /// \param [in] hCamera 相机的句柄。
 /// \param [in] iOutputIOIndex IO的索引号，从0开始。
-/// \param [in] uState 要设定的状态，1为高，0为低
+/// \param [in] uState 要设定的状态(GE、SUA: 0(高)  1(低))
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \note 已废弃，使用CameraSetIOStateEx，它对所有型号相机的输出状态值统一为1高 0低
+/// \~english
+/// \brief Set the level state of the specified IO. IO is the output IO. The number of programmable output IOs for the camera is determined by @link #tSdkCameraCapbility.iOutputIoCounts @endlink.
+/// \param [in] hCamera Camera handle.
+/// \param [in] iOutputIOIndex IO index, starting from 0.
+/// \param [in] uState The state to set(GE、SUA: 0(high)  1(low))
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+/// \note Obsolete, use CameraSetIOStateEx, which has a unified output state value of 1 high and 0 low for all models of cameras
+MVSDK_API CameraSdkStatus __stdcall CameraSetIOState(
+  CameraHandle    hCamera,
+  INT         iOutputIOIndex,
+  UINT        uState
+);
+
+/// @ingroup API_GPIO
+/// \~chinese
+/// \brief 设置指定IO的电平状态，IO为输出型IO，相机预留可编程输出IO的个数由@link #tSdkCameraCapbility.iOutputIoCounts @endlink决定。
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] iOutputIOIndex IO的索引号，从0开始。
+/// \param [in] uState 要设定的状态（1为高，0为低）
 /// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
 /// \~english
 /// \brief Set the level state of the specified IO. IO is the output IO. The number of programmable output IOs for the camera is determined by @link #tSdkCameraCapbility.iOutputIoCounts @endlink.
@@ -3347,11 +3498,32 @@ MVSDK_API CameraSdkStatus __stdcall CameraGetInerfaceVersion(
 /// \param [in] iOutputIOIndex IO index, starting from 0.
 /// \param [in] uState The state to set, 1 is high, 0 is low
 /// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
-MVSDK_API CameraSdkStatus __stdcall CameraSetIOState(
-  CameraHandle    hCamera,
-  INT         iOutputIOIndex,
-  UINT        uState
-);
+MVSDK_API CameraSdkStatus __stdcall CameraSetIOStateEx(
+	CameraHandle    hCamera,
+	INT         iOutputIOIndex,
+	UINT        uState
+	);
+
+/// @ingroup API_GPIO
+/// \~chinese
+/// \brief 读取指定IO的电平状态，IO为输出型IO，相机预留可编程输出IO的个数由@link #tSdkCameraCapbility.iOutputIoCounts @endlink决定。
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] iOutputIOIndex IO的索引号，从0开始。
+/// \param [out] puState 返回IO状态(GE、SUA: 0(高)  1(低))
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \note 已废弃，使用CameraGetOutPutIOStateEx，它对所有型号相机的输出状态值统一为1高 0低
+/// \~english
+/// \brief Read the level state of the specified IO. IO is the output IO. The number of programmable output IOs for the camera is determined by @link #tSdkCameraCapbility.iOutputIoCounts @endlink.
+/// \param [in] hCamera Camera handle.
+/// \param [in] iOutputIOIndex IO index, starting from 0.
+/// \param [out] puState return IO state(GE、SUA: 0(high)  1(low))
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+/// \note Obsolete, use CameraGetOutPutIOStateEx, which has a unified output state value of 1 high and 0 low for all models of cameras
+MVSDK_API CameraSdkStatus __stdcall CameraGetOutPutIOState(
+	CameraHandle    hCamera,
+	INT         iOutputIOIndex,
+	UINT*       puState
+	);
 
 /// @ingroup API_GPIO
 /// \~chinese
@@ -3366,11 +3538,32 @@ MVSDK_API CameraSdkStatus __stdcall CameraSetIOState(
 /// \param [in] iOutputIOIndex IO index, starting from 0.
 /// \param [out] puState return IO state, 1 is high, 0 is low
 /// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
-MVSDK_API CameraSdkStatus __stdcall CameraGetOutPutIOState(
+MVSDK_API CameraSdkStatus __stdcall CameraGetOutPutIOStateEx(
 	CameraHandle    hCamera,
 	INT         iOutputIOIndex,
 	UINT*       puState
 	);
+
+/// @ingroup API_GPIO
+/// \~chinese
+/// \brief 读取指定IO的电平状态，IO为输入型IO，相机预留可编程输出IO的个数由@link #tSdkCameraCapbility.iInputIoCounts @endlink决定。
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] iInputIOIndex IO的索引号，从0开始。
+/// \param [out] puState 指针，返回IO状态(GE、SUA: 0(高)  1(低))
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \note 已废弃，使用CameraGetIOStateEx，它对所有型号相机的输入状态值统一为1高 0低
+/// \~english
+/// \brief Read the level state of the specified IO, IO is input type IO, the number of programmable output IOs that the camera reserves is decided by @link #tSdkCameraCapbility.iInputIoCounts @endlink.
+/// \param [in] hCamera Camera handle.
+/// \param [in] iInputIOIndex IO index, starting from 0.
+/// \param [out] puState returns IO state(GE、SUA: 0(high)  1(low))
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+/// \note Obsolete, use CameraGetIOStateEx, which has a unified input state value of 1 high and 0 low for all models of cameras
+MVSDK_API CameraSdkStatus __stdcall CameraGetIOState(
+  CameraHandle    hCamera,
+  INT         iInputIOIndex,
+  UINT*         puState
+);
 
 /// @ingroup API_GPIO
 /// \~chinese
@@ -3385,11 +3578,11 @@ MVSDK_API CameraSdkStatus __stdcall CameraGetOutPutIOState(
 /// \param [in] iInputIOIndex IO index, starting from 0.
 /// \param [out] puState returns IO state, 1 is high, 0 is low
 /// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
-MVSDK_API CameraSdkStatus __stdcall CameraGetIOState(
-  CameraHandle    hCamera,
-  INT         iInputIOIndex,
-  UINT*         puState
-);
+MVSDK_API CameraSdkStatus __stdcall CameraGetIOStateEx(
+	CameraHandle    hCamera,
+	INT         iInputIOIndex,
+	UINT*         puState
+	);
 
 /// @ingroup API_GPIO
 /// \~chinese
@@ -5540,6 +5733,256 @@ MVSDK_API CameraSdkStatus __stdcall CameraGetRegionAverageGray(
 	int Width,
 	int Height,
 	int *AvgGray
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 获取输出格式的特性支持。（比如：H264、H265支持设置码率）
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] iMediaType 输出格式索引
+/// \param [out] uCap 特性支持
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the feature support of the output format. (For example: H264, H265 support setting bit rate)
+/// \param [in] hCamera Handle of the camera.
+/// \param [in] iMediaType output format index
+/// \param [out] uCap feature support
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraGetMediaCapability(
+	CameraHandle    hCamera, 
+	int				iMediaType,
+	UINT			*uCap
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 设置码率。（仅部分输出格式支持，比如：H264、H265）
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] iMediaType 输出格式索引
+/// \param [in] uRate 码率
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Set the bit rate. (Only some output formats are supported, such as H264, H265)
+/// \param [in] hCamera Handle of the camera.
+/// \param [in] iMediaType output format index
+/// \param [in] uRate bit rate
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraSetMediaBitRate(
+	CameraHandle    hCamera, 
+	int				iMediaType,
+	UINT			uRate
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 获取码率设置。（仅部分输出格式支持，比如：H264、H265）
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] iMediaType 输出格式索引
+/// \param [out] uRate 码率
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the bit rate. (Only some output formats are supported, such as H264, H265)
+/// \param [in] hCamera Handle of the camera.
+/// \param [in] iMediaType output format index
+/// \param [out] uRate bit rate
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraGetMediaBitRate(
+	CameraHandle    hCamera, 
+	int				iMediaType,
+	UINT			*uRate
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 设置相机帧事件回调函数。当帧开始以及帧完成时，pCallBack所指向的回调函数就会被调用。 
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] pCallBack 回调函数指针。
+/// \param [in] pContext  回调函数的附加参数，在回调函数被调用时该附加参数会被传入，可以为NULL。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \note 对于全局快门相机帧开始表示一帧曝光结束
+/// \~english
+/// \brief Set the camera frame event callback function. When the frame starts and when the frame is completed, the callback function pointed to by pCallBack will be called.
+/// \param [in] hCamera Camera handle.
+/// \param [in] pCallBack callback function pointer.
+/// \param [in] pContext Additional parameter of the callback function. This additional parameter will be passed in when the callback function is called. It can be NULL.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+/// \note For the start of the global shutter camera frame, it means the end of a frame exposure
+MVSDK_API CameraSdkStatus __stdcall CameraSetFrameEventCallback(
+	CameraHandle        hCamera,
+	CAMERA_FRAME_EVENT_CALLBACK pCallBack,
+	PVOID               pContext
+	);
+
+/// @ingroup API_ENHANCE
+/// \~chinese
+/// \brief 设置降噪系数.
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] value   [0,7]
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Set the noise reduction coefficient.
+/// \param [in] hCamera Camera handle.
+/// \param [in] value   [0,7]
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraSetNoiseReductionValue(
+	CameraHandle    hCamera,
+	int				value
+	);
+
+/// @ingroup API_ENHANCE
+/// \~chinese
+/// \brief 获取降噪系数.
+/// \param [in] hCamera 相机的句柄。
+/// \param [out] value  [0,7]
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the noise reduction coefficient.
+/// \param [in] hCamera Camera handle.
+/// \param [out] value  [0,7]
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraGetNoiseReductionValue(
+	CameraHandle    hCamera,
+	int*			value
+	);
+
+/// @ingroup API_ENHANCE
+/// \~chinese
+/// \brief 设置对数曲线值
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] value   [0,255]
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Set logarithmic curve value
+/// \param [in] hCamera Camera handle.
+/// \param [in] value   [0,255]
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraSetLogarithmicCurveValue(
+	CameraHandle    hCamera,
+	int				value
+	);
+
+/// @ingroup API_ENHANCE
+/// \~chinese
+/// \brief 获取对数曲线值
+/// \param [in] hCamera 相机的句柄。
+/// \param [out] value  [0,255]
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get logarithmic curve value
+/// \param [in] hCamera Camera handle.
+/// \param [out] value  [0,255]
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraGetLogarithmicCurveValue(
+	CameraHandle    hCamera,
+	int*			value
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 设置拼接行数，从多帧提取指定的行数拼接成一帧
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] numLines 拼接行数（默认为0，0表示不做拼接处理）
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Set the number of splicing lines, extract the specified number of lines from multiple frames and splice them into one frame (only support line scan series)
+/// \param [in] hCamera Camera handle.
+/// \param [in] numLines Number of splicing lines (default is 0, 0 means no splicing processing)
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraSetSpliceLines(
+	CameraHandle    hCamera,
+	int             numLines
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 获取拼接行数
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] numLines 拼接行数（默认为0，0表示不做拼接处理）
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the number of splicing lines
+/// \param [in] hCamera Camera handle.
+/// \param [in] numLines Number of splicing lines (default is 0, 0 means no splicing processing)
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraGetSpliceLines(
+	CameraHandle    hCamera,
+	int*            numLines
+	);
+
+/// @ingroup API_GRAB
+/// \~chinese
+/// \brief 从指定通道获取数据。(仅部分相机硬件支持此功能)
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] pszChannelName 通道名。
+/// \param [out] pFrameInfo 图像的帧头信息指针。
+/// \param [out] pbyBuffer 返回图像数据的缓冲区指针。
+/// \param [in] wTimes 抓取图像的超时时间，单位毫秒。在wTimes时间内还未获得图像，则该函数会返回超时错误。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get data from the specified channel. (Only some camera hardware supports this function)
+/// \param [in] hCamera Handle of the camera.
+/// \param [in] pszChannelName Channel name.
+/// \param [out] pFrameInfo The header information pointer of the image.
+/// \param [out] pbyBuffer Returns the buffer pointer of the image data.
+/// \param [in] wTimes Timeout for grabbing an image in milliseconds. The function returns a timeout error if no image has been obtained within wTimes.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraSnapChannelBuffer(
+	CameraHandle	hCamera,
+	char const*		pszChannelName,
+	tSdkFrameHead*	pFrameInfo,
+	BYTE**			pbyBuffer,
+	UINT			wTimes
+	);
+
+/// @ingroup API_GRAB
+/// \~chinese
+/// \brief 释放由@link #CameraSnapChannelBuffer @endlink获得的缓冲区。
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] pszChannelName 通道名。
+/// \param [in] pbyBuffer 帧缓冲区地址。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Releases the buffer obtained by @link #CameraSnapChannelBuffer @endlink.
+/// \param [in] hCamera Camera handle.
+/// \param [in] pszChannelName Channel name.
+/// \param [in] pbyBuffer Frame buffer address.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraReleaseChannelBuffer(
+	CameraHandle    hCamera, 
+	char const*		pszChannelName,
+	BYTE*           pbyBuffer
+	);
+
+/// @ingroup API_TRIGGER
+/// \~chinese
+/// \brief 触发编码器。当线阵相机处于条件行模式下时，如果触发方式是电平，调用此函数激活编码器后，相机开始接收编码器信号采集，直到再次调用此函数停止响应编码器。如果触发方式是边沿，调用此函数激活编码器后，相机开始接收编码器信号采集，采集完设定的行数后（分辨率高度*一次触发帧数），相机自动停止响应编码器。
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] action  0：停止响应编码器    1: 激活编码器
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Trigger the encoder. When the line scan camera is in the conditional line mode, if the trigger mode is level, after calling this function to activate the encoder, the camera starts to receive encoder signal acquisition, until this function is called again to stop responding to the encoder. If the trigger mode is edge, after calling this function to activate the encoder, the camera starts to receive encoder signal acquisition, and after collecting the set number of lines (resolution height * number of trigger frames at a time), the camera automatically stops responding to the encoder.
+/// \param [in] hCamera Camera handle.
+/// \param [in] action 0: stop responding to the encoder 1: activate the encoder
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraSetRotaryEncTrigger(
+	CameraHandle    hCamera,
+	int             action
+	);
+
+/// @ingroup API_TRIGGER
+/// \~chinese
+/// \brief 获取编码器触发状态。
+/// \param [in] hCamera 相机的句柄。
+/// \param [out] action 返回触发状态
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the encoder trigger status.
+/// \param [in] hCamera Camera handle.
+/// \param [out] action returns the trigger status
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+MVSDK_API CameraSdkStatus __stdcall CameraGetRotaryEncTrigger(
+	CameraHandle    hCamera,
+	int*            action
 	);
 
 #endif

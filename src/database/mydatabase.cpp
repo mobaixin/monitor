@@ -60,7 +60,6 @@ MyDataBase::MyDataBase(QObject *parent)
     }
 //    m_database.setDatabaseName(dirPath + "monitor.db");
     m_database.setDatabaseName(dbFilePath + "/monitor.db");
-    qDebug() << QDir::homePath();
 
     initDataBase();
 }
@@ -93,6 +92,7 @@ int MyDataBase::initDataBase()
                                        "type INTEGER,"
                                        "center VARCHAR(20),"
                                        "edge VARCHAR(20),"
+                                       "bound_rect VARCHAR(20),"
                                        "point_list TEXT,"
                                        "accuracy INTEGER,"
                                        "pixel INTEGER,"
@@ -146,6 +146,14 @@ int MyDataBase::initDataBase()
                                        "other2 VARCHAR)"
                                        ));
 
+    queryRes &= queryInit.exec(QString("create table if not exists db_version ("
+                                       "id INTEGER primary key AUTOINCREMENT,"
+                                       "version_id VARCHAR,"
+                                       "time VARCHAR,"
+                                       "other1 VARCHAR,"
+                                       "other2 VARCHAR)"
+                                       ));
+
     if (true == queryRes) {
         return 1;
     } else {
@@ -163,8 +171,8 @@ int MyDataBase::addShapeItemData(ShapeItemData itemData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("INSERT INTO shape_item (camera_id, scene_id, mold_id, type, center, edge, point_list, accuracy, pixel) VALUES "
-                          "(:camera_id, :scene_id, :mold_id, :type, :center, :edge, :point_list, :accuracy, :pixel)");
+            query.prepare("INSERT INTO shape_item (camera_id, scene_id, mold_id, type, center, edge, bound_rect, point_list, accuracy, pixel) VALUES "
+                          "(:camera_id, :scene_id, :mold_id, :type, :center, :edge, :bound_rect, :point_list, :accuracy, :pixel)");
 
             query.bindValue(":camera_id",  QString::number(itemData.cameraId));
             query.bindValue(":scene_id",   QString::number(itemData.sceneId));
@@ -172,6 +180,7 @@ int MyDataBase::addShapeItemData(ShapeItemData itemData)
             query.bindValue(":type",       QString::number(itemData.type));
             query.bindValue(":center",     itemData.center);
             query.bindValue(":edge",       itemData.edge);
+            query.bindValue(":bound_rect", itemData.boundRect);
             query.bindValue(":point_list", itemData.pointList);
             query.bindValue(":accuracy",   QString::number(itemData.accuracy));
             query.bindValue(":pixel",      QString::number(itemData.pixel));
@@ -250,6 +259,7 @@ QList<ShapeItemData> MyDataBase::queShapeItemData(ShapeItemData itemData)
         resData.type      = query.value("type").toInt();
         resData.center    = query.value("center").toString();
         resData.edge      = query.value("edge").toString();
+        resData.boundRect = query.value("bound_rect").toString();
         resData.pointList = query.value("point_list").toString();
         resData.accuracy  = query.value("accuracy").toInt();
         resData.pixel     = query.value("pixel").toInt();
@@ -270,7 +280,7 @@ int MyDataBase::altShapeItemData(ShapeItemData itemData)
         if (m_database.isValid()) {
             QSqlQuery query;
 
-            query.prepare("UPDATE shape_item SET type=:type, center=:center, edge=:edge, point_list=:point_list, accuracy=:accuracy, pixel=:pixel "
+            query.prepare("UPDATE shape_item SET type=:type, center=:center, edge=:edge, bound_rect=:bound_rect, point_list=:point_list, accuracy=:accuracy, pixel=:pixel "
                           "WHERE camera_id=:camera_id and scene_id=:scene_id and mold_id=:mold_id");
 
             query.bindValue(":camera_id",  QString::number(itemData.cameraId));
@@ -279,6 +289,7 @@ int MyDataBase::altShapeItemData(ShapeItemData itemData)
             query.bindValue(":type",       QString::number(itemData.type));
             query.bindValue(":center",     itemData.center);
             query.bindValue(":edge",       itemData.edge);
+            query.bindValue(":bound_rect", itemData.boundRect);
             query.bindValue(":point_list", itemData.pointList);
             query.bindValue(":accuracy",   QString::number(itemData.accuracy));
             query.bindValue(":pixel",      QString::number(itemData.pixel));
@@ -797,6 +808,7 @@ QList<OptRecordData> MyDataBase::queAllOptRecordData()
 int MyDataBase::addCameraIPData(CameraIPData cameraIPData)
 {
     bool queryRes = true;
+//    qDebug() << "cameraId:" << cameraIPData.cameraId;
 
     if (!checkCameraIPData(cameraIPData)) {
         return INVALID_INPUT;
@@ -934,6 +946,106 @@ QList<CameraIPData> MyDataBase::queAllCameraIPData()
         resData.cameraIp = query.value("camera_ip").toString();
         resData.cameraMask    = query.value("camera_mask").toString();
         resData.cameraGateway = query.value("camera_gateway").toString();
+
+        resDataList.append(resData);
+    }
+
+    return resDataList;
+}
+
+int MyDataBase::addDBVersionData(DBVersionData dBVersionData)
+{
+    if (m_database.isValid()) {
+        QSqlQuery query;
+        bool queryRes = true;
+
+        query.prepare("INSERT INTO db_version (version_id, time) VALUES "
+                      "(:version_id, :time)");
+
+        query.bindValue(":version_id", dBVersionData.versionId);
+        query.bindValue(":time",       dBVersionData.time);
+
+        queryRes = query.exec();
+
+        if (queryRes) {
+            return DB_OP_SUCC;
+        } else {
+            return DB_OP_ADD_FAILED;
+        }
+    } else {
+        return DB_UNCONNECT;
+    }
+}
+
+int MyDataBase::delDBVersionData(DBVersionData dBVersionData)
+{
+    bool queryRes = true;
+
+    QSqlQuery query;
+
+    query.prepare("DELETE FROM db_version WHERE version_id=:version_id");
+
+    query.bindValue(":version_id", dBVersionData.versionId);
+
+    queryRes = query.exec();
+
+    return queryRes;
+}
+
+DBVersionData MyDataBase::queDBVersionData(DBVersionData dBVersionData)
+{
+    DBVersionData resData;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM db_version WHERE version_id=:version_id");
+
+    query.bindValue(":version_id", dBVersionData.versionId);
+
+    queryRes = query.exec();
+
+    if (query.next()) {
+        resData.versionId = query.value("version_id").toString();
+        resData.time      = query.value("time").toString();
+    }
+
+    return resData;
+}
+
+QList<DBVersionData> MyDataBase::queAllDBVersionData()
+{
+    QList<DBVersionData> resDataList;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM db_version");
+
+    queryRes = query.exec();
+
+    if (query.next()) {
+        // DBVersion表有数据
+        query.previous();
+
+    } else {
+        // DBVersion表没有数据
+        DBVersionData dBVersionData;
+        dBVersionData.versionId = "1.0.0";
+        dBVersionData.time = "2022-08-01 09:00:00";
+
+        addDBVersionData(dBVersionData);
+
+        query.prepare("SELECT * FROM db_version");
+
+        queryRes = query.exec();
+    }
+
+    while (query.next()) {
+        DBVersionData resData;
+
+        resData.versionId = query.value("version_id").toString();
+        resData.time      = query.value("time").toString();
 
         resDataList.append(resData);
     }

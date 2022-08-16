@@ -6,7 +6,7 @@
 #include "src/view/mainwindow.h"
 #include "src/view/imgarea/imgarea.h"
 #include "src/view/titlebar/titlebar.h"
-#include "src/serialport/myserialport.h"
+//#include "src/serialport/myserialport.h"
 #include "src/view/common/mysettings.h"
 
 #if _MSC_VER >=1600    // MSVC2015>1899,对于MSVC2010以上版本都可以使用
@@ -208,10 +208,10 @@ void SideBar::setData()
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
 
     imgData.sceneId  = 1;
-    m_deteMoldNum     = MyDataBase::getInstance()->getImageMoldNum(imgData);
+    m_deteMoldNum    = MyDataBase::getInstance()->getImageMoldNum(imgData);
 
     imgData.sceneId  = 2;
-    m_prodMoldNum     = MyDataBase::getInstance()->getImageMoldNum(imgData);
+    m_prodMoldNum    = MyDataBase::getInstance()->getImageMoldNum(imgData);
 
     m_curDeteMoldIdx = m_deteMoldNum > 0 ? 1 : 0;
     m_curProdMoldIdx = m_prodMoldNum > 0 ? 1 : 0;
@@ -387,22 +387,22 @@ void SideBar::setCanThimbleState(int state)
 {
     setRadioBtnState(m_canThimbleBox, state);
 
-    if (state == RadioBtnState::Correct) {
-        MySerialPort::getInstance()->writeInfo(ThimbleMask, CanThimbleValue);
-    } else if (state == RadioBtnState::Wrong) {
-        MySerialPort::getInstance()->writeInfo(ThimbleMask, NotThimbleValue);
-    }
+//    if (state == RadioBtnState::Correct) {
+//        MySerialPort::getInstance()->writeInfo(ThimbleMask, CanThimbleValue);
+//    } else if (state == RadioBtnState::Wrong) {
+//        MySerialPort::getInstance()->writeInfo(ThimbleMask, NotThimbleValue);
+//    }
 }
 
 void SideBar::setCanClampMoldState(int state)
 {
     setRadioBtnState(m_canClampMoldBox, state);
 
-    if (state == RadioBtnState::Correct) {
-        MySerialPort::getInstance()->writeInfo(ClampMoldMask, CanClampMoldValue);
-    } else if (state == RadioBtnState::Wrong) {
-        MySerialPort::getInstance()->writeInfo(ClampMoldMask, NotClampMoldValue);
-    }
+//    if (state == RadioBtnState::Correct) {
+//        MySerialPort::getInstance()->writeInfo(ClampMoldMask, CanClampMoldValue);
+//    } else if (state == RadioBtnState::Wrong) {
+//        MySerialPort::getInstance()->writeInfo(ClampMoldMask, NotClampMoldValue);
+//    }
 }
 
 void SideBar::setDetectScene()
@@ -417,6 +417,53 @@ void SideBar::setDetectScene()
         m_productBtn->hide();
     } else {
         m_productBtn->show();
+    }
+}
+
+void SideBar::updateShowData()
+{
+    int cameraId = TitleBar::getInstance()->getCurCameraId();
+
+    ImageMoldData imgData;
+    imgData.cameraId = cameraId;
+
+    imgData.sceneId = 1;
+    m_deteMoldNum   = MyDataBase::getInstance()->getImageMoldNum(imgData);
+
+    imgData.sceneId = 2;
+    m_prodMoldNum   = MyDataBase::getInstance()->getImageMoldNum(imgData);
+
+    m_curDeteMoldIdx = m_deteMoldNum > 0 ? 1 : 0;
+    m_curProdMoldIdx = m_prodMoldNum > 0 ? 1 : 0;
+
+    updateOrderLab();
+}
+
+void SideBar::updateShapeData()
+{
+    // 清除检测结果
+//    ImgArea::getInstance()->clearDetectResult();
+
+    MainWindow::getInstance()->setDetectObject();
+
+    if (TitleBar::getInstance()->getMonitorSetState()) {
+        // 加载当前场景的模板
+        loadCurMold();
+    } else {
+        ShapeItemData itemData;
+        itemData.cameraId = TitleBar::getInstance()->getCurCameraId();
+        itemData.sceneId  = m_sceneId;
+        itemData.moldId   = 1;
+
+        if (TitleBar::getInstance()->getAllCamBtnState()) {
+            for (int i = 0; i < ImgArea::getInstance()->getCameraCounts(); i++) {
+                int cameraId = i + 1;
+                itemData.cameraId = cameraId;
+                ImgArea::getInstance()->loadShapeItem(itemData);
+            }
+        } else {
+            ImgArea::getInstance()->loadShapeItem(itemData);
+        }
     }
 }
 
@@ -464,7 +511,15 @@ void SideBar::checkMoldBtnClick()
         itemData.sceneId  = m_sceneId;
         itemData.moldId   = 1;
 
-        ImgArea::getInstance()->loadShapeItem(itemData);
+        if (TitleBar::getInstance()->getAllCamBtnState()) {
+            for (int i = 0; i < ImgArea::getInstance()->getCameraCounts(); i++) {
+                int cameraId = i + 1;
+                itemData.cameraId = cameraId;
+                ImgArea::getInstance()->loadShapeItem(itemData);
+            }
+        } else {
+            ImgArea::getInstance()->loadShapeItem(itemData);
+        }
     }
 
     OptRecord::addOptRecord("点击检模");
@@ -503,7 +558,15 @@ void SideBar::productBtnClick()
         itemData.sceneId  = m_sceneId;
         itemData.moldId   = 1;
 
-        ImgArea::getInstance()->loadShapeItem(itemData);
+        if (TitleBar::getInstance()->getAllCamBtnState()) {
+            for (int i = 0; i < ImgArea::getInstance()->getCameraCounts(); i++) {
+                int cameraId = i + 1;
+                itemData.cameraId = cameraId;
+                ImgArea::getInstance()->loadShapeItem(itemData);
+            }
+        } else {
+            ImgArea::getInstance()->loadShapeItem(itemData);
+        }
     }
 
     OptRecord::addOptRecord("点击产品");
@@ -513,7 +576,7 @@ void SideBar::saveMoldBtnClick()
 {
     OptRecord::addOptRecord("点击保存模板");
 
-    if (ImgArea::getInstance()->getCameraStatus(TitleBar::getInstance()->getCurCameraId()) == 0) {
+    if (ImgArea::getInstance()->getCameraState(TitleBar::getInstance()->getCurCameraId()) == 0) {
         return ;
     }
 
@@ -528,13 +591,21 @@ void SideBar::saveMoldBtnClick()
     ImageMoldData imgData;
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
     imgData.sceneId  = SideBar::getInstance()->getCurSceneID();
-    imgData.moldId   = SideBar::getInstance()->getCurMoldNum();
-    imgData.imgPath  = QString("%1/%2.png").arg(MyDataBase::imgMoldFilePath).arg(fileName);
+    imgData.moldId   = SideBar::getInstance()->getCurrentIdx();
+    imgData.imgPath  = QString("%1/%2.jpg").arg(MyDataBase::imgMoldFilePath).arg(fileName);
     imgData.time     = timeStr;
 
-    MyDataBase::getInstance()->addImgMoldData(imgData);
+    // 删除原来的图片模板
+    ImageMoldData resImgData = MyDataBase::getInstance()->queImgMoldData(imgData);
+    QFile imgMoldFile(resImgData.imgPath);
+    if (imgMoldFile.exists()) {
+        imgMoldFile.remove();
+    }
 
-    QImage curImage = ImgArea::getInstance()->getCurImage();
+    // 图片模板数据更新
+    MyDataBase::getInstance()->altImgMoldData(imgData);
+
+    QImage curImage = ImgArea::getInstance()->getCurImage(imgData.cameraId);
     curImage.save(imgData.imgPath);
 
     ImgArea::getInstance()->loadImage(imgData.imgPath);
@@ -573,15 +644,12 @@ void SideBar::addMoldBtnClick()
 {
     OptRecord::addOptRecord("点击添加模板");
 
-    if (ImgArea::getInstance()->getCameraStatus(TitleBar::getInstance()->getCurCameraId()) == 0) {
+    if (ImgArea::getInstance()->getCameraState(TitleBar::getInstance()->getCurCameraId()) == 0) {
         return ;
     }
 
     // 获取最大样本数
     int maxSampleNum = MySettings::getInstance()->getValue(IOSetSection, MaxSampleNumKey).toInt();
-
-    qDebug() << "maxSampleNum: " << maxSampleNum;
-    qDebug() << "getCurMoldNum: " << getCurMoldNum();
 
     if (getCurMoldNum() >= maxSampleNum) {
         QMessageBox::information(this, "提示", "已达到最大样本数");
@@ -695,7 +763,6 @@ void SideBar::delMoldBtnClick()
 {
     OptRecord::addOptRecord("点击删除模板");
 
-    bool isChange = false;
     ImageMoldData imgData;
     imgData.cameraId = TitleBar::getInstance()->getCurCameraId();
     imgData.sceneId  = m_sceneId;
@@ -714,7 +781,6 @@ void SideBar::delMoldBtnClick()
 
             if (m_curDeteMoldIdx == m_deteMoldNum) {
                 m_curDeteMoldIdx -= 1;
-                isChange = true;
             }
             MyDataBase::getInstance()->delImgMoldData(imgData);
             MyDataBase::getInstance()->updateImgMoldId(imgData);
@@ -727,7 +793,6 @@ void SideBar::delMoldBtnClick()
 
             if (m_curProdMoldIdx == m_prodMoldNum) {
                 m_curProdMoldIdx -= 1;
-                isChange = true;
             }
             MyDataBase::getInstance()->delImgMoldData(imgData);
             MyDataBase::getInstance()->updateImgMoldId(imgData);
@@ -737,9 +802,7 @@ void SideBar::delMoldBtnClick()
     updateOrderLab();
     MainWindow::getInstance()->setDetectObject();
 
-    if (isChange) {
-        loadCurImage();
-    }
+    loadCurImage();
 }
 
 void SideBar::clearMoldBtnClick()
@@ -842,7 +905,7 @@ void SideBar::loadCurImage()
     imgData.sceneId  = m_sceneId;
     imgData.moldId   = getCurrentIdx();
 
-    qDebug() << "load img idx: " << imgData.moldId;
+//    qDebug() << "load img idx: " << imgData.moldId;
     ImgArea::getInstance()->loadImageItem(imgData);
 }
 

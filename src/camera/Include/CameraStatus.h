@@ -81,7 +81,26 @@ typedef int CameraSdkStatus;
 #define CAMERA_STATUS_U3V_NO_CONTROL_EP			-51	 ///< \~chinese U3V控制端点未找到 \~english U3V control endpoint not found
 #define CAMERA_STATUS_U3V_CONTROL_ERROR			-52	 ///< \~chinese U3V控制通讯错误 \~english U3V control communication error
 #define CAMERA_STATUS_INVALID_FRIENDLY_NAME		-53	 ///< \~chinese 无效的设备名，名字里不能包含以下字符(\/:*?"<>|") \~english Invalid device name, the name cannot contain the following characters (\/:*?"<>|")
+#define CAMERA_STATUS_FORMAT_ERROR				-54	 ///< \~chinese 格式错误 \~english Format error
+#define CAMERA_STATUS_PCIE_OPEN_ERROR			-55  ///< \~chinese PCIE设备打开失败 \~english PCIE device open failed
+#define CAMERA_STATUS_PCIE_COMM_ERROR			-56  ///< \~chinese PCIE设备通讯失败 \~english PCIE device communication failed
+#define CAMERA_STATUS_PCIE_DDR_ERROR			-57  ///< \~chinese PCIE DDR错误 \~english PCIE DDR error
+#define CAMERA_STATUS_IP_ERROR					-58  ///< \~chinese IP错误 \~english IP error
 
+
+/**
+ * CameraLink Acquisition Device
+ */
+#define CAMERA_STATUS_CL_GRABBER_NOT_FOUND              -100  ///< \~chinese 指定的采集卡没有找到 \~english The specified frame grabber not found
+#define CAMERA_STATUS_CL_GRABBER_NOT_ACCESSIBLE         -101  ///< \~chinese 指定的采集卡被占用 \~english The specified frame grabber is busy
+#define CAMERA_STATUS_CL_GRABBER_RES_NOT_FOUND          -102  ///< \~chinese 采集卡固件无可用的指定资源 \~english The resource on the firmware of the frame grabber not found
+#define CAMERA_STATUS_CL_GRABBER_RES_NOT_AVAILABLE      -103  ///< \~chinese 采集卡的资源不可用 \~english Device resource is not available for the frame grabber
+#define CAMERA_STATUS_CL_GRABBER_NOT_VALID              -104  ///< \~chinese 指定的参数再当前资源中不可以设定 \~english Specified parameter is invalid for current device resource
+#define CAMERA_STATUS_CL_GRABBER_PRM_ILLEGAL            -105  ///< \~chinese 输入的参数值为非法值或该采集卡不支持  \~english The setting value for parameter is an illegal value or this frame grabber not supported
+#define CAMERA_STATUS_CL_GRABBER_SERIAL_OPEN_FAILED     -106  ///< \~chinese 采集卡串口打开失败 \~english The serial port open failed
+#define CAMERA_STATUS_CL_GRABBER_NOT_START_ACQ          -107  ///< \~chinese 没有发出开始采集信号SAP \~english The specified frame grabber doesn't received a start acquisition signal.
+#define CAMERA_STATUS_CL_GRABBER_NOT_SUPPORTED_FEATURE  -108  ///< \~chinese 当前采集卡类型为支持该功能 \~english The frame grabber not supported this feature.
+#define CAMERA_STATUS_CL_GRABBER_UNKNOWN_ERROR          -199  ///< \~chinese 采集卡发生未知错误 \~english Unknown error occurred in frame grabber
 
 
 //和AIA制定的标准相同

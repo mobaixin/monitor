@@ -55,7 +55,7 @@ void MySettings::setInitValue()
     m_settings->setValue(QString("%1/%2").arg(SysSection).arg(ProdDelayKey),  "4");
     m_settings->setValue(QString("%1/%2").arg(SysSection).arg(ProdTimesKey),  "2");
     m_settings->setValue(QString("%1/%2").arg(SysSection).arg(ProdDetectKey), "1");
-    m_settings->setValue(QString("%1/%2").arg(SysSection).arg(CameraCountsKey), "1");
+    m_settings->setValue(QString("%1/%2").arg(SysSection).arg(CameraCountsKey), "4");
 
     // 相机参数
     m_settings->setValue(QString("%1/%2").arg(CameraSection).arg(ExposeTimeKey), "1000");
@@ -84,6 +84,6 @@ void MySettings::setIOInitValue()
 
     m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(PeriodSigKey),     "0");
     m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(AseismicLevelKey), "3");
-    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(MaxSampleNumKey),  "20");
+    m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(MaxSampleNumKey),  "10");
     m_settings->setValue(QString("%1/%2").arg(IOSetSection).arg(MaxReDeteNumKey),  "10");
 }

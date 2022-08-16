@@ -41,27 +41,33 @@ class MySettings : public QObject
 {
     Q_OBJECT
 public:
+    // 单例
     static MySettings *getInstance();
 
     explicit MySettings(QObject *parent = nullptr);
 
+    // 设置配置项
     void setValue(QString section, QString key, QString value);
 
+    // 读取配置项
     QString getValue(QString section, QString key);
 
+    // 删除配置项
     void delValue(QString section, QString key);
 
+    // 初始化配置项
     void setInitValue();
 
+    // 初始化IO设置配置项
     void setIOInitValue();
 
 signals:
 
 private:
-    QString m_iniFilePath;
-    QSettings *m_settings;
+    QString m_iniFilePath;  // 配置文件的路径
+    QSettings *m_settings;  // 配置
 
-    QMutex m_mutex;
+    QMutex m_mutex;         // 互斥锁
 
 };
 

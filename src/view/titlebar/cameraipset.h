@@ -31,31 +31,31 @@ public:
     void setData();
 
 private:
-    void freshBtnClick();
-    void changeIpBtnClick();
-    void autoGetIpBtnClick();
-    void confirmBtnClick();
-    void cancelBtnClick();
+    void freshBtnClick();       // 刷新
+    void changeIpBtnClick();    // 修改IP
+    void autoGetIpBtnClick();   // 自动分配IP
+    void confirmBtnClick();     // 确认
+    void cancelBtnClick();      // 取消
 
     // 获取模型数据
     void getModelData();
 
 private:
-    QTableView *m_ipTableView;
-    QStandardItemModel *m_ipModel;
+    QTableView *m_ipTableView;      // 相机IP 显示view
+    QStandardItemModel *m_ipModel;  // 相机IP 数据model
 
-    QPushButton *m_freshBtn;
-    QPushButton *m_changeIpBtn;
-    QPushButton *m_autoGetIpBtn;
-    QPushButton *m_confirmBtn;
-    QPushButton *m_cancelBtn;
+    QPushButton *m_freshBtn;        // 刷新
+    QPushButton *m_changeIpBtn;     // 修改IP
+    QPushButton *m_autoGetIpBtn;    // 自动分配IP
+    QPushButton *m_confirmBtn;      // 确认
+    QPushButton *m_cancelBtn;       // 取消
 
-    QHBoxLayout *m_mainLayout;
-    QVBoxLayout *m_rightLayout;
+    QHBoxLayout *m_mainLayout;      // 总体布局
+    QVBoxLayout *m_rightLayout;     // 右侧布局
 
-    QList<CameraIPData> m_cameraIPDataList;
+    QList<CameraIPData> m_cameraIPDataList; // 相机IP数据列表
 
-    MyIpInputDialog *m_myIpInputDialog;
+    MyIpInputDialog *m_myIpInputDialog; // 修改IP对话框
 };
 
 
@@ -75,21 +75,22 @@ public:
     void setData();
 
 signals:
+    // 获取输入的IP 信号
     void getValues(QString value);
 
 private:
-    void cancelBtnClick();
-    void confirmBtnClick();
+    void cancelBtnClick();  // 取消
+    void confirmBtnClick(); // 确认
 
 private:
-    QLabel *m_captionLab;
-    QLineEdit *m_ipInputEdit;
+    QLabel *m_captionLab;       // 标题
+    QLineEdit *m_ipInputEdit;   // IP输入框
 
-    QPushButton *m_cancelBtn;
-    QPushButton *m_confirmBtn;
+    QPushButton *m_cancelBtn;   // 取消
+    QPushButton *m_confirmBtn;  // 确认
 
-    QHBoxLayout *m_btnLayout;
-    QVBoxLayout *m_mainLayout;
+    QHBoxLayout *m_btnLayout;   // 按钮布局
+    QVBoxLayout *m_mainLayout;  // 总体布局
 
 };
 
