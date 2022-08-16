@@ -1,4 +1,4 @@
-#include <QVector>
+﻿#include <QVector>
 #include <QDebug>
 #include <QMenu>
 #include <QSpinBox>
