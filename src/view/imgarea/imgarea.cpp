@@ -1,4 +1,4 @@
-﻿#include <QMessageBox>
+#include <QMessageBox>
 #include <QPixmap>
 #include <QDebug>
 #include <QApplication>
