@@ -53,6 +53,9 @@ void MainWindow::setWidgetUi()
     MySettings::getInstance();
 //    MySerialPort::getInstance();
 
+    // 获取数据库版本数据
+    MyDataBase::getInstance()->queAllDBVersionData();
+
     m_pMainWid   = new QWidget(this);
     m_pTitleBar  = TitleBar::getInstance(this);
     m_pBottomBar = BottomBar::getInstance(this);

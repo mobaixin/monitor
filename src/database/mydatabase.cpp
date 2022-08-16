@@ -147,6 +147,14 @@ int MyDataBase::initDataBase()
                                        "other2 VARCHAR)"
                                        ));
 
+    queryRes &= queryInit.exec(QString("create table if not exists db_version ("
+                                       "id INTEGER primary key AUTOINCREMENT,"
+                                       "version_id VARCHAR,"
+                                       "time VARCHAR,"
+                                       "other1 VARCHAR,"
+                                       "other2 VARCHAR)"
+                                       ));
+
     if (true == queryRes) {
         return 1;
     } else {
@@ -939,6 +947,106 @@ QList<CameraIPData> MyDataBase::queAllCameraIPData()
         resData.cameraIp = query.value("camera_ip").toString();
         resData.cameraMask    = query.value("camera_mask").toString();
         resData.cameraGateway = query.value("camera_gateway").toString();
+
+        resDataList.append(resData);
+    }
+
+    return resDataList;
+}
+
+int MyDataBase::addDBVersionData(DBVersionData dBVersionData)
+{
+    if (m_database.isValid()) {
+        QSqlQuery query;
+        bool queryRes = true;
+
+        query.prepare("INSERT INTO db_version (version_id, time) VALUES "
+                      "(:version_id, :time)");
+
+        query.bindValue(":version_id", dBVersionData.versionId);
+        query.bindValue(":time",       dBVersionData.time);
+
+        queryRes = query.exec();
+
+        if (queryRes) {
+            return DB_OP_SUCC;
+        } else {
+            return DB_OP_ADD_FAILED;
+        }
+    } else {
+        return DB_UNCONNECT;
+    }
+}
+
+int MyDataBase::delDBVersionData(DBVersionData dBVersionData)
+{
+    bool queryRes = true;
+
+    QSqlQuery query;
+
+    query.prepare("DELETE FROM db_version WHERE version_id=:version_id");
+
+    query.bindValue(":version_id", dBVersionData.versionId);
+
+    queryRes = query.exec();
+
+    return queryRes;
+}
+
+DBVersionData MyDataBase::queDBVersionData(DBVersionData dBVersionData)
+{
+    DBVersionData resData;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM db_version WHERE version_id=:version_id");
+
+    query.bindValue(":version_id", dBVersionData.versionId);
+
+    queryRes = query.exec();
+
+    if (query.next()) {
+        resData.versionId = query.value("version_id").toString();
+        resData.time      = query.value("time").toString();
+    }
+
+    return resData;
+}
+
+QList<DBVersionData> MyDataBase::queAllDBVersionData()
+{
+    QList<DBVersionData> resDataList;
+
+    QSqlQuery query;
+    bool queryRes = true;
+
+    query.prepare("SELECT * FROM db_version");
+
+    queryRes = query.exec();
+
+    if (query.next()) {
+        // DBVersion表有数据
+        query.previous();
+
+    } else {
+        // DBVersion表没有数据
+        DBVersionData dBVersionData;
+        dBVersionData.versionId = "1.0.0";
+        dBVersionData.time = "2022-08-01 09:00:00";
+
+        addDBVersionData(dBVersionData);
+
+        query.prepare("SELECT * FROM db_version");
+
+        queryRes = query.exec();
+    }
+
+    while (query.next()) {
+        DBVersionData resData;
+
+        resData.versionId = query.value("version_id").toString();
+        resData.time      = query.value("time").toString();
 
         resDataList.append(resData);
     }
