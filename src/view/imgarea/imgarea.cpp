@@ -268,7 +268,7 @@ void ImgArea::setData()
     status =0;
 
     // 初始化本机IP地址
-//    initLocalNetwork();
+    initLocalNetwork();
 
     // 获取设置的相机数
     int count = MySettings::getInstance()->getValue(SysSection, CameraCountsKey).toInt();
@@ -1323,8 +1323,8 @@ int ImgArea::initParameter(int hCamera, tSdkCameraCapbility *pCameraInfo)
 
     //获得相机当前的曝光模式。
 //    CameraSetAeState(hCamera, true);
-    CameraGetAeState(hCamera,&AEstate);
-    CameraSetAeState(hCamera, false);
+//    CameraGetAeState(hCamera,&AEstate);
+//    CameraSetAeState(hCamera, false);
 
     //获得相机的曝光时间。
     CameraGetExposureTime(hCamera,&m_pfExposureTime);
@@ -1989,11 +1989,12 @@ int ImgArea::initLocalNetwork()
                 int ifaceId = i + 1;
 
                 // 测试
-//                ifaceId = 2;
+//                ifaceId = 0;
 
                 QString localFaceIp = m_ifaceIp.arg(ifaceId).arg(ifaceId);
                 QString gateway     = m_gateway.arg(ifaceId);
                 if (entry.ip().toString() != localFaceIp) {
+                    // 使用命令修改本机IP
 //                    cmd.start(cmdStr.arg(iface.name()).arg(localFaceIp).arg(gateway));
 //                    cmd.waitForFinished();
                 }

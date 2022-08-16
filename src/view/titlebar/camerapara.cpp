@@ -163,7 +163,7 @@ void CameraPara::confirmBtnClick()
 void CameraPara::updateExposeTime(int value)
 {
     value = value > 0 ? value : 0;
-    qDebug() << "value: " << value;
+//    qDebug() << "value: " << value;
 
     int cameraId = TitleBar::getInstance()->getCurCameraId();
     ImgArea::getInstance()->setExposeTime(value, cameraId);
