@@ -5,18 +5,20 @@
 
 #### 软件架构
 软件架构说明
-./data 为数据目录
-./src 为源码目录
-./src/camera 为相机初始化的库函数目录
-./src/database 为数据库交互模块目录
-./src/serialport 为串口及GPIO交互模块目录
-./src/view 为界面交互模块目录
+##### ./data 为数据目录
+##### ./src 为源码目录
+##### ./src/camera 为相机初始化的库函数目录
+##### ./src/database 为数据库交互模块目录
+##### ./src/serialport 为串口及GPIO交互模块目录
+##### ./src/view 为界面交互模块目录
 
 #### 安装教程
 
 1.  qt 5.9.0 安装时需添加MSVC2015 32位
 2.  MSVC2015 32位 或 安装VS2015
 3.  opencv 3.4.14(vc14 32位)
+4.  MindVision SDK
+4.  查看部署注意事项.txt
 
 #### 使用说明
 

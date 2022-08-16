@@ -36,12 +36,13 @@ public:
     // 添加NG文字记录
     static void addNgTextRecord(QString ngText);
 
+    // 关闭事件
     void closeEvent(QCloseEvent *event);
 
 private:
-    void resetBtnClick();
-    void optRecordBtnClick();
-    void closeBtnClick();
+    void resetBtnClick();       // 重置
+    void optRecordBtnClick();   // 操作记录
+    void closeBtnClick();       // 关闭
 
     // 获取模型数据
     void getModelData();
@@ -53,28 +54,25 @@ private:
     void showNgRecordImg(const QModelIndex &index);
 
 private:
-    QTableView *m_ngTableView;
-    QStandardItemModel *m_ngModel;
+    QTableView *m_ngTableView;      // NG记录显示view
+    QStandardItemModel *m_ngModel;  // NG记录数据model
 
-    QTextEdit *m_recordTextEdit;
+    QTextEdit *m_recordTextEdit;    // 操作记录
 
-    QLabel *m_resultLab;
+    QLabel *m_resultLab;            // NG次数显示
 
-    QPushButton *m_resetBtn;
-    QPushButton *m_optRecordBtn;
-    QPushButton *m_closeBtn;
+    QPushButton *m_resetBtn;        // 重置
+    QPushButton *m_optRecordBtn;    // 操作记录
+    QPushButton *m_closeBtn;        // 关闭
 
-    QHBoxLayout *m_mainLayout;
-    QVBoxLayout *m_rightLayout;
+    QHBoxLayout *m_mainLayout;      // 总体布局
+    QVBoxLayout *m_rightLayout;     // 右侧布局
 
-    QList<NGRecordData> m_recordDataList;
+    QList<NGRecordData> m_recordDataList;   // NG记录数据列表
 
-    int m_okTotalNum;
-    int m_ngTotalNum;
+    OptRecord *m_optRecord;         // 操作记录界面
 
-    OptRecord *m_optRecord;
-
-    bool m_imgAreaShowState;
+    bool m_imgAreaShowState;        // 相机视频流显示状态
 };
 
 #endif // NGRECORD_H

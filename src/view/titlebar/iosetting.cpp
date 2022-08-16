@@ -214,8 +214,12 @@ void IOSetting::setWidgetStyle()
 
         m_sliderList.at(i)->setStep(1);
         m_sliderList.at(i)->setSliderSize(120, 20);
-        m_sliderList.at(i)->setValueRange(0, 50);
     }
+
+    m_sliderList[0]->setValueRange(0, 10);
+    m_sliderList[1]->setValueRange(0, 5);
+    m_sliderList[2]->setValueRange(0, 20);
+    m_sliderList[3]->setValueRange(0, 20);
 
     m_restartBtn->setFixedHeight(40);
     m_passwordBtn->setFixedHeight(40);

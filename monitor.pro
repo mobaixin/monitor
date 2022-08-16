@@ -10,6 +10,8 @@ CONFIG += c++11
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
+
+# 禁止warning和debug输出
 #DEFINES += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
 
 # You can also make your code fail to compile if it uses deprecated APIs.
@@ -18,16 +20,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 #INCLUDEPATH += D:\Documents\QTProjects\monitor\src\camera\include
-INCLUDEPATH += $$PWD\src\camera\include
+INCLUDEPATH += $$PWD/src/camera/Include
 
 #lib
 #LIBS += D:\Documents\QTProjects\monitor\src\camera\lib\MVCAMSDK.lib
 #LIBS += D:\Documents\QTProjects\monitor\src\camera\lib\MVCAMSDK_X64.lib
-LIBS += $$PWD\src\camera\lib\MVCAMSDK.lib
+LIBS += $$PWD/src/camera/lib/MVCAMSDK.lib
+LIBS += $$PWD/src/camera/lib/MVCAMSDK_X64.lib
 
-LIBS += "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\legacy_stdio_definitions.lib"
+#LIBS += "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\legacy_stdio_definitions.lib"
 #LIBS += D:\Documents\QTProjects\monitor\src\serialport\lib\Lucero.lib
-LIBS += $$PWD\src\serialport\lib\Lucero.lib
+#LIBS += $$PWD\src\serialport\lib\Lucero.lib
 
 
 #INCLUDEPATH +=D:\Documents\opencv3.4.0\OpenCV-MinGW-Build-OpenCV-3.4.5\include \
@@ -46,7 +49,7 @@ SOURCES += \
     src/camera/capturethread.cpp \
     src/camera/detect.cpp \
     src/database/mydatabase.cpp \
-    src/serialport/myserialport.cpp \
+#    src/serialport/myserialport.cpp \
     src/view/bottombar/bottombar.cpp    \
     src/view/common/myselectframe.cpp \
     src/view/common/mysettings.cpp \
@@ -69,10 +72,16 @@ HEADERS += \
     src/camera/camera.h \
     src/camera/capturethread.h \
     src/camera/resource.h \
+    src/camera/Include/CameraApi.h \
+    src/camera/Include/CameraApiLoad.h \
+    src/camera/Include/CameraDefine.H \
+    src/camera/Include/CameraGrabber.h \
+    src/camera/Include/CameraImage.h \
+    src/camera/Include/CameraStatus.h \
     src/database/mydatabase.h \
-    src/serialport/myserialport.h \
-    src/serialport/usb2gpio.h \
-    src/serialport/usbdevice.h \
+#    src/serialport/myserialport.h \
+#    src/serialport/usb2gpio.h \
+#    src/serialport/usbdevice.h \
     src/view/common/myselectframe.h \
     src/view/common/mysettings.h \
     src/view/common/myslider.h \
@@ -111,7 +120,3 @@ DISTFILES += \
 RESOURCES += \
     data/database/database.qrc \
     data/img/img.qrc
-
-DISTFILES += \
-    lib/MVCAMSDK.lib \
-    lib/MVCAMSDK_X64.lib

@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
-#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QLineEdit>
 #include <QProgressBar>
 #include <QImage>
@@ -18,16 +18,16 @@
 #include <QList>
 #include <QTimer>
 #include <QThread>
-#include <windows.h>
+
 #include <opencv2\opencv.hpp>
-#include <aruco.hpp>
-#include <iostream>
-#include <stdlib.h>
-#include <string.h>
+//#include <iostream>
+//#include <stdlib.h>
+//#include <string.h>
 
 #include "src/view/imgarea/mygraphicsitem.h"
 #include "src/view/imgarea/mygraphicsscene.h"
 #include "src/camera/capturethread.h"
+#include <windows.h>
 #include "src/camera/Include/CameraApi.h"
 #include "src/database/mydatabase.h"
 
@@ -49,43 +49,85 @@ typedef struct _WIDTH_HEIGHT{
 
 // MOG2数据
 typedef struct MyMOG2Data {
-    int cameraId;
-    int sceneId;
-    Ptr<BackgroundSubtractorMOG2> myMOG2;
-    Mat fgMaskMat;
-    double accuracy;
-    int pixel;
+    int cameraId;       // 相机ID
+    int sceneId;        // 场景ID
+    Ptr<BackgroundSubtractorMOG2> myMOG2;   // 学习数据
+    Mat fgMaskMat;      // 图形掩膜
+    double accuracy;    // 精确度
+    int pixel;          // 像素值
 } MyMOG2Data;
+
+// 相机参数数据
+typedef struct CameraParaData {
+    // 曝光时间
+    double pfExposureTime;
+    double exposureTimeMin;
+    double exposureTimeMax;
+    double expLineTime;
+
+    // 增益值
+    int pusAnalogGain;
+    int analogGainMin;
+    int analogGainMax;
+} CameraParaData;
+
+// 相机显示数据
+typedef struct CameraViewData {
+    int cameraId;                   // 相机id
+    int camState;                   // 相机状态
+    QGraphicsView *camView;         // 视频流显示
+    MyGraphicsScene *camScene;      // 场景
+    QGraphicsPixmapItem *imageItem; // 显示视频流的item
+    QList<QGraphicsItem *> allShapeItemList;    // 所有的图形item
+    CaptureThread *camThread;       // 视频流线程
+    QImage curImage;                // 当前获取的图片
+    QImage curDetectImage;          // 当前检测的图片
+    int curDetectSceneId;           // 当前检测场景
+    double scaleValue;              // 缩放的值
+    bool isShowCamImage;            // 是否显示视频流
+    bool isNGState;                 // 是否处于NG状态
+    QVector<QVector<QPointF>> resPointList;   // NG区域的边缘点
+    QList<int> resAreaSizeList;     // NG区域的范围大小
+    QList<QGraphicsPolygonItem *> detectResItemList;    // 检测结果图形
+    QList<QGraphicsTextItem *> detectResTxtItemList;    // 检测结果范围
+    CameraParaData cameraParaData;  // 相机参数
+} CameraViewData;
 
 // 相机检测数据
 typedef struct CameraDetectData {
-    int cameraId;
-    int cameraRunState;
-    QList<Mat> moldShapeMaskList;
-    QList<Mat> prodShapeMaskList;
-    QList<MyMOG2Data> moldMOG2DataList;
-    QList<MyMOG2Data> prodMOG2DataList;
+    int cameraId;                       // 相机ID
+    int cameraRunState;                 // 相机运行状态
+    QList<Mat> moldShapeMaskList;       // 检模图形掩膜列表
+    QList<Mat> prodShapeMaskList;       // 产品图形掩膜列表
+    QList<MyMOG2Data> moldMOG2DataList; // 检模学习数据列表
+    QList<MyMOG2Data> prodMOG2DataList; // 产品学习数据列表
+    QList<QPointF> moldShapeCenterList; // 检模图形中心点列表
+    QList<QPointF> moldShapeBoundList;  // 检模图形外接矩形
+    QList<QPointF> prodShapeCenterList; // 产品图形中心点列表
+    QList<QPointF> prodShapeBoundList;  // 产品图形外接矩形
 } CameraDetectData;
 
 // 相机运行状态
 enum CameraState {
-    OffLine = 0,
-    Running = 1,
-    Pause   = 2,
+    OffLine = 0,    // 相机断线
+    Running = 1,    // 监视运行
+    Pause   = 2,    // 保护停止
 };
 
 // 检测结果
 enum DetectRes {
-    NG = 0,
-    OK = 1,
+    NG = 0,         // NG
+    OK = 1,         // OK
 };
 
+// 检测图片类
 class DetectImageWork;
 
 class ImgArea : public QWidget
 {
     Q_OBJECT
 public:
+    // 单例
     static ImgArea *getInstance(QWidget *parent = nullptr);
 
     explicit ImgArea(QWidget *parent = nullptr);
@@ -104,19 +146,19 @@ public:
     MyGraphicsScene *getScene();
 
     // 设置背景图片
-    void loadImage(QString filePath);
+    void loadImage(QString filePath, int cameraId = -1);
 
     // 擦除单个图形item
-    void eraseShape();
+    void eraseShape(int cameraId = -1);
 
     // 清除所有图形item
-    void clearShapes();
+    void clearShapes(int cameraId = -1);
 
     // 设置运行状态
     void setRunState(int state, int cameraId = -1);
 
     // 设置监视状态
-    void setMonitorState(bool isMonitor);
+    void setMonitorState(bool isMonitor, int cameraId = 1);
 
     // 设置检测状态
     void setDetectState(bool isDetect);
@@ -131,39 +173,39 @@ public:
     void setSampleLab(bool isDetectMold, int curIdx = 1);
 
     // 获得图像图形模板
-    QImage getImageItem();
-    QList<ShapeItemData> getShapeItems();
+    QImage getImageItem(int cameraId = -1);
+    QList<ShapeItemData> getShapeItems(int cameraId = -1);
 
     // 加载图像图形模板
-    void loadImageItem(ImageMoldData imgData);
-    void loadShapeItem(ShapeItemData itemData);
+    void loadImageItem(ImageMoldData imgData, int cameraId = -1);
+    void loadShapeItem(ShapeItemData itemData, int cameraId = -1);
 
     // 保存为图片
-    QImage saveAsImage(QString imgPath);
+    QImage saveAsImage(QString imgPath, int cameraId = -1);
 
     // 设置分辨率
-    void setResolution(int index);
+    void setResolution(int cameraId);
 
     // 设置曝光时间
-    void setExposeTime(int value, int cameraIdx = 0);
+    void setExposeTime(int value, int cameraId = -1);
 
     // 设置相机增益
-    void setCameraGain(int gain, int cameraIdx = 0);
+    void setCameraGain(int gain, int cameraId = -1);
 
     // 获取曝光数据
-    QList<double> getExposureTime();
+    QList<double> getExposureTime(int cameraId = -1);
 
     // 获取增益数据
-    QList<int> getCameraGain();
+    QList<int> getCameraGain(int cameraId = -1);
 
     // 保存相机参数
-    void saveCameraPara();
+    void saveCameraPara(int cameraIdx = 1);
 
     // 开始运行
-    void startCamera();
+    void startCamera(int cameraId = 1);
 
     // 停止运行
-    void pauseCamera();
+    void pauseCamera(int cameraId = 1);
 
     // 更新图形图片模板
     void updateShapeImgMold(int cameraId, int sceneId);
@@ -181,7 +223,7 @@ public:
     void getDetectResult(int result, QVector<QVector<QPointF>> resPointList, QList<int> resAreaSizeList);
 
     // 获取当前检测图片
-    QImage getCurDetectImage();
+    QImage getCurDetectImage(int cameraId);
 
     // 获取当前检测相机id
     int getCurDetectCameraId();
@@ -190,25 +232,22 @@ public:
     int getCurDetectSceneId();
 
     // 获取item数
-    int getShapeItemNum();
-
-    // 获取opencv mask
-    Mat getShapeMask(ShapeItemData itemData, QImage img, QList<ShapeItemData> maskItemData);
+    int getShapeItemNum(int cameraId);
 
     // 设置显示状态
-    void setShowState(bool isShow);
+    void setShowState(bool isShow, int cameraId = -1);
 
     // 获取显示状态
-    bool getShowState();
+    bool getShowState(int cameraId = -1);
 
     // 获取当前图片
-    QImage getCurImage();
+    QImage getCurImage(int cameraId);
 
     // 获取相机数
     int getCameraCounts();
 
     // 获取相机状态
-    int getCameraStatus(int cameraId);
+    int getCameraState(int cameraId);
 
     // 描绘检测结果
     void drawDetectResult(QVector<QVector<QPointF>> resPointList);
@@ -226,7 +265,7 @@ public:
     void setSceneDelayTime(int sceneId, double delayTime);
 
     // 添加图形item到list
-    void addShapeItemToList(QGraphicsItem *newItem);
+    void addShapeItemToList(QGraphicsItem *newItem, int cameraId = -1);
 
     // 获取选中的图形item
     QList<QGraphicsItem *> getSelectItemList();
@@ -237,13 +276,32 @@ public:
     // 复制当前选中的图形
     void copySelectedShapeItem();
 
+    // 显示全部相机画面
+    void showAllCameraView();
+
+    // 显示单个相机画面
+    void showSingleCameraView(int cameraId);
+
+    // 获取单个相机的NG状态
+    bool getCamNGState(int cameraId);
+
+    //设置单个相机的NG状态
+    void setCamNGState(int cameraId, bool state);
+
 public:
     int status;
 
 signals:
+    // 设置相机个数信号
     void setCameraCountsSig(int cameraCounts);
+
+    // 设置场景尺寸信号
     void setSceneRectSizeSig(QSize size);
+
+    // 更新图形图像模板信号
     void startUpdateMoldSig(int cameraId, int sceneId, QList<ShapeItemData> itemDataList, QList<ImageMoldData> imgDataList);
+
+    // 开始检测图片信号
     void startDetectImageSig(QImage imgFg, int cameraId, int sceneId, int &detectRes);
 
 private:
@@ -253,13 +311,14 @@ private:
     // SDK初始化
     int initSDK();
     void cameraStatues();
+
+    // 初始化相机参数
     int initParameter(int hCamera,tSdkCameraCapbility * pCameraInfo);
 
+    // 坐标列表转字符串
     QString pointListToStr(QList<QPointF> pointList);
 
-    // 获取MOG2
-    Ptr<BackgroundSubtractorMOG2> getMOG2Data(ShapeItemData itemData);
-
+    // QImage和Mat格式转换
     static QImage matToQim(Mat & mat);
     static Mat qimToMat(QImage & qim);
 
@@ -267,27 +326,29 @@ private:
     void setSigDelayTimeLab();
 
 private slots:
-    void imageProcess(QImage img);
+    // 视频流显示
+    void imageProcess(QImage img, int cameraId);
+    void imageProcess1(QImage img, int cameraId);
+    void imageProcess2(QImage img, int cameraId);
+    void imageProcess3(QImage img, int cameraId);
+    void imageProcess4(QImage img, int cameraId);
 
 private:
     // 相机状态
-    QLabel *m_pTipLab;
+    QList<QLabel *> m_cameraStateLabList;
+
     // 信号倒计时
     QLabel *m_pSigTimeLab;
+
     // 图片模板序号
     QLabel *m_pSampleLab;
+
     // 检测结果
-    QLabel *m_pResultLab;
+    QList<QLabel *> m_resultLabList;
 
-    QImage *m_pMainImg;
+    QGridLayout *m_pImgAreaLayout;
 
-    QHBoxLayout *m_pImgAreaLayout;
-
-    QGraphicsView *m_pView;
-    MyGraphicsScene *m_pScene;
-    QGraphicsPixmapItem *m_pImageItem;
-    QImage m_pCurImage;
-
+    // 单个scene的尺寸
     QSize m_sceneSize;
 
     // 当前检测相机id
@@ -305,21 +366,25 @@ private:
     // 相机监视状态
     QList<int> m_cameraStateList;
 
+    // 检测结果显示倒计时
     QTimer *m_resTimer;
-    CaptureThread *m_thread;
 
-    // 信号倒计时
+    // 检测信号倒计时
     QTimer *m_sigDelayTimer;
+
+    // 检测延时
     double m_delayTime;
+
+    // 重检次数
     int m_reDetectTimes;
 
     // 本机IP地址
 //    QString m_ifaceIp  = QString("192.168.0.10%1");
-    QString m_ifaceIp  = QString("192.168.%1.10%2");
+    QString m_ifaceIp  = QString("192.168.%1.20%2");
 
     // 相机IP地址
 //    QString m_cameraIp = QString("192.168.0.11%1");
-    QString m_cameraIp   = QString("192.168.%1.11%2");
+    QString m_cameraIp   = QString("192.168.%1.21%2");
     QString m_cameraMask = QString("255.255.255.0");
 
     // 网关地址
@@ -335,8 +400,6 @@ private:
     // NG区域的范围大小
     QList<int> m_resAreaSizeList;
 
-    bool m_isShowImage;
-
     // 曝光时间
     double m_pfExposureTime;
     double m_exposureTimeMin;
@@ -348,28 +411,14 @@ private:
     int m_analogGainMin;
     int m_analogGainMax;
 
-    // opencv
-    int m_minArea;
-    Mat m_frame;
-    Mat m_fgMaskMOG2;
-    Mat m_maskCountour;
-//    Ptr<BackgroundSubtractorMOG2> m_pMOG2;
-
-    QList<Mat> m_moldShapeMaskList;
-    QList<Mat> m_prodShapeMaskList;
-    QList<MyMOG2Data> m_moldMOG2DataList;
-    QList<MyMOG2Data> m_prodMOG2DataList;
-
-    QList<CameraDetectData> m_cameraDetectDataList;
-
-    QList<QGraphicsPolygonItem *> m_detectResItemList;
-    QList<QGraphicsTextItem *> m_detectResTxtItemList;
-
     // 存放所有的图形item
     QList<QGraphicsItem *> m_allShapeItemList;
+
+    // 所有相机显示相关的信息
+    QList<CameraViewData> m_cameraViewDataList;
 };
 
-
+// 检测图片类
 class DetectImageWork : public QObject
 {
     Q_OBJECT
@@ -393,90 +442,23 @@ public:
     void detectImage(QImage imgFg, int cameraId, int sceneId, int &detectRes);
 
 signals:
+    // 检测结果信号
     void resultReadySig(int result, QVector<QVector<QPointF>> resPointList, QList<int> resAreaSizeList);
 
 private:
+    // QImage和Mat格式转换
     static QImage matToQim(Mat & mat);
     static Mat qimToMat(QImage & qim);
 
 private:
-    QSize m_sceneRectSize;
+    QSize m_sceneRectSize;  // 场景尺寸 即图片要缩放的尺寸
 
-    // opencv
-    int m_minArea;
-    Mat m_frame;
-    Mat m_fgMaskMOG2;
-    Mat m_maskCountour;
+    QList<Mat> m_moldShapeMaskList;         // 检模图形掩膜列表
+    QList<Mat> m_prodShapeMaskList;         // 产品图形掩膜列表
+    QList<MyMOG2Data> m_moldMOG2DataList;   // 检模学习数据列表
+    QList<MyMOG2Data> m_prodMOG2DataList;   // 产品学习数据列表
 
-    QList<Mat> m_moldShapeMaskList;
-    QList<Mat> m_prodShapeMaskList;
-    QList<MyMOG2Data> m_moldMOG2DataList;
-    QList<MyMOG2Data> m_prodMOG2DataList;
-
-    QList<CameraDetectData> m_cameraDetectDataList;
+    QList<CameraDetectData> m_cameraDetectDataList; // 相机检测数据列表
 };
-
-
-static std::string base64Encode(const unsigned char* Data, int DataByte) {
-    //编码表
-    const char EncodeTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    //返回值
-    std::string strEncode;
-    unsigned char Tmp[4] = { 0 };
-    int LineLength = 0;
-    for (int i = 0; i < (int)(DataByte / 3); i++) {
-        Tmp[1] = *Data++;
-        Tmp[2] = *Data++;
-        Tmp[3] = *Data++;
-        strEncode += EncodeTable[Tmp[1] >> 2];
-        strEncode += EncodeTable[((Tmp[1] << 4) | (Tmp[2] >> 4)) & 0x3F];
-        strEncode += EncodeTable[((Tmp[2] << 2) | (Tmp[3] >> 6)) & 0x3F];
-        strEncode += EncodeTable[Tmp[3] & 0x3F];
-        if (LineLength += 4, LineLength == 76) { strEncode += "\r\n"; LineLength = 0; }
-    }
-    //对剩余数据进行编码
-    int Mod = DataByte % 3;
-    if (Mod == 1) {
-        Tmp[1] = *Data++;
-        strEncode += EncodeTable[(Tmp[1] & 0xFC) >> 2];
-        strEncode += EncodeTable[((Tmp[1] & 0x03) << 4)];
-        strEncode += "==";
-    }
-    else if (Mod == 2) {
-        Tmp[1] = *Data++;
-        Tmp[2] = *Data++;
-        strEncode += EncodeTable[(Tmp[1] & 0xFC) >> 2];
-        strEncode += EncodeTable[((Tmp[1] & 0x03) << 4) | ((Tmp[2] & 0xF0) >> 4)];
-        strEncode += EncodeTable[((Tmp[2] & 0x0F) << 2)];
-        strEncode += "=";
-    }
-
-
-    return strEncode;
-}
-
-//imgType 包括png bmp jpg jpeg等opencv能够进行编码解码的文件
-static std::string Mat2Base64(const cv::Mat &img, std::string imgType) {
-    //Mat转base64
-    std::string img_data;
-    std::vector<uchar> vecImg;
-    std::vector<int> vecCompression_params;
-    vecCompression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
-    vecCompression_params.push_back(90);
-    imgType = "." + imgType;
-    cv::imencode(imgType, img, vecImg, vecCompression_params);
-    img_data = base64Encode(vecImg.data(), vecImg.size());
-    return img_data;
-}
-
-
-//static cv::Mat Base2Mat(std::string &base64_data) {
-//    cv::Mat img;
-//    std::string s_mat;
-//    s_mat = base64Decode(base64_data.data(), base64_data.size());
-//    std::vector<char> base64_img(s_mat.begin(), s_mat.end());
-//    img = cv::imdecode(base64_img, CV_LOAD_IMAGE_COLOR);
-//    return img;
-//}
 
 #endif // IMG_AREA

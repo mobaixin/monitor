@@ -27,9 +27,11 @@ public:
     MyPointItem(QAbstractGraphicsShapeItem* parent, QPointF p, PointType type);
     virtual ~MyPointItem();
 
+    // 获取功能点的坐标
     QPointF getPoint();
     void setPoint(QPointF p);
 
+    // 获取功能点的类型
     PointType getPointType();
 
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
@@ -43,8 +45,8 @@ protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:
-    QPointF m_point;
-    PointType m_type = PointType::Other;
+    QPointF m_point;    // 坐标
+    PointType m_type = PointType::Other;    // 类型
 };
 
 
@@ -52,9 +54,9 @@ private:
 class MyPointItemList : public QList<MyPointItem *>
 {
 public:
-    void setRandColor();
-    void setColor(const QColor color);
-    void setVisible(bool visible);
+    void setRandColor();                // 随机颜色
+    void setColor(const QColor color);  // 设置颜色
+    void setVisible(bool visible);      // 是否可见
 };
 
 #endif // MYPOINTITEM_H

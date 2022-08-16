@@ -36,7 +36,8 @@ void SysSetting::setWidgetUi()
     m_moldTimesLab = new QLabel(this);
     m_prodDelayLab = new QLabel(this);
     m_prodTimesLab = new QLabel(this);
-    m_prodDetectLab = new QLabel(this);
+    m_prodDetectLab  = new QLabel(this);
+    m_cameraCountLab = new QLabel(this);
 
     m_moldDelaySlider = new MySlider(this);
     m_moldTimesSlider = new MySlider(this);
@@ -45,12 +46,22 @@ void SysSetting::setWidgetUi()
 
     m_prodDetectBtn = new QRadioButton(this);
 
+    m_cameraBtnGroup = new QButtonGroup(this);
+    m_cameraBtnGroup->setExclusive(true);
+
+    for (int i = 0; i < 4; i++) {
+        m_cameraBtnList.append(new QPushButton(this));
+        m_cameraBtnList[i]->setCheckable(true);
+        m_cameraBtnGroup->addButton(m_cameraBtnList[i]);
+    }
+
     m_changeTimeBtn = new QPushButton(this);
     m_ioSettingsBtn = new QPushButton(this);
     m_cameraParaBtn = new QPushButton(this);
     m_closeSetBtn = new QPushButton(this);
 
     m_sysSetLayout = new QGridLayout();
+    m_camBtnLayout = new QHBoxLayout();
     m_btnLayout    = new QHBoxLayout();
     m_mainLayout   = new QVBoxLayout(this);
 
@@ -60,15 +71,23 @@ void SysSetting::setWidgetUi()
     m_sysSetLayout->addWidget(m_prodDelayLab, 2, 0, 1, 1);
     m_sysSetLayout->addWidget(m_prodTimesLab, 3, 0, 1, 1);
     m_sysSetLayout->addWidget(m_prodDetectLab, 4, 0, 1, 1);
+    m_sysSetLayout->addWidget(m_cameraCountLab, 5, 0, 1, 1);
 
     m_sysSetLayout->addWidget(m_moldDelaySlider, 0, 1, 1, 3);
     m_sysSetLayout->addWidget(m_moldTimesSlider, 1, 1, 1, 3);
     m_sysSetLayout->addWidget(m_prodDelaySlider, 2, 1, 1, 3);
     m_sysSetLayout->addWidget(m_prodTimesSlider, 3, 1, 1, 3);
     m_sysSetLayout->addWidget(m_prodDetectBtn, 4, 1, 1, 1);
+    m_sysSetLayout->addLayout(m_camBtnLayout, 5, 1, 1, 3);
 
     m_sysSetLayout->setContentsMargins(5, 5, 5, 5);
     m_sysSetLayout->setSpacing(20);
+
+    for (int i = 0; i < m_cameraBtnList.size(); i++) {
+        m_camBtnLayout->addWidget(m_cameraBtnList[i]);
+    }
+    m_camBtnLayout->setContentsMargins(0, 0, 0, 0);
+    m_camBtnLayout->setSpacing(5);
 
     m_btnLayout->addWidget(m_changeTimeBtn);
     m_btnLayout->addWidget(m_ioSettingsBtn);
@@ -102,12 +121,16 @@ void SysSetting::setWidgetUi()
     connect(m_ioSettingsBtn, &QPushButton::clicked, this, &SysSetting::ioSettingsBtnClick);
     connect(m_cameraParaBtn, &QPushButton::clicked, this, &SysSetting::cameraParaBtnClick);
     connect(m_closeSetBtn,   &QPushButton::clicked, this, &SysSetting::closeSetBtnClick);
+
+    for (int i = 0; i < m_cameraBtnList.size(); i++) {
+        connect(m_cameraBtnList[i], &QPushButton::clicked, this, &SysSetting::updateCameraCount);
+    }
 }
 
 void SysSetting::setWidgetStyle()
 {
     this->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
-    this->setFixedSize(450, 300);
+    this->setFixedSize(450, 330);
     this->setWindowTitle("系统设定");
 
     m_moldDelayLab->setFixedSize(100, 30);
@@ -115,6 +138,7 @@ void SysSetting::setWidgetStyle()
     m_prodDelayLab->setFixedSize(100, 30);
     m_prodTimesLab->setFixedSize(100, 30);
     m_prodDetectLab->setFixedSize(100, 30);
+    m_cameraCountLab->setFixedSize(100, 30);
 
     m_moldDelaySlider->setStep(1);
     m_moldTimesSlider->setStep(1);
@@ -126,6 +150,11 @@ void SysSetting::setWidgetStyle()
 //    m_prodDelaySlider->setValue(4);
 //    m_prodTimesSlider->setValue(2);
 
+    for (int i = 0; i < m_cameraBtnList.size(); i++) {
+        m_cameraBtnList[i]->setFixedHeight(30);
+        m_cameraBtnList[i]->setFocusPolicy(Qt::NoFocus);
+    }
+
     m_changeTimeBtn->setFixedHeight(30);
     m_ioSettingsBtn->setFixedHeight(30);
     m_cameraParaBtn->setFixedHeight(30);
@@ -136,6 +165,11 @@ void SysSetting::setWidgetStyle()
     m_prodDelayLab->setText("产品拍照延时(秒):");
     m_prodTimesLab->setText("产品重检次数:");
     m_prodDetectLab->setText("产品检测:");
+    m_cameraCountLab->setText("相机数:");
+
+    for (int i = 0; i < m_cameraBtnList.size(); i++) {
+        m_cameraBtnList[i]->setText(QString("%1个").arg(i + 1));
+    }
 
     m_prodDetectBtn->setText("启用");
     m_changeTimeBtn->setText("修改时间");
@@ -179,6 +213,25 @@ void SysSetting::setData()
     } else {
         m_cameraParaBtn->show();
     }
+
+    // 获得相机数
+    int showCamCount = MySettings::getInstance()->getValue(IOSetSection, FrameListKey.arg(14)).toInt();
+    int cameraCount  = MySettings::getInstance()->getValue(SysSection, CameraCountsKey).toInt();
+
+    if (showCamCount == 0) {
+        m_cameraCountLab->hide();
+        for (int i = 0; i < m_cameraBtnList.size(); i++) {
+            m_cameraBtnList[i]->hide();
+        }
+        this->setFixedHeight(300);
+    } else {
+        m_cameraCountLab->show();
+        for (int i = 0; i < m_cameraBtnList.size(); i++) {
+            m_cameraBtnList[i]->show();
+        }
+        m_cameraBtnList[cameraCount - 1]->setChecked(true);
+        this->setFixedHeight(330);
+    }
 }
 
 void SysSetting::changeTimeBtnClick()
@@ -193,6 +246,8 @@ void SysSetting::ioSettingsBtnClick()
 
     m_ioSetting = new IOSetting();
     m_ioSetting->exec();
+
+    setData();
 }
 
 void SysSetting::cameraParaBtnClick()
@@ -238,6 +293,17 @@ void SysSetting::updateProdDetect(bool checked)
     SideBar::getInstance()->setDetectScene();
 
     updateDisPlay(checked);
+}
+
+void SysSetting::updateCameraCount()
+{
+    int i = 0;
+    for (; i < m_cameraBtnList.size(); i++) {
+        if (m_cameraBtnList[i]->isChecked()) {
+            break;
+        }
+    }
+    MySettings::getInstance()->setValue(SysSection, CameraCountsKey, QString::number(i + 1));
 }
 
 void SysSetting::updateDisPlay(bool isShowProd)

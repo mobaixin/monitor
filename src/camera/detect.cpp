@@ -226,9 +226,9 @@ using namespace cv;
 //    namedWindow("移动目标跟踪");
 //    namedWindow("Mask");
 
-//    pMOG2 = createBackgroundSubtractorMOG2(50, 200.0, true);
+//    pMOG2 = createBackgroundSubtractorMOG2(30, 200.0, true);
 
-//    char *videoFilename = "0";
+//    char *videoFilename;
 //    processVideo(videoFilename);
 
 //    destroyAllWindows();
@@ -298,8 +298,11 @@ void processVideo(char* videoFilename)
     cout << "cam opened: " << capture.isOpened() << endl;
 
     cv::Mat tmp;
-    cv::Mat frame_bg = cv::imread("D:/image/page021.png");
-    cv::Mat frame_fg = cv::imread("D:/image/page032.png");
+//    cv::Mat frame_bg = cv::imread("D:/image/page021.png");
+//    cv::Mat frame_fg = cv::imread("D:/image/page032.png");
+
+    cv::Mat frame_bg = cv::imread("D:/Documents/模具监视器/砂轮/4.bmp");
+    cv::Mat frame_fg = cv::imread("D:/Documents/模具监视器/砂轮/3.bmp");
 
     vector<vector<Point>> mask_area;
     vector<Point> mask_points;
@@ -330,7 +333,7 @@ void processVideo(char* videoFilename)
     cv::Mat mask, dst;
 
     frame_bg.copyTo(mask);
-    mask.setTo(cv::Scalar::all(0));
+    mask.setTo(cv::Scalar::all(255));
     fillPoly(mask, mask_area, Scalar(255, 255, 255));
     fillPoly(mask, mask_area2, Scalar(255, 255, 255));
     rectangle(mask, Point(900, 100), Point(1000, 200), Scalar(255, 255, 255), -1, 8, 0);
@@ -350,7 +353,7 @@ void processVideo(char* videoFilename)
     cv::Mat mask2, dst2;
 
     frame_fg.copyTo(mask2);
-    mask2.setTo(cv::Scalar::all(0));
+    mask2.setTo(cv::Scalar::all(255));
     fillPoly(mask2, mask_area, Scalar(255, 255, 255));
     fillPoly(mask2, mask_area2, Scalar(255, 255, 255));
     rectangle(mask2, Point(900, 100), Point(1000, 200), Scalar(255, 255, 255), -1, 8, 0);
