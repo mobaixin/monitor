@@ -1674,7 +1674,7 @@ void ImgArea::clearDetectResult()
 
 void ImgArea::setShapeNoMove(bool noMove)
 {
-    for (int i = 0; i < m_cameraCounts; i++) {
+    for (int i = 0; i < m_cameraViewDataList.size(); i++) {
         m_cameraViewDataList[i].camView->setAttribute(Qt::WA_TransparentForMouseEvents, noMove);
     }
 }
