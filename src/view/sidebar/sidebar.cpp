@@ -651,9 +651,6 @@ void SideBar::addMoldBtnClick()
     // 获取最大样本数
     int maxSampleNum = MySettings::getInstance()->getValue(IOSetSection, MaxSampleNumKey).toInt();
 
-    qDebug() << "maxSampleNum: " << maxSampleNum;
-    qDebug() << "getCurMoldNum: " << getCurMoldNum();
-
     if (getCurMoldNum() >= maxSampleNum) {
         QMessageBox::information(this, "提示", "已达到最大样本数");
         return ;
@@ -908,7 +905,7 @@ void SideBar::loadCurImage()
     imgData.sceneId  = m_sceneId;
     imgData.moldId   = getCurrentIdx();
 
-    qDebug() << "load img idx: " << imgData.moldId;
+//    qDebug() << "load img idx: " << imgData.moldId;
     ImgArea::getInstance()->loadImageItem(imgData);
 }
 

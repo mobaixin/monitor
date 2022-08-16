@@ -482,7 +482,7 @@ void TitleBar::testBtnClick()
     ImgArea::getInstance()->setShapeNoMove(true);
     ImgArea::getInstance()->clearDetectResult();
 
-    qDebug() << "after clearDetectResult";
+//    qDebug() << "after clearDetectResult";
 //    if (ImgArea::getInstance()->getCameraState(m_cameraId) != CameraState::OffLine) {
 //        m_detectTimeList[m_cameraId - 1] = QDateTime::currentDateTime();
 //        ImgArea::getInstance()->detectCurImage(m_cameraId);
@@ -507,7 +507,7 @@ void TitleBar::testBtnClick()
         }
     }
 
-    qDebug() << "after detectCurImage";
+//    qDebug() << "after detectCurImage";
 }
 
 void TitleBar::addMoldBtnClick()

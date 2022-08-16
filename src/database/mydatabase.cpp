@@ -60,7 +60,6 @@ MyDataBase::MyDataBase(QObject *parent)
     }
 //    m_database.setDatabaseName(dirPath + "monitor.db");
     m_database.setDatabaseName(dbFilePath + "/monitor.db");
-    qDebug() << QDir::homePath();
 
     initDataBase();
 }
@@ -809,7 +808,7 @@ QList<OptRecordData> MyDataBase::queAllOptRecordData()
 int MyDataBase::addCameraIPData(CameraIPData cameraIPData)
 {
     bool queryRes = true;
-    qDebug() << "cameraId:" << cameraIPData.cameraId;
+//    qDebug() << "cameraId:" << cameraIPData.cameraId;
 
     if (!checkCameraIPData(cameraIPData)) {
         return INVALID_INPUT;

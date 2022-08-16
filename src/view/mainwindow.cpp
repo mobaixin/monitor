@@ -238,7 +238,7 @@ int MainWindow::autoDetectImage(int cameraId, int sceneId)
         reDetectTimes = MySettings::getInstance()->getValue(SysSection, ProdTimesKey).toInt();
     }
 
-    qDebug() << delayTime << " " << reDetectTimes;
+//    qDebug() << delayTime << " " << reDetectTimes;
 
     m_pImgArea->autoDetectImage(cameraId, sceneId, delayTime * 1000, reDetectTimes);
 
