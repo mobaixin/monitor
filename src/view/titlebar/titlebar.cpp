@@ -517,7 +517,7 @@ void TitleBar::addMoldBtnClick()
     QString fileName = m_detectTimeList[m_cameraId - 1].toString("yyyy-MM-dd-HH-mm-ss-zzz");
     QString timeStr  = m_detectTimeList[m_cameraId - 1].toString("yyyy-MM-dd HH:mm:ss");
     QString moldFilePath = QString("%1/%2.jpg").arg(MyDataBase::imgMoldFilePath).arg(fileName);
-    QString ngFilePath   = QString("%1/%2.jpg").arg(MyDataBase::imgNgFilePath).arg(fileName);
+//    QString ngFilePath   = QString("%1/%2.jpg").arg(MyDataBase::imgNgFilePath).arg(fileName);
 
     QImage detectImage = ImgArea::getInstance()->getCurDetectImage(m_cameraId);
     detectImage.save(moldFilePath);
@@ -527,19 +527,23 @@ void TitleBar::addMoldBtnClick()
     SideBar::getInstance()->setCanThimbleState(RadioBtnState::Correct);
 
     setAlarmBtnState(false);
-    ImgArea::getInstance()->saveAsImage(ngFilePath);
+
+    // 保存NG图片
+//    ImgArea::getInstance()->saveAsImage(ngFilePath);
+
     ImgArea::getInstance()->clearDetectResult();
     ImgArea::getInstance()->setShowState(true);
 //    ImgArea::getInstance()->setShapeNoMove(false);
 
-    NGRecordData ngData;
-    ngData.time = timeStr;
-    ngData.cameraId = ImgArea::getInstance()->getCurDetectCameraId();
-    ngData.sceneId  = ImgArea::getInstance()->getCurDetectSceneId();
-    ngData.result   = "异常";
-    ngData.imgPath  = ngFilePath;
+    // 添加NG记录
+//    NGRecordData ngData;
+//    ngData.time = timeStr;
+//    ngData.cameraId = ImgArea::getInstance()->getCurDetectCameraId();
+//    ngData.sceneId  = ImgArea::getInstance()->getCurDetectSceneId();
+//    ngData.result   = "异常";
+//    ngData.imgPath  = ngFilePath;
 
-    MyDataBase::getInstance()->addNGRecordData(ngData);
+//    MyDataBase::getInstance()->addNGRecordData(ngData);
 
     OptRecord::addOptRecord("点击添加模板");
 }

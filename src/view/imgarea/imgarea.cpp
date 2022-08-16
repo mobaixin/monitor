@@ -936,13 +936,16 @@ void ImgArea::loadShapeItem(ShapeItemData itemData, int cameraId)
     }
 }
 
-QImage ImgArea::saveAsImage(QString imgPath)
+QImage ImgArea::saveAsImage(QString imgPath, int cameraId)
 {
-    qDebug() << m_sceneSize.width() << " " << m_sceneSize.height();
+    if (cameraId == -1) {
+        cameraId = TitleBar::getInstance()->getCurCameraId();
+    }
+
+//    qDebug() << m_sceneSize.width() << " " << m_sceneSize.height();
     QImage image(m_sceneSize, QImage::Format_RGB32);
     QPainter painter(&image);
     painter.setRenderHint(QPainter::Antialiasing);
-    int cameraId = TitleBar::getInstance()->getCurCameraId();
     m_cameraViewDataList[cameraId - 1].camScene->render(&painter);
 
     image.save(imgPath);
@@ -1418,6 +1421,26 @@ int ImgArea::detectCurImage(int cameraId, int sceneId, int detectTimes)
             m_cameraViewDataList[m_detectCameraId - 1].resAreaSizeList = m_resAreaSizeList;
 
             drawDetectResult(m_resPointList);
+
+            // 添加NG记录
+            QDateTime curTime  = QDateTime::currentDateTime();
+            QString fileName   = curTime.toString("yyyy-MM-dd-HH-mm-ss-zzz");
+            QString timeStr    = curTime.toString("yyyy-MM-dd HH:mm:ss");
+            QString ngFilePath = QString("%1/%2.jpg").arg(MyDataBase::imgNgFilePath).arg(fileName);
+
+            // 保存NG图片
+            saveAsImage(ngFilePath, m_detectCameraId);
+
+            // 添加NG记录
+            NGRecordData ngData;
+            ngData.time = timeStr;
+            ngData.cameraId = m_detectCameraId;
+            ngData.sceneId  = m_detectSceneId;
+            ngData.result   = "异常";
+            ngData.imgPath  = ngFilePath;
+
+            MyDataBase::getInstance()->addNGRecordData(ngData);
+
 
             // 指示灯变化
             if (m_detectSceneId == 1) {

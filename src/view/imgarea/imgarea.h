@@ -181,7 +181,7 @@ public:
     void loadShapeItem(ShapeItemData itemData, int cameraId = -1);
 
     // 保存为图片
-    QImage saveAsImage(QString imgPath);
+    QImage saveAsImage(QString imgPath, int cameraId = -1);
 
     // 设置分辨率
     void setResolution(int cameraId);
