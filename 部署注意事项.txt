@@ -1,9 +1,19 @@
-1. 动态链接库
+1. 代码修改
+1.1 mainwindow.cpp line49
+    设置全屏显示，注释掉setFixedSize，解除注释showFullScreen
+1.2 imgarea.cpp line1193
+    设置相机IP，解注释CameraGigeSetIp
+1.3 imgarea.cpp line1998
+    使用命令修改本机IP，解注释cmd.start和cmd.waitForFinished
+1.4 本地开发
+    本地开发时，将以上代码注释掉，根据需要进行解注释
+
+2. 动态链接库
 直接使用windepolyqt.exe命令，拿到的可能不是MSVC2015_32位的库，所以需要手动进行替换，
 或者直接使用提供的exefile样例(只需要替换exe文件即可)
 
-2. 运行库
+3. 运行库
 目标系统中可能没有MSVC2015_32位的运行库，所以需要安装vc_redist.x86.exe
 
-3. 串口GPIO的库
+4. 串口GPIO的库
 在开发机上可正常运行，在目标系统中无法运行，尚未解决
