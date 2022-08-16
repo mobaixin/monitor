@@ -336,7 +336,9 @@ void TitleBar::cameraBtnListClick()
     SideBar::getInstance()->updateShowData();
 
     // 更新图形模板显示
-//    SideBar::getInstance()->updateShapeData();
+    if (ImgArea::getInstance()->getCamNGState(m_cameraId) == false) {
+        SideBar::getInstance()->updateShapeData();
+    }
 
     // 处于监视设定状态
     if (m_pIsSetMonitor) {
