@@ -426,6 +426,13 @@ typedef    CameraSdkStatus (__stdcall *_CameraSnapToBuffer)(
 	UINT                uWaitTimeMs
 	);
 
+typedef    CameraSdkStatus (__stdcall *_CameraSnapJpegToFile)(
+	CameraHandle    hCamera,
+	char const*     lpszFileName,
+	BYTE            byQuality,
+	UINT            wTimes
+	);
+
 /******************************************************/
 // 函数名   : CameraReleaseImageBuffer
 // 功能描述 : 释放由CameraGetImageBuffer获得的缓冲区。
@@ -692,6 +699,54 @@ typedef    CameraSdkStatus (__stdcall *_CameraGetMediaType)(
 typedef    CameraSdkStatus (__stdcall *_CameraSetMediaType)(
 	CameraHandle    hCamera, 
 	INT             iMediaType
+	);
+	
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 获取RAW数据的最大有效位数
+/// \param [in] hCamera 相机的句柄。
+/// \param [out] pMaxAvailBits	返回RAW的最大有效位数
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the maximum number of significant bits of RAW data
+/// \param [in] hCamera Camera handle.
+/// \param [out] pMaxAvailBits	returns the maximum number of significant bits of RAW data
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+typedef    CameraSdkStatus (__stdcall *_CameraGetRawMaxAvailBits)(
+	CameraHandle    hCamera,
+	int*           pMaxAvailBits
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 设置RAW数据的输出起始位
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] startBit 起始BIT（默认输出高8位）
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Set the output start bit of RAW data
+/// \param [in] hCamera Camera handle.
+/// \param [in] startBit Start BIT (The high 8 bits are output by default)
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+typedef    CameraSdkStatus (__stdcall *_CameraSetRawStartBit)(
+	CameraHandle    hCamera,
+	int             startBit
+	);
+
+/// @ingroup API_ADVANCE
+/// \~chinese
+/// \brief 获取RAW数据的输出起始位
+/// \param [in] hCamera 相机的句柄。
+/// \param [out] startBit 起始BIT
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the output start bit of RAW data
+/// \param [in] hCamera Camera handle.
+/// \param [out] startBit Start BIT
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+typedef    CameraSdkStatus (__stdcall *_CameraGetRawStartBit)(
+	CameraHandle    hCamera,
+	int*            startBit
 	);
 
 /******************************************************/
@@ -1364,6 +1419,62 @@ typedef    CameraSdkStatus (__stdcall *_CameraSetAnalogGain)(
 typedef    CameraSdkStatus (__stdcall *_CameraGetAnalogGain)(
 	CameraHandle    hCamera, 
 	INT*            piAnalogGain
+	);
+	
+/// @ingroup API_EXPOSURE
+/// \~chinese
+/// \brief 设置相机的模拟增益放大倍数。
+/// \param [in] hCamera 相机的句柄。
+/// \param [in] fGain 设定的模拟增益放大倍数。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Set the image gain magnification of the camera.
+/// \param [in] hCamera Camera handle.
+/// \param [in] fGain Gain magnification.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+typedef    CameraSdkStatus (__stdcall *_CameraSetAnalogGainX)(
+	CameraHandle    hCamera,
+	float    		fGain
+	);
+
+/// @ingroup API_EXPOSURE
+/// \~chinese
+/// \brief 获得图像信号的模拟增益放大倍数。
+/// \param [in] hCamera 相机的句柄。
+/// \param [out] pfGain 指针，返回当前的模拟增益放大倍数。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \see CameraSetAnalogGainX
+/// \~english
+/// \brief Obtain the gain magnification of the image signal.
+/// \param [in] hCamera Camera handle.
+/// \param [out] pfGain pointer, returns the current gain magnification.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+/// \see CameraSetAnalogGainX
+typedef    CameraSdkStatus (__stdcall *_CameraGetAnalogGainX)(
+	CameraHandle    hCamera, 
+	float*          pfGain
+	);
+
+/// @ingroup API_EXPOSURE
+/// \~chinese
+/// \brief 获得相机的模拟增益放大倍数取值范围
+/// \param [in] hCamera		相机的句柄。
+/// \param [out] pfMin		指针，返回最小倍数。
+/// \param [out] pfMax		指针，返回最大倍数。
+/// \param [out] pfStep		指针，返回步进值。
+/// \return 成功返回 CAMERA_STATUS_SUCCESS(0)。否则返回非0值的错误码, 请参考 CameraStatus.h 中错误码的定义。
+/// \~english
+/// \brief Get the value range of the camera's gain magnification
+/// \param [in] hCamera		Camera handle.
+/// \param [out] pfMin		pointer, returns the minimum multiple.
+/// \param [out] pfMax		pointer, returns the maximum multiple.
+/// \param [out] pfStep		pointer, returns the step value.
+/// \return Returns CAMERA_STATUS_SUCCESS(0) successfully. Otherwise, it returns a non-zero error code. Please refer to the definition of the error code in CameraStatus.h.
+typedef    CameraSdkStatus (__stdcall *_CameraGetAnalogGainXRange)(
+	CameraHandle	hCamera, 
+	float*			pfMin,
+	float*			pfMax,
+	float*			pfStep
 	);
 
 /******************************************************/
@@ -3033,6 +3144,12 @@ typedef CameraSdkStatus (__stdcall *_CameraSetIOState)(
 	INT         iOutputIOIndex,
 	UINT        uState
 	);
+
+typedef CameraSdkStatus (__stdcall *_CameraSetIOStateEx)(
+	CameraHandle    hCamera,
+	INT         iOutputIOIndex,
+	UINT        uState
+	);
 	
 /// @ingroup API_GPIO
 /// \~chinese
@@ -3053,6 +3170,12 @@ typedef CameraSdkStatus (__stdcall *_CameraGetOutPutIOState)(
 	UINT*       puState
 	);
 
+typedef CameraSdkStatus (__stdcall *_CameraGetOutPutIOStateEx)(
+	CameraHandle    hCamera,
+	INT         iOutputIOIndex,
+	UINT*       puState
+	);
+
 /******************************************************/
 // 函数名   : CameraGetIOState
 // 功能描述 : 设置指定IO的电平状态，IO为输入型IO，相机
@@ -3066,6 +3189,12 @@ typedef CameraSdkStatus (__stdcall *_CameraGetOutPutIOState)(
 //            中错误码的定义。
 /******************************************************/
 typedef CameraSdkStatus (__stdcall *_CameraGetIOState)(
+	CameraHandle      hCamera,
+	INT               iInputIOIndex,
+	UINT*             puState
+	);
+
+typedef CameraSdkStatus (__stdcall *_CameraGetIOStateEx)(
 	CameraHandle      hCamera,
 	INT               iInputIOIndex,
 	UINT*             puState
@@ -4702,6 +4831,84 @@ typedef CameraSdkStatus (__stdcall *_CameraGetRegionAverageGray)(
 	int *AvgGray
 	);
 
+typedef CameraSdkStatus (__stdcall *_CameraGetMediaCapability)(
+	CameraHandle    hCamera, 
+	int	            iMediaType,
+	UINT			*uCap
+	);
+
+typedef CameraSdkStatus (__stdcall *_CameraSetMediaBitRate)(
+	CameraHandle    hCamera, 
+	int	            iMediaType,
+	UINT			uRate
+	);
+
+typedef CameraSdkStatus (__stdcall *_CameraGetMediaBitRate)(
+	CameraHandle    hCamera, 
+	int	            iMediaType,
+	UINT			*uRate
+	);
+	
+typedef CameraSdkStatus (__stdcall *_CameraSetFrameEventCallback)(
+	CameraHandle        hCamera,
+	CAMERA_FRAME_EVENT_CALLBACK pCallBack,
+	PVOID               pContext
+	);
+	
+typedef CameraSdkStatus (__stdcall *_CameraSetNoiseReductionValue)(
+	CameraHandle    hCamera,
+	int				value
+	);
+
+typedef CameraSdkStatus (__stdcall *_CameraGetNoiseReductionValue)(
+	CameraHandle    hCamera,
+	int*			value
+	);
+
+typedef CameraSdkStatus (__stdcall *_CameraSetLogarithmicCurveValue)(
+	CameraHandle    hCamera,
+	int				value
+	);
+
+typedef CameraSdkStatus (__stdcall *_CameraGetLogarithmicCurveValue)(
+	CameraHandle    hCamera,
+	int*			value
+	);
+
+typedef CameraSdkStatus (__stdcall *_CameraSetSpliceLines)(
+	CameraHandle    hCamera,
+	int             numLines
+	);
+
+typedef CameraSdkStatus (__stdcall *_CameraGetSpliceLines)(
+	CameraHandle    hCamera,
+	int*            numLines
+	);
+	
+typedef CameraSdkStatus (__stdcall *_CameraSnapChannelBuffer)(
+	CameraHandle	hCamera,
+	char const*		pszChannelName,
+	tSdkFrameHead*	pFrameInfo,
+	BYTE**			pbyBuffer,
+	UINT			wTimes
+	);
+	
+typedef CameraSdkStatus (__stdcall *_CameraReleaseChannelBuffer)(
+	CameraHandle    hCamera, 
+	char const*		pszChannelName,
+	BYTE*           pbyBuffer
+	);
+	
+typedef CameraSdkStatus (__stdcall *_CameraSetRotaryEncTrigger)(
+	CameraHandle    hCamera,
+	int             action
+	);
+
+typedef CameraSdkStatus (__stdcall *_CameraGetRotaryEncTrigger)(
+	CameraHandle    hCamera,
+	int*            action
+	);
+
 /******************************************************/
 // 函数名   : CameraGrabber_CreateFromDevicePage
 // 功能描述 : 弹出相机列表让用户选择要打开的相机
@@ -5582,6 +5789,8 @@ EXTERN _CameraSpecialControl CameraSpecialControl;
 
 EXTERN _CameraSnapToBuffer CameraSnapToBuffer;
 
+EXTERN _CameraSnapJpegToFile CameraSnapJpegToFile;
+
 EXTERN _CameraIsOpened CameraIsOpened;
 
 EXTERN _CameraInit CameraInit;
@@ -5662,6 +5871,12 @@ EXTERN _CameraGetMediaType CameraGetMediaType;
 
 EXTERN _CameraSetMediaType CameraSetMediaType;
 
+EXTERN _CameraGetRawMaxAvailBits CameraGetRawMaxAvailBits;
+
+EXTERN _CameraSetRawStartBit CameraSetRawStartBit;
+
+EXTERN _CameraGetRawStartBit CameraGetRawStartBit;
+
 EXTERN _CameraSetAeState CameraSetAeState;
 
 EXTERN _CameraGetAeState CameraGetAeState;
@@ -5703,6 +5918,12 @@ EXTERN _CameraGetExposureLineTime CameraGetExposureLineTime;
 EXTERN _CameraSetAnalogGain CameraSetAnalogGain;
 
 EXTERN _CameraGetAnalogGain CameraGetAnalogGain;
+
+EXTERN _CameraSetAnalogGainX CameraSetAnalogGainX;
+
+EXTERN _CameraGetAnalogGainX CameraGetAnalogGainX;
+
+EXTERN _CameraGetAnalogGainXRange CameraGetAnalogGainXRange;
 
 EXTERN _CameraSetSharpness CameraSetSharpness;
 
@@ -5919,10 +6140,13 @@ EXTERN _CameraGetEnumInfo CameraGetEnumInfo;
 EXTERN _CameraGetInerfaceVersion CameraGetInerfaceVersion;
 
 EXTERN _CameraSetIOState CameraSetIOState;
+EXTERN _CameraSetIOStateEx CameraSetIOStateEx;
 
 EXTERN _CameraGetOutPutIOState CameraGetOutPutIOState;
+EXTERN _CameraGetOutPutIOStateEx CameraGetOutPutIOStateEx;
 
 EXTERN _CameraGetIOState CameraGetIOState;
+EXTERN _CameraGetIOStateEx CameraGetIOStateEx;
 
 EXTERN _CameraSetInPutIOMode CameraSetInPutIOMode;
 
@@ -6119,6 +6343,25 @@ EXTERN _CameraGetEyeCount CameraGetEyeCount;
 EXTERN _CameraMultiEyeImageProcess CameraMultiEyeImageProcess;
 
 EXTERN _CameraGetRegionAverageGray CameraGetRegionAverageGray;
+
+EXTERN _CameraGetMediaCapability CameraGetMediaCapability;
+
+EXTERN _CameraSetMediaBitRate CameraSetMediaBitRate;
+
+EXTERN _CameraGetMediaBitRate CameraGetMediaBitRate;
+
+EXTERN _CameraSetFrameEventCallback CameraSetFrameEventCallback;
+
+EXTERN _CameraSetNoiseReductionValue CameraSetNoiseReductionValue;
+EXTERN _CameraGetNoiseReductionValue CameraGetNoiseReductionValue;
+EXTERN _CameraSetLogarithmicCurveValue CameraSetLogarithmicCurveValue;
+EXTERN _CameraGetLogarithmicCurveValue CameraGetLogarithmicCurveValue;
+EXTERN _CameraSetSpliceLines CameraSetSpliceLines;
+EXTERN _CameraGetSpliceLines CameraGetSpliceLines;
+EXTERN _CameraSnapChannelBuffer CameraSnapChannelBuffer;
+EXTERN _CameraReleaseChannelBuffer CameraReleaseChannelBuffer;
+EXTERN _CameraSetRotaryEncTrigger CameraSetRotaryEncTrigger;
+EXTERN _CameraGetRotaryEncTrigger CameraGetRotaryEncTrigger;
 
 EXTERN _CameraGrabber_CreateFromDevicePage CameraGrabber_CreateFromDevicePage;
 
@@ -6352,6 +6595,7 @@ CameraSdkStatus LoadSdkApi()
 	GET_MVSDK_API(CameraPushFrame);
 	GET_MVSDK_API(CameraSpecialControl);
 	GET_MVSDK_API(CameraSnapToBuffer);
+	GET_MVSDK_API(CameraSnapJpegToFile);
 	GET_MVSDK_API(CameraGetImageBuffer);
 	GET_MVSDK_API(CameraGetImageBufferEx);
 	GET_MVSDK_API(CameraReleaseImageBuffer);
@@ -6377,6 +6621,9 @@ CameraSdkStatus LoadSdkApi()
 	GET_MVSDK_API(CameraSetImageResolutionEx);
 	GET_MVSDK_API(CameraGetMediaType);
 	GET_MVSDK_API(CameraSetMediaType);
+	GET_MVSDK_API(CameraGetRawMaxAvailBits);
+	GET_MVSDK_API(CameraSetRawStartBit);
+	GET_MVSDK_API(CameraGetRawStartBit);
 	GET_MVSDK_API(CameraSetAeState);
 	GET_MVSDK_API(CameraGetAeState);
 	GET_MVSDK_API(CameraSetAeTarget);
@@ -6399,6 +6646,9 @@ CameraSdkStatus LoadSdkApi()
 	GET_MVSDK_API(CameraGetExposureLineTime);
 	GET_MVSDK_API(CameraSetAnalogGain);
 	GET_MVSDK_API(CameraGetAnalogGain);
+	GET_MVSDK_API(CameraSetAnalogGainX);
+	GET_MVSDK_API(CameraGetAnalogGainX);
+	GET_MVSDK_API(CameraGetAnalogGainXRange);
 	GET_MVSDK_API(CameraSetSharpness);
 	GET_MVSDK_API(CameraGetSharpness);
 	GET_MVSDK_API(CameraSetOnceWB);
@@ -6485,8 +6735,11 @@ CameraSdkStatus LoadSdkApi()
 	GET_MVSDK_API(CameraGetEnumInfo);
 	GET_MVSDK_API(CameraGetInerfaceVersion);
 	GET_MVSDK_API(CameraSetIOState);
+	GET_MVSDK_API(CameraSetIOStateEx);
 	GET_MVSDK_API(CameraGetOutPutIOState);
+	GET_MVSDK_API(CameraGetOutPutIOStateEx);
 	GET_MVSDK_API(CameraGetIOState);
+	GET_MVSDK_API(CameraGetIOStateEx);
 	GET_MVSDK_API(CameraSetInPutIOMode);
 	GET_MVSDK_API(CameraGetInPutIOMode);
 	GET_MVSDK_API(CameraSetOutPutIOMode);
@@ -6611,6 +6864,20 @@ CameraSdkStatus LoadSdkApi()
 	GET_MVSDK_API(CameraGetEyeCount);
 	GET_MVSDK_API(CameraMultiEyeImageProcess);
 	GET_MVSDK_API(CameraGetRegionAverageGray);
+	GET_MVSDK_API(CameraGetMediaCapability);
+	GET_MVSDK_API(CameraSetMediaBitRate);
+	GET_MVSDK_API(CameraGetMediaBitRate);
+	GET_MVSDK_API(CameraSetFrameEventCallback);
+	GET_MVSDK_API(CameraSetNoiseReductionValue);
+	GET_MVSDK_API(CameraGetNoiseReductionValue);
+	GET_MVSDK_API(CameraSetLogarithmicCurveValue);
+	GET_MVSDK_API(CameraGetLogarithmicCurveValue);
+	GET_MVSDK_API(CameraSetSpliceLines);
+	GET_MVSDK_API(CameraGetSpliceLines);
+	GET_MVSDK_API(CameraSnapChannelBuffer);
+	GET_MVSDK_API(CameraReleaseChannelBuffer);
+	GET_MVSDK_API(CameraSetRotaryEncTrigger);
+	GET_MVSDK_API(CameraGetRotaryEncTrigger);
 
 	GET_MVSDK_API(CameraGrabber_CreateFromDevicePage);
 	GET_MVSDK_API(CameraGrabber_CreateByIndex);

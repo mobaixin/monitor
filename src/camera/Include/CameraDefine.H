@@ -230,6 +230,11 @@ typedef enum
   PROP_SHEET_INDEX_DEVICE_INFO=9,		///< \~chinese 设备信息 \~english Device Information
   PROP_SHEET_INDEX_WDR=10,				///< \~chinese 宽动态 \~english Wide Dynamic
   PROP_SHEET_INDEX_MULTI_EXPOSURE=11,	///< \~chinese 多重曝光 \~english Multi exposure
+  PROP_SHEET_INDEX_SPECIAL=12,			///< \~chinese 特殊设置 \~english Special settings
+  PROP_SHEET_INDEX_GIGE=13,				///< \~chinese GIGE设置 \~english GIGE settings
+  PROP_SHEET_INDEX_GF_SETTING_I = 14,   ///< \~chinese GF系列红外相机设置I  \~english GF Settings I
+  PROP_SHEET_INDEX_GF_SETTING_II = 15,  ///< \~chinese GF系列红外相机设置II \~english GF Settings II
+
 }emSdkPropSheetMask;
 
 /// @ingroup MV_ENUM_TYPE
@@ -733,6 +738,20 @@ typedef struct sCameraFrame
   BYTE *          pBuffer;  ///< \~chinese 数据区 \~english Image Data
 }tSdkFrame;
 
+/// \~chinese 帧事件
+/// \~english Frame Event
+typedef struct tSdkFrameEvent_
+{
+	UINT 	uType;			///< \~chinese 事件类型(1:帧开始   2:帧结束) \~english Event type (1:frame start   2:frame end)
+	UINT	uStatus;		///< \~chinese 状态(0:成功  非0:错误) \~english Status (0:success, non-zero:error)
+	UINT 	uFrameID;		///< \~chinese 帧ID \~english Frame ID
+	UINT	uWidth;			///< \~chinese 宽度 \~english Width
+	UINT	uHeight;		///< \~chinese 高度 \~english Height
+	UINT	uPixelFormat;	///< \~chinese 图像格式 \~english Image Format 
+	UINT	TimeStampL;		///< \~chinese 时间戳低32位 \~english Lower 32 bits of timestamp
+	UINT	TimeStampH;		///< \~chinese 时间戳高32位 \~english High 32 bits of timestamp
+}tSdkFrameEvent;
+
 /// @ingroup API_GRAB_CB
 /// \~chinese 图像捕获的回调函数定义
 /// \~english Callback function definition for image capture
@@ -771,6 +790,11 @@ typedef void (WINAPI* CAMERA_PAGE_MSG_PROC)(CameraHandle hCamera,UINT MSG,UINT u
 /// \note           0: The last dropped reason, network communication failed
 /// \note           1: The last dropped reason, the camera lost power
 typedef void (WINAPI* CAMERA_CONNECTION_STATUS_CALLBACK)(CameraHandle hCamera,UINT MSG,UINT uParam,PVOID pContext);
+
+/// @ingroup API_ADVANCE
+/// \~chinese 帧事件回调函数定义
+/// \~english Callback function definition for frame event
+typedef void (WINAPI* CAMERA_FRAME_EVENT_CALLBACK)(CameraHandle hCamera, tSdkFrameEvent* pEvent, PVOID pContext);
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -979,6 +1003,17 @@ typedef void (__stdcall *pfnCameraGrabberSaveImageComplete)(
 /*MindVision 12bit packed monochome*/
 #define CAMERA_MEDIA_TYPE_MONO12_PACKED_MV		(CAMERA_MEDIA_TYPE_MONO | CAMERA_MEDIA_TYPE_OCCUPY12BIT | 0x0064)
 #define CAMERA_MEDIA_TYPE_YUV420P_MV			(CAMERA_MEDIA_TYPE_COLOR | CAMERA_MEDIA_TYPE_OCCUPY12BIT | 0x0065)
+
+/*planar YUV 4:2:0, 12bpp, 1 plane for Y and 1 plane for the UV components, which are interleaved (first byte V and the following byte U)*/
+#define CAMERA_MEDIA_TYPE_YUV_NV21_MV			(CAMERA_MEDIA_TYPE_COLOR | CAMERA_MEDIA_TYPE_OCCUPY12BIT | 0x0066)
+
+/* H264 H265 */
+#define CAMERA_MEDIA_TYPE_H264_MV				(CAMERA_MEDIA_TYPE_COLOR | CAMERA_MEDIA_TYPE_OCCUPY8BIT | 0x0067)
+#define CAMERA_MEDIA_TYPE_H265_MV				(CAMERA_MEDIA_TYPE_COLOR | CAMERA_MEDIA_TYPE_OCCUPY8BIT | 0x0068)
+
+/* JPEG */
+#define CAMERA_MEDIA_TYPE_JPEG_MV				(CAMERA_MEDIA_TYPE_COLOR | CAMERA_MEDIA_TYPE_OCCUPY8BIT | 0x0069)
+
 /// @}
 
 #endif

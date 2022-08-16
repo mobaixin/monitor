@@ -84,9 +84,6 @@ void MainWindow::setWidgetUi()
 // 设置组件样式
 void MainWindow::setWidgetStyle()
 {
-//    this->setWindowFlags(Qt::Window);
-//    this->setFixedSize(1350, 750);
-//    this->showFullScreen();
 //    this->setWindowFlags(Qt::FramelessWindowHint);
     this->setWindowTitle("模具监视器");
 
